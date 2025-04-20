@@ -5,6 +5,7 @@ import 'package:kanada/pages/more.dart';
 import 'package:kanada/pages/more/debug.dart';
 import 'package:kanada/pages/more/debug/link.dart';
 import 'package:kanada/pages/more/debug/player.dart';
+import 'package:kanada/pages/more/debug/toast.dart';
 
 class Global{
   static Map<String, WidgetBuilder> routes = {
@@ -13,6 +14,7 @@ class Global{
     '/more/debug': (context) => const DebugPage(),
     '/more/debug/link': (context) => const LinkDebug(),
     '/more/debug/player': (context) => const PlayerDebug(),
+    '/more/debug/toast': (context) => const ToastDebug(),
   };
   static late AudioPlayer player;
 }

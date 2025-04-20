@@ -14,6 +14,7 @@ class _DebugPageState extends State<DebugPage>{
       body: LinkList(links: [
         [Icons.link, 'Link Debug Page', '/more/debug/link'],
         [Icons.music_note, 'Player Debug Page', '/more/debug/player'],
+        [Icons.text_fields, 'Toast Debug Page', '/more/debug/toast']
       ]),
     );
   }

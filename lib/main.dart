@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/services.dart';
@@ -31,24 +29,20 @@ Future<void> main() async {
     // statusBarIconBrightness: Brightness.dark,
     // systemNavigationBarIconBrightness: Brightness.dark,
   ));
-  checkAndRequestAudioPermission();
+  requestPermission();
   runApp(const MyApp());
 }
 
-// 检查并请求 READ_MEDIA_AUDIO 权限的函数
-Future<void> checkAndRequestAudioPermission() async {
-  PermissionStatus status = await Permission.audio.request();
-  if (status.isDenied) {
-    // 如果权限被拒绝，显示一个提示框
-    checkAndRequestAudioPermission();
-    // print('音频权限被拒绝');
-  } else if (status.isPermanentlyDenied) {
-    // 如果权限被永久拒绝，引导用户去设置中开启权限
+Future<void> requestPermission() async {
+  // Toast.showToast('请求权限中...');
+  PermissionStatus audio = await Permission.audio.request();
+  PermissionStatus manageExternalStorage = await Permission.manageExternalStorage.request();
+  PermissionStatus notification = await Permission.notification.request();
+  if (audio.isDenied || manageExternalStorage.isDenied || notification.isDenied) {
+    requestPermission();
+  }
+  else if (audio.isPermanentlyDenied || manageExternalStorage.isPermanentlyDenied || notification.isPermanentlyDenied) {
     openAppSettings();
-    // print('音频权限被永久拒绝，请在设置中开启权限');
-  } else if (status.isGranted) {
-    // 权限已授予
-    // print('音频权限已授予');
   }
 }
 
