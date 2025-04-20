@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:kanada/pages/app.dart';
 import 'package:kanada/pages/more.dart';
 import 'package:kanada/pages/more/debug.dart';
 import 'package:kanada/pages/more/debug/link.dart';
+import 'package:kanada/pages/more/debug/player.dart';
 
 class Global{
   static Map<String, WidgetBuilder> routes = {
@@ -10,5 +12,7 @@ class Global{
     '/more': (context) => const MorePage(),
     '/more/debug': (context) => const DebugPage(),
     '/more/debug/link': (context) => const LinkDebug(),
+    '/more/debug/player': (context) => const PlayerDebug(),
   };
+  static late AudioPlayer player;
 }

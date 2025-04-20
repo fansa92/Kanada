@@ -12,7 +12,8 @@ class _DebugPageState extends State<DebugPage>{
   Widget build(BuildContext context) {
     return Scaffold(
       body: LinkList(links: [
-        [Icons.link, 'Link Debug Page', '/more/debug/link']
+        [Icons.link, 'Link Debug Page', '/more/debug/link'],
+        [Icons.music_note, 'Player Debug Page', '/more/debug/player'],
       ]),
     );
   }
