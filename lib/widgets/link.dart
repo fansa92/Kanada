@@ -166,7 +166,7 @@ class _LinkState extends State<Link> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       key: widgetKey,
       onTap: () {
         final RenderBox renderBox = context.findRenderObject() as RenderBox;
@@ -188,6 +188,64 @@ class _LinkState extends State<Link> {
             // 使用传入的圆角
             clipBehavior: widget.clipBehavior ?? Clip.antiAlias, // 使用传入的裁剪行为
           ),
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
+class LinkBuilder extends StatefulWidget {
+  final Widget child;
+  final WidgetBuilder builder;
+  final Duration? duration;
+  final Curve? curve;
+  final double? elevation;
+  final Color? shadowColor;
+  final BorderRadius? borderRadius; // 新增圆角参数
+  final Clip? clipBehavior; // 新增裁剪行为参数
+
+  const LinkBuilder({
+    super.key,
+    required this.child,
+    required this.builder,
+    this.duration,
+    this.curve,
+    this.elevation,
+    this.shadowColor,
+    this.borderRadius,
+    this.clipBehavior,
+  });
+  @override
+  State<LinkBuilder> createState() => _LinkBuilderState();
+}
+
+class _LinkBuilderState extends State<LinkBuilder> {
+  final GlobalKey widgetKey = GlobalKey();
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      key: widgetKey,
+      onTap: () {
+        final RenderBox renderBox = context.findRenderObject() as RenderBox;
+        final Offset offset = renderBox.localToGlobal(Offset.zero);
+        final Size size = renderBox.size;
+        Navigator.push(
+          context,
+          CustomRoute(
+            position: [offset.dx, offset.dy],
+            // 起始位置 (left, top)
+            size: [size.width, size.height],
+            // 起始尺寸 (width, height)
+            builder: widget.builder,
+            duration: widget.duration?? const Duration(milliseconds: 300),
+            curve: widget.curve?? Curves.easeInOut,
+            elevation: widget.elevation?? 8.0,
+            shadowColor: widget.shadowColor?? Colors.black,
+            borderRadius: widget.borderRadius?? BorderRadius.zero,
+            // 使用传入的圆角
+            clipBehavior: widget.clipBehavior?? Clip.antiAlias, // 使用传入的裁剪行为
+          )
         );
       },
       child: widget.child,

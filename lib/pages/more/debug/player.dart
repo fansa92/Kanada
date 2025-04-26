@@ -71,14 +71,14 @@ class _PlayerDebugState extends State<PlayerDebug> {
                     //     )
                     // ));
                     Global.player.setAudioSource(AudioSource.file(
-                        '/storage/emulated/0/Music/102220648.mp3',
+                        '/storage/emulated/0/Music/Yuki/miku/102220648.mp3',
                         tag: MediaItem(
                           id: "102220648.mp3",
                           album: 'Album name',
                           title: 'Track title',
                           artist: 'Artist name',
                           duration: const Duration(seconds: 160),
-                          artUri: Uri.parse('http://10.0.2.3:5244/d/SYSTEM-MEMZ-CAO/D/90422/Desktop/temp/emu.jpg'),
+                          artUri: Uri.parse('http://192.168.31.151:5244/d/SYSTEM-MEMZ-CAO/D/90422/Desktop/temp/emu.jpg'),
                         )
                     ));
                     setState(() {

@@ -19,6 +19,7 @@ class _AppPageState extends State<AppPage>{
     return Scaffold(
       body: nav[index][1],
       bottomNavigationBar: NavigationBar(
+        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
         onDestinationSelected: (int index) {
           setState(() {
             this.index = index;
