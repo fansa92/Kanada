@@ -20,7 +20,7 @@ class _ToastDebugState extends State<ToastDebug> {
           children: [
             TextField(
               decoration: const InputDecoration(
-                hintText: 'Enter your message',
+                labelText: 'Enter your message',
               ),
               onChanged: (value) {
                 echo = value;
@@ -47,7 +47,7 @@ class _ToastDebugState extends State<ToastDebug> {
                 );
               },
               child: const Text('Show Toast'),
-            )
+            ),
           ],
         ),
     );

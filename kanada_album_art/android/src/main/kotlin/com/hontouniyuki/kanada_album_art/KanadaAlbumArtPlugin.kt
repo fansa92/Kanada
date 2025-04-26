@@ -12,7 +12,7 @@ class KanadaAlbumArtPlugin : FlutterPlugin, MethodCallHandler {
   private lateinit var channel: MethodChannel
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "kanada")
+    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "kanada_album_art")
     channel.setMethodCallHandler(this)
   }
 

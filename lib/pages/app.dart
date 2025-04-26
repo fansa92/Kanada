@@ -1,20 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:kanada/pages/folders.dart';
 import 'package:kanada/pages/more.dart';
+import 'package:kanada/pages/search.dart';
 
 import 'home.dart';
 
-class AppPage extends StatefulWidget{
+class AppPage extends StatefulWidget {
   const AppPage({super.key});
+
   @override
   State<AppPage> createState() => _AppPageState();
 }
-class _AppPageState extends State<AppPage>{
+
+class _AppPageState extends State<AppPage> {
   static List<List<dynamic>> nav = [
-    [NavigationDestination(icon: Icon(Icons.home), label: 'Home'), const HomePage()],
-    [NavigationDestination(icon: Icon(Icons.search), label: 'Search'), const Text('Search')],
-    [NavigationDestination(icon: Icon(Icons.library_music), label: 'Music'), FoldersPage()],
-    [NavigationDestination(icon: Icon(Icons.settings), label: 'More'), const MorePage()],
+    [
+      NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+      const HomePage(),
+    ],
+    [
+      NavigationDestination(icon: Icon(Icons.search), label: 'Search'),
+      const SearchPage(),
+    ],
+    [
+      NavigationDestination(icon: Icon(Icons.library_music), label: 'Music'),
+      const FoldersPage(),
+    ],
+    [
+      NavigationDestination(icon: Icon(Icons.settings), label: 'More'),
+      const MorePage(),
+    ],
   ];
   int index = 0;
 
@@ -30,8 +45,9 @@ class _AppPageState extends State<AppPage>{
           });
         },
         selectedIndex: index,
-        destinations: nav.map((e) => e[0]).toList().cast<NavigationDestination>(),
-      )
+        destinations:
+            nav.map((e) => e[0]).toList().cast<NavigationDestination>(),
+      ),
     );
-    }
+  }
 }

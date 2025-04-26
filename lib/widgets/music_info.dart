@@ -40,7 +40,7 @@ class _MusicInfoState extends State<MusicInfo> {
     //       album: metadata.album,
     //       title: metadata.title?? widget.path.split('/').last,
     //       artist: metadata.artist,
-    //       duration: const Duration(seconds: 160),
+    //       duration: metadata.duration,
     //       artUri: Uri.parse(
     //         'file://${metadata.picturePath}',
     //       ),

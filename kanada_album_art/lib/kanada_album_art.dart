@@ -10,7 +10,7 @@ class KanadaAlbumArt {
 
 class KanadaAlbumArtPlugin {
   // 定义与 Android 端一致的 MethodChannel 名称
-  static const MethodChannel _channel = MethodChannel('kanada');
+  static const MethodChannel _channel = MethodChannel('kanada_album_art');
 
   /// 调用原生方法获取专辑封面
   ///
