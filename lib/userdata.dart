@@ -6,7 +6,7 @@ class UserData {
   final String path;
   UserData(this.path);
 
-  Future<void> post(dynamic data) async {
+  Future<void> set(dynamic data) async {
     final appDir = await getApplicationDocumentsDirectory();
     final file = File('${appDir.path}/$path');
     await file.create(recursive: true);

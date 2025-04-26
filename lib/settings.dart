@@ -14,7 +14,7 @@ class Settings{
     debug = json['debug'];
   }
   static Future<void> save() async {
-    await UserData('settings.json').post({
+    await UserData('settings.json').set({
       'name': name,
       'folders': folders,
       'debug': debug,
