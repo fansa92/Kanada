@@ -17,7 +17,7 @@ class _MorePageState extends State<MorePage> {
       if (Settings.debug) [Icons.bug_report, 'Debug', '/more/debug'],
     ];
     return Scaffold(
-      body: LinkList(links: settings, onTap: () => setState(() {})),
+      body: LinkList(links: settings, onTapAfter: () => setState(() {})),
     );
   }
 }

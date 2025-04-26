@@ -4,6 +4,7 @@ import 'package:kanada/widgets/music_info.dart';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 
+import '../global.dart';
 import '../utools.dart';
 
 class FolderPage extends StatefulWidget {
@@ -61,7 +62,7 @@ class _FolderPageState extends State<FolderPage> {
           return 0;
       }
     });
-
+    Global.playlist = files.map((e) => e.path).toList();
     setState(() {});
   }
 

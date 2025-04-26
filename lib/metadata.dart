@@ -42,6 +42,7 @@ class Metadata {
     final pic = File('${appDir.path}/metadata/picture/${path.hashCode}.jpg');
     if (await pic.exists()) {
       picture = await pic.readAsBytes();
+      picturePath = pic.path;
       return;
     }
     else {
@@ -49,6 +50,7 @@ class Metadata {
       if (picture != null) {
         await pic.create(recursive: true);
         await pic.writeAsBytes(picture!);
+        picturePath = pic.path;
       }
     }
   }
@@ -60,5 +62,6 @@ class Metadata {
   String? album;
   String? lyric;
   Uint8List? picture;
+  String? picturePath;
   Duration? duration;
 }

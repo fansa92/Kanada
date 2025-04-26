@@ -11,6 +11,7 @@ import 'package:kanada/pages/more/debug/player.dart';
 import 'package:kanada/pages/more/debug/toast.dart';
 import 'package:kanada/pages/more/settings.dart';
 import 'package:kanada/pages/more/settings/folders.dart';
+import 'package:kanada/pages/player.dart';
 
 class Global{
   static Map<String, WidgetBuilder> routes = {
@@ -25,6 +26,8 @@ class Global{
     '/more/debug/file_choose': (context) => const FileChooseDebug(),
     '/more/settings': (context) => const SettingsPage(),
     '/more/settings/folders': (context) => const FoldersSettings(),
+    '/player': (context) => const PlayerPage(),
   };
   static late AudioPlayer player;
+  static List<String> playlist = [];
 }

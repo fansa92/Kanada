@@ -144,7 +144,8 @@ class Link extends StatefulWidget {
   final Color? shadowColor;
   final BorderRadius? borderRadius;
   final Clip? clipBehavior;
-  final Function? onTap; // 新增 onTap 回调
+  final Function? onTapBefore; // 新增 onTap 回调
+  final Function? onTapAfter; // 新增 onTap 回调
 
   const Link({
     super.key,
@@ -156,7 +157,8 @@ class Link extends StatefulWidget {
     this.shadowColor,
     this.borderRadius,
     this.clipBehavior,
-    this.onTap, // 接收外部点击回调
+    this.onTapBefore, // 接收外部点击回调
+    this.onTapAfter, // 接收外部点击回调
   });
 
   @override
@@ -167,6 +169,11 @@ class _LinkState extends State<Link> {
   final GlobalKey widgetKey = GlobalKey();
 
   Future<void> _handleTap() async {
+    // 优先执行外部传入的 onTap
+    if (widget.onTapBefore != null) {
+      widget.onTapBefore!();
+    }
+
     // 默认导航逻辑（如果外部未提供回调）
     final RenderBox renderBox = context.findRenderObject() as RenderBox;
     final Offset offset = renderBox.localToGlobal(Offset.zero);
@@ -186,8 +193,8 @@ class _LinkState extends State<Link> {
       ),
     );
 
-    if (widget.onTap != null) {
-      widget.onTap!();
+    if (widget.onTapAfter != null) {
+      widget.onTapAfter!();
     }
   }
 
@@ -210,7 +217,8 @@ class LinkBuilder extends StatefulWidget {
   final Color? shadowColor;
   final BorderRadius? borderRadius;
   final Clip? clipBehavior;
-  final VoidCallback? onTap; // 新增 onTap 回调
+  final VoidCallback? onTapBefore; // 新增 onTap 回调
+  final VoidCallback? onTapAfter; // 新增 onTap 回调
 
   const LinkBuilder({
     super.key,
@@ -222,7 +230,8 @@ class LinkBuilder extends StatefulWidget {
     this.shadowColor,
     this.borderRadius,
     this.clipBehavior,
-    this.onTap, // 接收外部点击回调
+    this.onTapBefore, // 接收外部点击回调
+    this.onTapAfter, // 接收外部点击回调
   });
 
   @override
@@ -234,9 +243,8 @@ class _LinkBuilderState extends State<LinkBuilder> {
 
   void _handleTap() {
     // 优先执行外部传入的 onTap
-    if (widget.onTap != null) {
-      widget.onTap!();
-      return;
+    if (widget.onTapBefore != null) {
+      widget.onTapBefore!();
     }
 
     // 默认导航逻辑（如果外部未提供回调）
@@ -257,6 +265,10 @@ class _LinkBuilderState extends State<LinkBuilder> {
         clipBehavior: widget.clipBehavior ?? Clip.antiAlias,
       ),
     );
+
+    if (widget.onTapAfter != null) {
+      widget.onTapAfter!();
+    }
   }
 
   @override
