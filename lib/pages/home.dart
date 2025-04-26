@@ -1,0 +1,27 @@
+import 'package:flutter/material.dart';
+
+import '../settings.dart';
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Home'),
+      ),
+      body: InkWell(
+        onTap: () {
+          Settings.fresh();
+        },
+        child: const Text('Home'),
+      ),
+    );
+  }
+}

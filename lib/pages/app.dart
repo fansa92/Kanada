@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:kanada/pages/folders.dart';
 import 'package:kanada/pages/more.dart';
+
+import 'home.dart';
 
 class AppPage extends StatefulWidget{
   const AppPage({super.key});
@@ -8,8 +11,9 @@ class AppPage extends StatefulWidget{
 }
 class _AppPageState extends State<AppPage>{
   static List<List<dynamic>> nav = [
-    [NavigationDestination(icon: Icon(Icons.home), label: 'Home'), const Text('Home')],
+    [NavigationDestination(icon: Icon(Icons.home), label: 'Home'), const HomePage()],
     [NavigationDestination(icon: Icon(Icons.search), label: 'Search'), const Text('Search')],
+    [NavigationDestination(icon: Icon(Icons.library_music), label: 'Music'), FoldersPage()],
     [NavigationDestination(icon: Icon(Icons.settings), label: 'More'), const MorePage()],
   ];
   int index = 0;

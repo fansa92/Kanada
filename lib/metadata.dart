@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:audio_metadata_reader/audio_metadata_reader.dart';
 import 'package:kanada_album_art/kanada_album_art.dart';
+import 'package:path_provider/path_provider.dart';
 
 class Metadata {
   String path;
@@ -10,7 +11,7 @@ class Metadata {
 
   Future<void> getMetadata() async {
     final file = File(path);
-    metadata = readAllMetadata(file, getImage: true);
+    metadata = readAllMetadata(file, getImage: false);
     // metadata2 = await MetadataRetriever.fromFile(file);
     // print(metadata);
     // String? contentGroupDescription; // TIT1
@@ -32,9 +33,24 @@ class Metadata {
     // picture = metadata.pictures[0].bytes;
     // picture = await metadata2!.albumArt;
     duration = metadata.duration;
-    picture = await KanadaAlbumArtPlugin.getAlbumArt(path);
     // File('/sdcard/cover.jpg').writeAsBytes(picture!);
     // title = metadata.toString();
+  }
+
+  Future<void> getPicture() async {
+    final appDir = await getApplicationDocumentsDirectory();
+    final pic = File('${appDir.path}/metadata/picture/${path.hashCode}.jpg');
+    if (await pic.exists()) {
+      picture = await pic.readAsBytes();
+      return;
+    }
+    else {
+      picture = await KanadaAlbumArtPlugin.getAlbumArt(path);
+      if (picture != null) {
+        await pic.create(recursive: true);
+        await pic.writeAsBytes(picture!);
+      }
+    }
   }
 
   dynamic metadata;

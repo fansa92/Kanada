@@ -11,6 +11,9 @@ class _DebugPageState extends State<DebugPage>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Debug'),
+      ),
       body: LinkList(links: [
         [Icons.link, 'Link Debug Page', '/more/debug/link'],
         [Icons.music_note, 'Player Debug Page', '/more/debug/player'],

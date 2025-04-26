@@ -142,8 +142,9 @@ class Link extends StatefulWidget {
   final Curve? curve;
   final double? elevation;
   final Color? shadowColor;
-  final BorderRadius? borderRadius; // 新增圆角参数
-  final Clip? clipBehavior; // 新增裁剪行为参数
+  final BorderRadius? borderRadius;
+  final Clip? clipBehavior;
+  final Function? onTap; // 新增 onTap 回调
 
   const Link({
     super.key,
@@ -155,6 +156,7 @@ class Link extends StatefulWidget {
     this.shadowColor,
     this.borderRadius,
     this.clipBehavior,
+    this.onTap, // 接收外部点击回调
   });
 
   @override
@@ -164,32 +166,36 @@ class Link extends StatefulWidget {
 class _LinkState extends State<Link> {
   final GlobalKey widgetKey = GlobalKey();
 
+  Future<void> _handleTap() async {
+    // 默认导航逻辑（如果外部未提供回调）
+    final RenderBox renderBox = context.findRenderObject() as RenderBox;
+    final Offset offset = renderBox.localToGlobal(Offset.zero);
+    final Size size = renderBox.size;
+    await Navigator.push(
+      context,
+      CustomRoute(
+        position: [offset.dx, offset.dy],
+        size: [size.width, size.height],
+        builder: (context) => Global.routes[widget.route]!(context),
+        duration: widget.duration ?? const Duration(milliseconds: 300),
+        curve: widget.curve ?? Curves.easeInOut,
+        elevation: widget.elevation ?? 8.0,
+        shadowColor: widget.shadowColor ?? Colors.black,
+        borderRadius: widget.borderRadius ?? BorderRadius.zero,
+        clipBehavior: widget.clipBehavior ?? Clip.antiAlias,
+      ),
+    );
+
+    if (widget.onTap != null) {
+      widget.onTap!();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
       key: widgetKey,
-      onTap: () {
-        final RenderBox renderBox = context.findRenderObject() as RenderBox;
-        final Offset offset = renderBox.localToGlobal(Offset.zero);
-        final Size size = renderBox.size;
-        Navigator.push(
-          context,
-          CustomRoute(
-            position: [offset.dx, offset.dy],
-            // 起始位置 (left, top)
-            size: [size.width, size.height],
-            // 起始尺寸 (width, height)
-            builder: (context) => Global.routes[widget.route]!(context),
-            duration: widget.duration ?? const Duration(milliseconds: 300),
-            curve: widget.curve ?? Curves.easeInOut,
-            elevation: widget.elevation ?? 8.0,
-            shadowColor: widget.shadowColor ?? Colors.black,
-            borderRadius: widget.borderRadius ?? BorderRadius.zero,
-            // 使用传入的圆角
-            clipBehavior: widget.clipBehavior ?? Clip.antiAlias, // 使用传入的裁剪行为
-          ),
-        );
-      },
+      onTap: _handleTap, // 使用统一的点击处理
       child: widget.child,
     );
   }
@@ -202,8 +208,9 @@ class LinkBuilder extends StatefulWidget {
   final Curve? curve;
   final double? elevation;
   final Color? shadowColor;
-  final BorderRadius? borderRadius; // 新增圆角参数
-  final Clip? clipBehavior; // 新增裁剪行为参数
+  final BorderRadius? borderRadius;
+  final Clip? clipBehavior;
+  final VoidCallback? onTap; // 新增 onTap 回调
 
   const LinkBuilder({
     super.key,
@@ -215,39 +222,48 @@ class LinkBuilder extends StatefulWidget {
     this.shadowColor,
     this.borderRadius,
     this.clipBehavior,
+    this.onTap, // 接收外部点击回调
   });
+
   @override
   State<LinkBuilder> createState() => _LinkBuilderState();
 }
 
 class _LinkBuilderState extends State<LinkBuilder> {
   final GlobalKey widgetKey = GlobalKey();
+
+  void _handleTap() {
+    // 优先执行外部传入的 onTap
+    if (widget.onTap != null) {
+      widget.onTap!();
+      return;
+    }
+
+    // 默认导航逻辑（如果外部未提供回调）
+    final RenderBox renderBox = context.findRenderObject() as RenderBox;
+    final Offset offset = renderBox.localToGlobal(Offset.zero);
+    final Size size = renderBox.size;
+    Navigator.push(
+      context,
+      CustomRoute(
+        position: [offset.dx, offset.dy],
+        size: [size.width, size.height],
+        builder: widget.builder,
+        duration: widget.duration ?? const Duration(milliseconds: 300),
+        curve: widget.curve ?? Curves.easeInOut,
+        elevation: widget.elevation ?? 8.0,
+        shadowColor: widget.shadowColor ?? Colors.black,
+        borderRadius: widget.borderRadius ?? BorderRadius.zero,
+        clipBehavior: widget.clipBehavior ?? Clip.antiAlias,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
       key: widgetKey,
-      onTap: () {
-        final RenderBox renderBox = context.findRenderObject() as RenderBox;
-        final Offset offset = renderBox.localToGlobal(Offset.zero);
-        final Size size = renderBox.size;
-        Navigator.push(
-          context,
-          CustomRoute(
-            position: [offset.dx, offset.dy],
-            // 起始位置 (left, top)
-            size: [size.width, size.height],
-            // 起始尺寸 (width, height)
-            builder: widget.builder,
-            duration: widget.duration?? const Duration(milliseconds: 300),
-            curve: widget.curve?? Curves.easeInOut,
-            elevation: widget.elevation?? 8.0,
-            shadowColor: widget.shadowColor?? Colors.black,
-            borderRadius: widget.borderRadius?? BorderRadius.zero,
-            // 使用传入的圆角
-            clipBehavior: widget.clipBehavior?? Clip.antiAlias, // 使用传入的裁剪行为
-          )
-        );
-      },
+      onTap: _handleTap, // 使用统一的点击处理
       child: widget.child,
     );
   }

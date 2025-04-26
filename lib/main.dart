@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:kanada/global.dart';
+import 'package:kanada/settings.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 Future<void> main() async {
@@ -30,6 +31,7 @@ Future<void> main() async {
     // systemNavigationBarIconBrightness: Brightness.dark,
   ));
   requestPermission();
+  Settings.fresh();
   runApp(const MyApp());
 }
 
