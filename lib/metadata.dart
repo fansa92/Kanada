@@ -12,7 +12,9 @@ class Metadata {
 
   Future<void> getMetadata({bool cache = false, int timeout = 604800}) async {
     final appDir = await getApplicationDocumentsDirectory();
-    final meta = File('${appDir.path}/cache/metadata/metadata/${path.hashCode}.json');
+    final meta = File(
+      '${appDir.path}/cache/metadata/metadata/${path.hashCode}.json',
+    );
     if (cache &&
         await meta.exists() &&
         DateTime.now().difference(await meta.lastModified()).inSeconds <
@@ -53,6 +55,12 @@ class Metadata {
     duration = metadata.duration;
     // File('/sdcard/cover.jpg').writeAsBytes(picture!);
     // title = metadata.toString();
+    if (File(
+      '${appDir.path}/cache/metadata/picture/${path.hashCode}.jpg',
+    ).existsSync()) {
+      pictureCache =
+          '${appDir.path}/cache/metadata/picture/${path.hashCode}.jpg';
+    }
     meta.create(recursive: true);
     await meta.writeAsString(
       jsonEncode({
@@ -67,7 +75,9 @@ class Metadata {
 
   Future<void> getLyric({bool cache = true, int timeout = 604800}) async {
     final appDir = await getApplicationDocumentsDirectory();
-    final lrc = File('${appDir.path}/cache/metadata/lyric/${path.hashCode}.lrc');
+    final lrc = File(
+      '${appDir.path}/cache/metadata/lyric/${path.hashCode}.lrc',
+    );
     if (cache &&
         await lrc.exists() &&
         DateTime.now().difference(await lrc.lastModified()).inSeconds <
@@ -76,13 +86,15 @@ class Metadata {
       return;
     }
     final file = File(path);
-    final dynamic meta=readAllMetadata(file, getImage: false);
+    final dynamic meta = readAllMetadata(file, getImage: false);
     lyric = meta.lyric;
   }
 
   Future<void> getPicture({bool cache = true, int timeout = 604800}) async {
     final appDir = await getApplicationDocumentsDirectory();
-    final pic = File('${appDir.path}/cache/metadata/picture/${path.hashCode}.jpg');
+    final pic = File(
+      '${appDir.path}/cache/metadata/picture/${path.hashCode}.jpg',
+    );
     if (cache &&
         await pic.exists() &&
         DateTime.now().difference(await pic.lastModified()).inSeconds <
@@ -107,5 +119,6 @@ class Metadata {
   String? lyric;
   Uint8List? picture;
   String? picturePath;
+  String? pictureCache;
   Duration? duration;
 }

@@ -15,7 +15,7 @@ import 'package:kanada/pages/more/settings/folders.dart';
 import 'package:kanada/pages/player.dart';
 import 'package:kanada/pages/search.dart';
 
-class Global{
+class Global {
   static Map<String, WidgetBuilder> routes = {
     '/': (context) => const AppPage(),
     '/home': (context) => const HomePage(),
@@ -33,5 +33,7 @@ class Global{
     '/player': (context) => const PlayerPage(),
   };
   static late AudioPlayer player;
+  static bool init = false;
+  static String path = '';
   static List<String> playlist = [];
 }

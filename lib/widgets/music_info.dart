@@ -47,72 +47,78 @@ class _MusicInfoState extends State<MusicInfo> {
     //     ),
     //   ),
     // );
-    int idx=-1;
-    List<AudioSource> sources=[];
-    for (var i = 0; i < Global.playlist.length; i++) {
-      print(Global.playlist[i]);
-      if (Global.playlist[i] == widget.path) {
-        idx=i;
-      }
-      final data=Metadata(Global.playlist[i]);
-      await data.getMetadata();
-      await data.getPicture();
-      sources.add(AudioSource.file(
-        Global.playlist[i],
-        tag: MediaItem(
-          id: Global.playlist[i],
-          album: data.album,
-          title: data.title?? Global.playlist[i].split('/').last,
-          artist: data.artist,
-          duration: data.duration?? const Duration(seconds: 180),
-          artUri: Uri.parse(
-            'file://${data.picturePath}',
+    Global.init = false;
+    Global.path = widget.path;
+
+    // 提前提取路径列表，避免多次访问 Global.playlist
+    final playlistPaths = Global.playlist;
+
+    // 使用 map+toList 并行化处理
+    final sources = await Future.wait(
+      playlistPaths.map((path) async {
+        final data = Metadata(path);
+        await Future.wait([data.getMetadata(), data.getPicture()]);
+        return AudioSource.file(
+          path,
+          tag: MediaItem(
+            id: path,
+            album: data.album,
+            title: data.title ?? path.split('/').last,
+            artist: data.artist,
+            duration: data.duration ?? const Duration(seconds: 180),
+            artUri: Uri.parse('file://${data.picturePath}'),
           ),
-        )
-      ));
-    }
-    Global.player.setAudioSource(
-      ConcatenatingAudioSource(
-        children: sources,
-      ),
-      initialIndex: idx,
+        );
+      }),
     );
+
+    // 查找索引的优化（避免重复遍历）
+    final idx = playlistPaths.indexOf(widget.path);
+
+    Global.player.setAudioSource(
+      ConcatenatingAudioSource(children: sources),
+      initialIndex: idx >= 0 ? idx : null,
+    );
+    Global.init = true;
     Global.player.play();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Link(route: '/player', onTapBefore: play, child: Row(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: SizedBox(
-            width: 50,
-            height: 50,
-            child:
-            metadata.picture != null
-                ? Image.memory(metadata.picture!, fit: BoxFit.cover)
-                : const Icon(Icons.music_note),
+    return InkWell(
+      onTap: play,
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(
+              width: 50,
+              height: 50,
+              child:
+                  metadata.picture != null
+                      ? Image.memory(metadata.picture!, fit: BoxFit.cover)
+                      : const Icon(Icons.music_note),
+            ),
           ),
-        ),
-        SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(metadata.title ?? widget.path.split('/').last),
-              Text(
-                metadata.artist ?? 'Unknown Artist',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: .6),
+          SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(metadata.title ?? widget.path.split('/').last),
+                Text(
+                  metadata.artist ?? 'Unknown Artist',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: .6),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
-    ));
+        ],
+      ),
+    );
   }
 }
