@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 
 import '../global.dart';
 import '../utools.dart';
+import '../widgets/float_playing.dart';
 
 class FolderPage extends StatefulWidget {
   final String path;
@@ -189,6 +190,8 @@ class _FolderPageState extends State<FolderPage> {
           );
         },
       ),
+      floatingActionButton: FloatPlaying(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

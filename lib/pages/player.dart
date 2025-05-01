@@ -27,11 +27,7 @@ class _PlayerPageState extends State<PlayerPage> {
       path = Global.path;
       setState(() {});
       metadata = Metadata(path);
-      await metadata!.getMetadata(cache: false);
-      setState(() {});
-      await metadata!.getLyric(cache: false);
-      setState(() {});
-      await metadata!.getPicture(cache: false);
+      await Future.wait([metadata!.getMetadata(), metadata!.getPicture()]);
       setState(() {});
       while (!Global.init) {
         await Future.delayed(const Duration(milliseconds: 100));
@@ -41,13 +37,18 @@ class _PlayerPageState extends State<PlayerPage> {
     path = playlist.children[Global.player.currentIndex].tag.id;
     setState(() {});
     if (path != metadata!.path) {
-      await metadata!.getMetadata(cache: false);
+      // 并行执行带缓存的操作
+      await Future.wait([metadata!.getMetadata(), metadata!.getPicture()]);
       setState(() {});
-      await metadata!.getLyric(cache: false);
-      setState(() {});
-      await metadata!.getPicture(cache: false);
+
+      // 并行执行不带缓存的操作
+      await Future.wait([
+        metadata!.getMetadata(cache: false),
+        metadata!.getPicture(cache: false),
+      ]);
       setState(() {});
     }
+    print(metadata);
   }
 
   @override
@@ -60,9 +61,9 @@ class _PlayerPageState extends State<PlayerPage> {
             width: 200,
             height: 200,
             child:
-                metadata!.picture != null
+                metadata?.picture != null
                     ? Image.memory(metadata!.picture!)
-                    : (metadata!.pictureCache != null
+                    : (metadata?.pictureCache != null
                         ? Image.file(File(metadata!.pictureCache!))
                         : Icon(Icons.music_note)),
           ),

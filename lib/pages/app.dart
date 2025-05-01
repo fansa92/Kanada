@@ -3,6 +3,7 @@ import 'package:kanada/pages/folders.dart';
 import 'package:kanada/pages/more.dart';
 import 'package:kanada/pages/search.dart';
 
+import '../widgets/float_playing.dart';
 import 'home.dart';
 
 class AppPage extends StatefulWidget {
@@ -37,6 +38,8 @@ class _AppPageState extends State<AppPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: nav[index][1],
+      floatingActionButton: FloatPlaying(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       bottomNavigationBar: NavigationBar(
         labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
         onDestinationSelected: (int index) {
