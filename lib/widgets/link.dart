@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:kanada/global.dart';
 
@@ -11,8 +9,10 @@ class CustomRoute<T> extends PageRoute<T> {
   final Curve curve;
   final double elevation;
   final Color shadowColor;
-  final BorderRadius borderRadius; // 新增圆角参数
-  final Clip clipBehavior; // 新增裁剪行为参数
+  final BorderRadius borderRadius;
+  final Clip clipBehavior;
+  final GlobalKey? sourceKey; // 源页面元素的Key
+  final GlobalKey? targetKey; // 目标页面元素的Key
 
   CustomRoute({
     required this.builder,
@@ -22,8 +22,10 @@ class CustomRoute<T> extends PageRoute<T> {
     this.curve = Curves.easeInOut,
     this.elevation = 8.0,
     this.shadowColor = Colors.black,
-    this.borderRadius = BorderRadius.zero, // 默认无圆角
-    this.clipBehavior = Clip.antiAlias, // 默认抗锯齿裁剪
+    this.borderRadius = BorderRadius.zero,
+    this.clipBehavior = Clip.antiAlias,
+    this.sourceKey,
+    this.targetKey,
   });
 
   @override
@@ -43,73 +45,109 @@ class CustomRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      ) {
     return builder(context);
   }
 
   @override
   Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      Widget child,
+      ) {
     final screenSize = MediaQuery.of(context).size;
 
-    final beginRect = Rect.fromLTWH(
-      position[0].toDouble(),
-      position[1].toDouble(),
-      size[0].toDouble(),
-      size[1].toDouble(),
-    );
-
+    // 页面展开动画
+    final beginRect = Rect.fromLTWH(position[0], position[1], size[0], size[1]);
     final endRect = Rect.fromLTWH(0, 0, screenSize.width, screenSize.height);
-
     final rectTween = RectTween(begin: beginRect, end: endRect);
     final curvedAnimation = CurvedAnimation(parent: animation, curve: curve);
 
-    // 添加圆角动画
-    final borderRadiusTween = BorderRadiusTween(
-      begin: borderRadius, // 使用传入的初始圆角
-      end: BorderRadius.zero, // 动画结束时变为0
-    );
-
-    final rectAnimation = curvedAnimation.drive(rectTween);
-    final borderRadiusAnimation = curvedAnimation.drive(borderRadiusTween);
-    final opacityTween = Tween<double>(begin: 0.0, end: 5.0);
-    final opacityAnimation = curvedAnimation.drive(opacityTween);
+    // 动态获取共享元素位置
+    Rect? sharedStartRect;
+    Rect? sharedEndRect;
+    if (sourceKey != null && targetKey != null) {
+      sharedStartRect = _getWidgetRect(sourceKey!);
+      sharedEndRect = _getWidgetRect(targetKey!);
+    }
 
     return AnimatedBuilder(
       animation: Listenable.merge([
-        rectAnimation,
-        opacityAnimation,
-        borderRadiusAnimation, // 添加圆角动画监听
+        rectTween.animate(curvedAnimation),
+        curvedAnimation,
       ]),
       builder: (context, child) {
-        return Opacity(
-          opacity: min(opacityAnimation.value, 1.0),
-          child: CustomSingleChildLayout(
-            delegate: _LayoutDelegate(rectAnimation.value!),
-            child: PhysicalModel(
-              color: Colors.transparent,
-              elevation: elevation,
-              shadowColor: shadowColor,
-              borderRadius: borderRadiusAnimation.value!,
-              // 使用动画值
-              clipBehavior: clipBehavior,
-              child: ClipRRect(
-                borderRadius: borderRadiusAnimation.value!, // 使用动画值
+        final currentRect = rectTween.evaluate(curvedAnimation)!;
+        final progress = curvedAnimation.value;
+
+        return Stack(
+          children: [
+            // 主页面动画
+            CustomSingleChildLayout(
+              delegate: _LayoutDelegate(currentRect),
+              child: PhysicalModel(
+                color: Colors.transparent,
+                elevation: elevation,
+                shadowColor: shadowColor,
+                borderRadius: borderRadius,
                 clipBehavior: clipBehavior,
-                child: child,
+                child: ClipRRect(
+                  borderRadius: borderRadius,
+                  clipBehavior: clipBehavior,
+                  child: child,
+                ),
               ),
             ),
-          ),
+
+            // 共享元素动画
+            if (sharedStartRect != null && sharedEndRect != null)
+              _buildSharedElementAnimation(
+                context,
+                sharedStartRect,
+                sharedEndRect,
+                progress,
+              ),
+          ],
         );
       },
       child: child,
+    );
+  }
+
+  // 获取任意元素的全局坐标
+  Rect? _getWidgetRect(GlobalKey key) {
+    final renderBox = key.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return null;
+
+    // 关键计算步骤：将局部坐标转换为全局坐标
+    final offset = renderBox.localToGlobal(Offset.zero);
+    return offset & renderBox.size;
+  }
+
+  // 构建共享元素动画
+  Widget _buildSharedElementAnimation(
+      BuildContext context,
+      Rect startRect,
+      Rect endRect,
+      double progress,
+      ) {
+    final currentLeft = startRect.left + (endRect.left - startRect.left) * progress;
+    final currentTop = startRect.top + (endRect.top - startRect.top) * progress;
+    final currentWidth = startRect.width + (endRect.width - startRect.width) * progress;
+    final currentHeight = startRect.height + (endRect.height - startRect.height) * progress;
+
+    return Positioned(
+      left: currentLeft,
+      top: currentTop,
+      child: SizedBox(
+        width: currentWidth,
+        height: currentHeight,
+        child: targetKey?.currentWidget ?? const SizedBox(),
+      ),
     );
   }
 }
@@ -130,9 +168,7 @@ class _LayoutDelegate extends SingleChildLayoutDelegate {
   }
 
   @override
-  bool shouldRelayout(_LayoutDelegate oldDelegate) {
-    return rect != oldDelegate.rect;
-  }
+  bool shouldRelayout(_LayoutDelegate oldDelegate) => rect != oldDelegate.rect;
 }
 
 class Link extends StatefulWidget {

@@ -50,6 +50,7 @@ class _MusicInfoState extends State<MusicInfo> {
     int idx=-1;
     List<AudioSource> sources=[];
     for (var i = 0; i < Global.playlist.length; i++) {
+      print(Global.playlist[i]);
       if (Global.playlist[i] == widget.path) {
         idx=i;
       }
