@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:kanada/global.dart';
 import 'package:kanada/metadata.dart';
-import 'package:kanada/widgets/link.dart';
 
 class MusicInfo extends StatefulWidget {
   final String path;
@@ -52,6 +51,8 @@ class _MusicInfoState extends State<MusicInfo> {
 
     // 提前提取路径列表，避免多次访问 Global.playlist
     final playlistPaths = Global.playlist;
+
+    playlistPaths.shuffle();
 
     // 使用 map+toList 并行化处理
     final sources = await Future.wait(
@@ -105,7 +106,9 @@ class _MusicInfoState extends State<MusicInfo> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(metadata.title ?? widget.path.split('/').last),
+                Text(metadata.title ?? widget.path.split('/').last,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,),
                 Text(
                   metadata.artist ?? 'Unknown Artist',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -113,6 +116,8 @@ class _MusicInfoState extends State<MusicInfo> {
                       context,
                     ).colorScheme.onSurface.withValues(alpha: .6),
                   ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

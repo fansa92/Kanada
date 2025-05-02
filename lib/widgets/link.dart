@@ -11,8 +11,14 @@ class CustomRoute<T> extends PageRoute<T> {
   final Color shadowColor;
   final BorderRadius borderRadius;
   final Clip clipBehavior;
-  final GlobalKey? sourceKey; // 源页面元素的Key
-  final GlobalKey? targetKey; // 目标页面元素的Key
+  final GlobalKey? sourceKey;
+  final GlobalKey? targetKey;
+
+  // 提前获取源元素位置
+  final Rect? sharedStartRect;
+
+  // 监听目标元素位置变化
+  final ValueNotifier<Rect?> sharedEndRectNotifier = ValueNotifier(null);
 
   CustomRoute({
     required this.builder,
@@ -26,7 +32,16 @@ class CustomRoute<T> extends PageRoute<T> {
     this.clipBehavior = Clip.antiAlias,
     this.sourceKey,
     this.targetKey,
-  });
+  }) : sharedStartRect = sourceKey != null
+      ? _getWidgetRect(sourceKey)
+      : null;
+
+  static Rect? _getWidgetRect(GlobalKey key) {
+    final renderBox = key.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return null;
+    final offset = renderBox.localToGlobal(Offset.zero);
+    return offset & renderBox.size;
+  }
 
   @override
   Color? get barrierColor => null;
@@ -49,7 +64,17 @@ class CustomRoute<T> extends PageRoute<T> {
       Animation<double> animation,
       Animation<double> secondaryAnimation,
       ) {
-    return builder(context);
+    final page = builder(context);
+
+    // 在布局完成后获取目标元素位置
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (targetKey != null) {
+        final rect = _getWidgetRect(targetKey!);
+        sharedEndRectNotifier.value = rect;
+      }
+    });
+
+    return page;
   }
 
   @override
@@ -60,57 +85,28 @@ class CustomRoute<T> extends PageRoute<T> {
       Widget child,
       ) {
     final screenSize = MediaQuery.of(context).size;
-
-    // 页面展开动画
-    final beginRect = Rect.fromLTWH(position[0], position[1], size[0], size[1]);
-    final endRect = Rect.fromLTWH(0, 0, screenSize.width, screenSize.height);
-    final rectTween = RectTween(begin: beginRect, end: endRect);
     final curvedAnimation = CurvedAnimation(parent: animation, curve: curve);
-
-    // 动态获取共享元素位置
-    Rect? sharedStartRect;
-    Rect? sharedEndRect;
-    if (sourceKey != null && targetKey != null) {
-      sharedStartRect = _getWidgetRect(sourceKey!);
-      sharedEndRect = _getWidgetRect(targetKey!);
-    }
 
     return AnimatedBuilder(
       animation: Listenable.merge([
-        rectTween.animate(curvedAnimation),
         curvedAnimation,
+        sharedEndRectNotifier,
       ]),
       builder: (context, child) {
-        final currentRect = rectTween.evaluate(curvedAnimation)!;
-        final progress = curvedAnimation.value;
+        // 页面展开动画
+        final pageRect = _buildPageAnimation(screenSize, curvedAnimation);
+
+        // 共享元素动画
+        final sharedWidget = _buildSharedAnimation(curvedAnimation);
 
         return Stack(
+          clipBehavior: Clip.none,
           children: [
             // 主页面动画
-            CustomSingleChildLayout(
-              delegate: _LayoutDelegate(currentRect),
-              child: PhysicalModel(
-                color: Colors.transparent,
-                elevation: elevation,
-                shadowColor: shadowColor,
-                borderRadius: borderRadius,
-                clipBehavior: clipBehavior,
-                child: ClipRRect(
-                  borderRadius: borderRadius,
-                  clipBehavior: clipBehavior,
-                  child: child,
-                ),
-              ),
-            ),
+            _buildPageWidget(pageRect, child!),
 
             // 共享元素动画
-            if (sharedStartRect != null && sharedEndRect != null)
-              _buildSharedElementAnimation(
-                context,
-                sharedStartRect,
-                sharedEndRect,
-                progress,
-              ),
+            if (sharedWidget != null) sharedWidget,
           ],
         );
       },
@@ -118,19 +114,47 @@ class CustomRoute<T> extends PageRoute<T> {
     );
   }
 
-  // 获取任意元素的全局坐标
-  Rect? _getWidgetRect(GlobalKey key) {
-    final renderBox = key.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox == null) return null;
-
-    // 关键计算步骤：将局部坐标转换为全局坐标
-    final offset = renderBox.localToGlobal(Offset.zero);
-    return offset & renderBox.size;
+  Widget _buildPageWidget(Rect rect, Widget child) {
+    return CustomSingleChildLayout(
+      delegate: _LayoutDelegate(rect),
+      child: PhysicalModel(
+        color: Colors.transparent,
+        elevation: elevation,
+        shadowColor: shadowColor,
+        borderRadius: borderRadius,
+        clipBehavior: clipBehavior,
+        child: ClipRRect(
+          borderRadius: borderRadius,
+          clipBehavior: clipBehavior,
+          child: child,
+        ),
+      ),
+    );
   }
 
-  // 构建共享元素动画
+  Rect _buildPageAnimation(Size screenSize, Animation<double> animation) {
+    final beginRect = Rect.fromLTWH(
+        position[0],
+        position[1],
+        size[0],
+        size[1]
+    );
+    final endRect = Rect.fromLTWH(0, 0, screenSize.width, screenSize.height);
+    return RectTween(begin: beginRect, end: endRect).evaluate(animation)!;
+  }
+
+  Widget? _buildSharedAnimation(Animation<double> animation) {
+    final endRect = sharedEndRectNotifier.value;
+    if (sharedStartRect == null || endRect == null) return null;
+
+    return _buildSharedElementAnimation(
+      sharedStartRect!,
+      endRect,
+      animation.value,
+    );
+  }
+
   Widget _buildSharedElementAnimation(
-      BuildContext context,
       Rect startRect,
       Rect endRect,
       double progress,
@@ -182,6 +206,8 @@ class Link extends StatefulWidget {
   final Clip? clipBehavior;
   final Function? onTapBefore; // 新增 onTap 回调
   final Function? onTapAfter; // 新增 onTap 回调
+  final GlobalKey? sourceKey; // 源页面元素的Key
+  final GlobalKey? targetKey; // 目标页面元素的Key
 
   const Link({
     super.key,
@@ -195,6 +221,8 @@ class Link extends StatefulWidget {
     this.clipBehavior,
     this.onTapBefore, // 接收外部点击回调
     this.onTapAfter, // 接收外部点击回调
+    this.sourceKey,
+    this.targetKey,
   });
 
   @override
@@ -226,6 +254,8 @@ class _LinkState extends State<Link> {
         shadowColor: widget.shadowColor ?? Colors.black,
         borderRadius: widget.borderRadius ?? BorderRadius.zero,
         clipBehavior: widget.clipBehavior ?? Clip.antiAlias,
+        sourceKey: widget.sourceKey,
+        targetKey: widget.targetKey,
       ),
     );
 

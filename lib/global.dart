@@ -36,4 +36,5 @@ class Global {
   static bool init = false;
   static String path = '';
   static List<String> playlist = [];
+  static String? pictureCache;
 }
