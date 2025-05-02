@@ -68,8 +68,9 @@ class _FoldersSettingsState extends State<FoldersSettings> {
 
   // 显示对话框修改文件夹路径
   void _showEditFolderDialog(int index) {
-    TextEditingController controller =
-    TextEditingController(text: _folders![index]);
+    TextEditingController controller = TextEditingController(
+      text: _folders![index],
+    );
 
     showDialog(
       context: context,
@@ -113,14 +114,7 @@ class _FoldersSettingsState extends State<FoldersSettings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          '文件夹设置',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSecondaryContainer,
-          ),
-        ),
-      ),
+      appBar: AppBar(title: Text('文件夹设置')),
       body: SafeArea(
         child: Column(
           children: [

@@ -34,6 +34,11 @@ class _PlayerPageState extends State<PlayerPage> {
     super.initState();
     _init();
 
+    KanadaVolumePlugin.getMaxVolume().then((value) {
+      maxVolume = value?.toDouble() ?? 100;
+      if (mounted) setState(() {});
+    });
+
     // 监听 currentIndex 变化
     _currentIndexSub = Global.player.currentIndexStream.listen((index) {
       _fresh();

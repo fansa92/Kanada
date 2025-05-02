@@ -7,6 +7,7 @@ import 'package:kanada/pages/more.dart';
 import 'package:kanada/pages/more/debug.dart';
 import 'package:kanada/pages/more/debug/file_choose.dart';
 import 'package:kanada/pages/more/debug/link.dart';
+import 'package:kanada/pages/more/debug/lyric.dart';
 import 'package:kanada/pages/more/debug/lyric_sender.dart';
 import 'package:kanada/pages/more/debug/player.dart';
 import 'package:kanada/pages/more/debug/toast.dart';
@@ -28,6 +29,7 @@ class Global {
     '/more/debug/toast': (context) => const ToastDebug(),
     '/more/debug/file_choose': (context) => const FileChooseDebug(),
     '/more/debug/lyric_sender': (context) => const LyricSenderDebug(),
+    '/more/debug/lyric': (context) => const LyricDebug(),
     '/more/settings': (context) => const SettingsPage(),
     '/more/settings/folders': (context) => const FoldersSettings(),
     '/player': (context) => const PlayerPage(),

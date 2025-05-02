@@ -19,7 +19,8 @@ class _DebugPageState extends State<DebugPage>{
         [Icons.music_note, 'Player Debug Page', '/more/debug/player'],
         [Icons.text_fields, 'Toast Debug Page', '/more/debug/toast'],
         [Icons.folder_copy, 'File Choose Debug Page', '/more/debug/file_choose'],
-        [Icons.text_fields, 'Lyric Sender Debug Page', '/more/debug/lyric_sender']
+        [Icons.text_fields, 'Lyric Sender Debug Page', '/more/debug/lyric_sender'],
+        [Icons.text_fields, 'Lyric Debug Page', '/more/debug/lyric'],
       ]),
     );
   }

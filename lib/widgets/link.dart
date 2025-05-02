@@ -106,7 +106,7 @@ class CustomRoute<T> extends PageRoute<T> {
             _buildPageWidget(pageRect, child!),
 
             // 共享元素动画
-            if (sharedWidget != null) sharedWidget,
+            if (sharedWidget != null && curvedAnimation.value<1) sharedWidget,
           ],
         );
       },

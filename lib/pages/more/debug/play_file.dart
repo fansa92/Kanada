@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../lyric.dart';
 import '../../../metadata.dart';
 
 class PlayFileDebug extends StatefulWidget {
@@ -9,12 +10,23 @@ class PlayFileDebug extends StatefulWidget {
 }
 class _PlayFileDebugState extends State<PlayFileDebug> {
   late Metadata metadata;
+  Lyrics lyrics = Lyrics('');
 
   @override
   void initState() {
     super.initState();
     metadata = Metadata(widget.path);
     metadata.getMetadata().then((value) {
+      setState(() {});
+    });
+    metadata.getLyric().then((value) {
+      setState(() {});
+      lyrics=Lyrics(metadata.lyric!);
+      lyrics.parse().then((value) {
+        setState(() {});
+      });
+    });
+    metadata.getPicture().then((value) {
       setState(() {});
     });
   }
@@ -35,7 +47,8 @@ class _PlayFileDebugState extends State<PlayFileDebug> {
           Text('Picture: ${metadata.picture?.length} bytes'),
           metadata.picture!=null?Image.memory(metadata.picture!):Container(),
           Text('Lyric: ${metadata.lyric}'),
-          Text('Metadata: ${metadata.metadata}')
+          Text('Metadata: ${metadata.metadata}'),
+          Text('Lyrics: ${lyrics.lyrics}')
         ],
       ),
     );
