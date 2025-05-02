@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:kanada_volume/kanada_volume.dart';
@@ -121,20 +120,27 @@ class _PlayerPageState extends State<PlayerPage> {
             SizedBox(
               width: width,
               height: width,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                key: PlayerPage.pictureKey,
-                child: SizedBox(
-                  width: double.infinity,
-                  height: double.infinity,
-                  child:
-                      metadata?.picture != null
-                          ? Image.memory(metadata!.picture!)
-                          : (metadata?.pictureCache != null
-                              ? Image.file(File(metadata!.pictureCache!))
-                              : (Global.pictureCache != null
-                                  ? Image.file(File(Global.pictureCache!))
-                                  : Icon(Icons.music_note))),
+              child: Center(
+                child: Card(
+                  elevation: 8,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    key: PlayerPage.pictureKey,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      width: width * (Global.player.playing ? 1 : 0.8),
+                      height: width * (Global.player.playing ? 1 : 0.8),
+                      child:
+                          metadata?.picture != null
+                              ? Image.memory(metadata!.picture!)
+                              : (metadata?.pictureCache != null
+                                  ? Image.file(File(metadata!.pictureCache!))
+                                  : (Global.pictureCache != null
+                                      ? Image.file(File(Global.pictureCache!))
+                                      : Icon(Icons.music_note))),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -296,6 +302,7 @@ class _PlayerPageState extends State<PlayerPage> {
                 ],
               ),
             ),
+            SizedBox(height: 24),
           ],
         ),
       ),

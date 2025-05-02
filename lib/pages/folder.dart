@@ -181,14 +181,25 @@ class _FolderPageState extends State<FolderPage> {
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: files.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            key: ValueKey(files[index].path),
-            title: MusicInfo(path: files[index].path),
-          );
-        },
+      // body: ListView.builder(
+      //   itemCount: files.length,
+      //   itemBuilder: (context, index) {
+      //     return ListTile(
+      //       key: ValueKey(files[index].path),
+      //       title: MusicInfo(path: files[index].path),
+      //     );
+      //   },
+      // ),
+      body: ListView(
+        children:[
+          for (final file in files) ListTile(
+            key: ValueKey(file.path),
+            title: MusicInfo(path: file.path),
+          ),
+          SizedBox(
+            height: 100,
+          )
+        ]
       ),
       floatingActionButton: FloatPlaying(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

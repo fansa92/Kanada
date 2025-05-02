@@ -37,15 +37,34 @@ Future<void> main() async {
 
 Future<void> requestPermission() async {
   // Toast.showToast('请求权限中...');
-  PermissionStatus audio = await Permission.audio.request();
-  PermissionStatus manageExternalStorage = await Permission.manageExternalStorage.request();
-  PermissionStatus notification = await Permission.notification.request();
-  if (audio.isDenied || manageExternalStorage.isDenied || notification.isDenied) {
-    requestPermission();
+  // PermissionStatus audio = await Permission.audio.request();
+  // PermissionStatus manageExternalStorage = await Permission.manageExternalStorage.request();
+  // PermissionStatus notification = await Permission.notification.request();
+  // if (audio.isDenied || manageExternalStorage.isDenied || notification.isDenied) {
+  //   requestPermission();
+  // }
+  // else if (audio.isPermanentlyDenied || manageExternalStorage.isPermanentlyDenied || notification.isPermanentlyDenied) {
+  //   openAppSettings();
+  // }
+  final permissions = [
+    Permission.audio,
+    Permission.manageExternalStorage,
+    Permission.notification,
+  ];
+  bool flag1=false;
+  bool flag2=false;
+  for (final permission in permissions) {
+    final status = await permission.request();
+    if(status.isPermanentlyDenied)
+    {
+      flag2=true;
+    }
+    else if (status.isDenied) {
+      flag1=true;
+    }
   }
-  else if (audio.isPermanentlyDenied || manageExternalStorage.isPermanentlyDenied || notification.isPermanentlyDenied) {
-    openAppSettings();
-  }
+  if(flag1)requestPermission();
+  if(flag2)openAppSettings();
 }
 
 class MyApp extends StatelessWidget {

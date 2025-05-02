@@ -19,7 +19,7 @@ class KanadaVolumePlugin {
     try {
       final result = await _channel.invokeMethod<int>('getVolume');
       return result ?? 0;
-    } on PlatformException catch (e) {
+    } on PlatformException catch (_) {
       return null;
     } catch (e) {
       return null;
@@ -31,7 +31,7 @@ class KanadaVolumePlugin {
     try {
       final result = await _channel.invokeMethod<int>('getMaxVolume');
       return result ?? 0;
-    } on PlatformException catch (e) {
+    } on PlatformException catch (_) {
       return null;
     } catch (e) {
       return null;
@@ -45,7 +45,7 @@ class KanadaVolumePlugin {
           'setVolume',
           volume,
       );
-    } on PlatformException catch (e) {
+    } on PlatformException catch (_) {
       return;
     } catch (e) {
       return;
