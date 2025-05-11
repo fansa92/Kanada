@@ -8,6 +8,7 @@ import 'package:kanada/settings.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   // Global.audioHandler = await AudioService.init(
   //   builder: () => MyAudioHandler(),
   //   config: AudioServiceConfig(
@@ -21,15 +22,27 @@ Future<void> main() async {
     androidNotificationOngoing: true,
   );
   Global.player = AudioPlayer();
+  Global.player.setAudioSource(
+    ConcatenatingAudioSource(
+      children: [
+        AudioSource.uri(Uri.parse("/storage/emulated/0/Music/Yuki/miku/102220648.mp3"), tag: MediaItem(id: "/storage/emulated/0/Music/Yuki/miku/102220648.mp3", title: "Kanada")),
+      ],
+    ),
+    initialIndex: 0,
+  );
+  Global.player.play();
+  Global.player.pause();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    // 设置状态栏和导航栏背景为透明
-    // statusBarColor: Colors.transparent,
-    systemNavigationBarColor: Colors.transparent,
-    // 设置状态栏和导航栏图标颜色为白色
-    // statusBarIconBrightness: Brightness.dark,
-    // systemNavigationBarIconBrightness: Brightness.dark,
-  ));
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      // 设置状态栏和导航栏背景为透明
+      // statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+      // 设置状态栏和导航栏图标颜色为白色
+      // statusBarIconBrightness: Brightness.dark,
+      // systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
   requestPermission();
   Settings.fresh();
   runApp(const MyApp());
@@ -51,20 +64,18 @@ Future<void> requestPermission() async {
     Permission.manageExternalStorage,
     Permission.notification,
   ];
-  bool flag1=false;
-  bool flag2=false;
+  bool flag1 = false;
+  bool flag2 = false;
   for (final permission in permissions) {
     final status = await permission.request();
-    if(status.isPermanentlyDenied)
-    {
-      flag2=true;
-    }
-    else if (status.isDenied) {
-      flag1=true;
+    if (status.isPermanentlyDenied) {
+      flag2 = true;
+    } else if (status.isDenied) {
+      flag1 = true;
     }
   }
-  if(flag1)requestPermission();
-  if(flag2)openAppSettings();
+  if (flag1) requestPermission();
+  if (flag2) openAppSettings();
 }
 
 class MyApp extends StatelessWidget {
@@ -95,15 +106,13 @@ class MyApp extends StatelessWidget {
         }
 
         return MaterialApp(
-          theme: ThemeData(
-            colorScheme: lightColorScheme,
-            useMaterial3: true,
-          ),
+          theme: ThemeData(colorScheme: lightColorScheme, useMaterial3: true),
           darkTheme: ThemeData(
             colorScheme: darkColorScheme,
             useMaterial3: true,
           ),
-          themeMode: ThemeMode.system, // 跟随系统主题设置
+          themeMode: ThemeMode.system,
+          // 跟随系统主题设置
           initialRoute: '/',
           routes: Global.routes,
         );

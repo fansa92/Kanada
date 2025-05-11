@@ -14,6 +14,7 @@ import 'package:kanada/pages/more/debug/toast.dart';
 import 'package:kanada/pages/more/settings.dart';
 import 'package:kanada/pages/more/settings/folders.dart';
 import 'package:kanada/pages/player.dart';
+import 'package:kanada/pages/playing.dart';
 import 'package:kanada/pages/search.dart';
 
 class Global {
@@ -32,7 +33,7 @@ class Global {
     '/more/debug/lyric': (context) => const LyricDebug(),
     '/more/settings': (context) => const SettingsPage(),
     '/more/settings/folders': (context) => const FoldersSettings(),
-    '/player': (context) => const PlayerPage(),
+    '/player': (context) => const PlayingPage(),
   };
   static late AudioPlayer player;
   static bool init = false;
