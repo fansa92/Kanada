@@ -58,6 +58,17 @@ class _LyricViewState extends State<LyricView> {
   }
 
   @override
+  void didUpdateWidget(LyricView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.path != widget.path) {
+      // 路径变化时执行重新初始化
+      lyrics = null;
+      if (mounted) setState(() {});
+      _init();
+    }
+  }
+
+  @override
   void dispose() {
     super.dispose();
     // _positionSub?.cancel();
@@ -88,7 +99,7 @@ class _LyricViewState extends State<LyricView> {
         }
       }
       if (idx != index && idx != -1) {
-        print('idx: $idx');
+        // print('idx: $idx');
         index = idx;
         if (_scrollController.hasClients && lyrics!.lyrics.isNotEmpty) {
           RenderBox? singleChildRenderBox =
@@ -107,13 +118,19 @@ class _LyricViewState extends State<LyricView> {
               Offset.zero,
               ancestor: columnRenderBox,
             );
-            // print('Miraiku: ${singleChildRenderBox.size.height}');
             _scrollController.animateTo(
-              (-childPosition.dy) -
-                  (singleChildRenderBox.size.height - widget.paddingTop) / 2 +
-                  (targetRenderBox.size.height / 2),
+              min(
+                max(
+                  _scrollController.position.minScrollExtent,
+                  (-childPosition.dy) -
+                      (singleChildRenderBox.size.height - widget.paddingTop) /
+                          2 +
+                      (targetRenderBox.size.height / 2),
+                ),
+                _scrollController.position.maxScrollExtent,
+              ),
               duration: Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
+              curve: Curves.easeOut,
             );
           }
         }
@@ -149,97 +166,6 @@ class _LyricViewState extends State<LyricView> {
             ],
           ),
         );
-    // : ListView.builder(
-    //   controller: _scrollController,
-    //   itemCount: lyrics!.lyrics.length + 2,
-    //   physics: NeverScrollableScrollPhysics(),
-    //   itemBuilder: (context, i) {
-    //     // print(lyrics!.lyrics.length);
-    //     if (i == 0) {
-    //       return SizedBox(height: widget.paddingTop);
-    //     }
-    //     if (i >= lyrics!.lyrics.length) {
-    //       return SizedBox(height: widget.paddingBottom);
-    //     }
-    //     if (i < 0) {
-    //       return Container();
-    //     }
-    //     final lyric = lyrics!.lyrics[i];
-    //     // if (i == 1) {
-    //     //     final lrc = lyrics!.lyrics[i - 1 + index - 2+2];
-    //     //     final progress =
-    //     //         (Global.player.position.inMilliseconds - lrc['startTime']) /
-    //     //         (lrc['endTime'] - lrc['startTime']);
-    //     //   return SizedBox(
-    //     //     child: FractionClip(
-    //     //         top: Curves.easeInOut.transform(max(0, min(progress*3-2, 1))),
-    //     //         child: ListTile(
-    //     //           // key: firstKey,
-    //     //           title: Padding(
-    //     //             padding: const EdgeInsets.only(top: 3),
-    //     //             child: Text(
-    //     //               lyric['content'],
-    //     //               style: TextStyle(
-    //     //                 color:
-    //     //                 Global.player.position.inMilliseconds >
-    //     //                     lyric['startTime']
-    //     //                     ? LyricView.primaryColor
-    //     //                     : LyricView.secondaryColor,
-    //     //                 fontSize: 24,
-    //     //                 fontWeight: FontWeight.bold,
-    //     //               ),
-    //     //             ),
-    //     //           ),
-    //     //         )),
-    //     //   );
-    //     // }
-    //     final bool isActive =
-    //         Global.player.position.inMilliseconds >= lyric['startTime'] &&
-    //         Global.player.position.inMilliseconds <= lyric['endTime'];
-    //     if (isActive) {
-    //       return ListTile(
-    //         // key: activeKey,
-    //         title: Wrap(
-    //           children: [
-    //             for (final word in lyric['lyric'])
-    //               Padding(
-    //                 padding: const EdgeInsets.symmetric(vertical: 4),
-    //                 child: Word(
-    //                   word: word['word'],
-    //                   startTime: word['startTime'],
-    //                   endTime: word['endTime'],
-    //                   currentTime: Global.player.position.inMilliseconds,
-    //                 ),
-    //               ),
-    //           ],
-    //         ),
-    //       );
-    //     }
-    //     return AnimatedContainer(
-    //       duration: Duration(milliseconds: 300),
-    //       curve: Curves.easeInOut,
-    //       height: i>=index-2?null:0,
-    //       child: ListTile(
-    //         // key: ValueKey(lyric),
-    //         title: Padding(
-    //           padding: const EdgeInsets.only(top: 3),
-    //           child: Text(
-    //             lyric['content'],
-    //             style: TextStyle(
-    //               color:
-    //                   Global.player.position.inMilliseconds >
-    //                           lyric['startTime']
-    //                       ? LyricView.primaryColor
-    //                       : LyricView.secondaryColor,
-    //               fontSize: 24,
-    //               fontWeight: FontWeight.bold,
-    //             ),
-    //           ),
-    //         ),
-    //       ),
-    //     );
-    //   },
-    // );
   }
 }
 
@@ -259,44 +185,26 @@ class LyricWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool active =
-        Global.player.position.inMilliseconds >= startTime &&
-        Global.player.position.inMilliseconds <= endTime;
-    return Container(
-      // duration: Duration(milliseconds: 300),
-      // curve: Curves.easeInOut,
-      // height: Global.player.position.inMilliseconds > startTime ? null : 0,
-      child: ListTile(
-        title: Padding(
-          padding: const EdgeInsets.only(top: 3),
-          child:
-              active
-                  ? Wrap(
-                    children: [
-                      for (final word in lyric)
-                        Padding(
-                          key: ValueKey(word),
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Word(
-                            word: word['word'],
-                            startTime: word['startTime'],
-                            endTime: word['endTime'],
-                            currentTime: Global.player.position.inMilliseconds,
-                          ),
-                        ),
-                    ],
-                  )
-                  : Text(
-                    ctx,
-                    style: TextStyle(
-                      color:
-                          Global.player.position.inMilliseconds > startTime
-                              ? LyricView.primaryColor
-                              : LyricView.secondaryColor,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+    // final bool active =
+    //     Global.player.position.inMilliseconds >= startTime &&
+    //         Global.player.position.inMilliseconds <= endTime;
+    return ListTile(
+      title: Padding(
+        padding: const EdgeInsets.only(top: 3),
+        child: Wrap(
+          children: [
+            for (final word in lyric)
+              Padding(
+                key: ValueKey(word),
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Word(
+                  word: word['word'],
+                  startTime: word['startTime'],
+                  endTime: word['endTime'],
+                  currentTime: Global.player.position.inMilliseconds,
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -363,11 +271,10 @@ class Word extends StatelessWidget {
         top:
             padding *
             Curves.easeInOut.transform(
-              1 -
-                  max(
-                    0,
-                    min((currentTime - startTime) / (endTime - startTime), 1),
-                  ),
+              max(
+                0,
+                min(1 - (currentTime - startTime) / (endTime - startTime), 1),
+              ),
             ),
         bottom:
             padding *

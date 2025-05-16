@@ -21,7 +21,7 @@ class _PlayerPageState extends State<PlayerPage> {
   static const double iconSize = 64;
   String? path;
   Metadata? metadata;
-  StreamSubscription<int?>? _currentIndexSub;
+  // StreamSubscription<int?>? _currentIndexSub;
   StreamSubscription<SequenceState?>? _sequenceSub;
   StreamSubscription<Duration>? _positionSub;
   Duration pos = Duration.zero;
@@ -45,9 +45,9 @@ class _PlayerPageState extends State<PlayerPage> {
     });
 
     // 监听 currentIndex 变化
-    _currentIndexSub = Global.player.currentIndexStream.listen((index) {
-      _fresh();
-    });
+    // _currentIndexSub = Global.player.currentIndexStream.listen((index) {
+    //   _fresh();
+    // });
 
     // 监听播放列表元数据变化（包括 setAudioSource）
     _sequenceSub = Global.player.sequenceStateStream.listen((state) {
@@ -71,7 +71,7 @@ class _PlayerPageState extends State<PlayerPage> {
 
   @override
   void dispose() {
-    _currentIndexSub?.cancel();
+    // _currentIndexSub?.cancel();
     _sequenceSub?.cancel();
     _positionSub?.cancel();
     super.dispose();

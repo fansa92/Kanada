@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -18,10 +19,31 @@ class _LyricPageState extends State<LyricPage> {
   String? path;
   Metadata? metadata;
 
+  // StreamSubscription<int?>? _currentIndexSub;
+  StreamSubscription<SequenceState?>? _sequenceSub;
+
   @override
   void initState() {
     super.initState();
     _init();
+    // _currentIndexSub = Global.player.currentIndexStream.listen((index) {
+    //   if (index != null) {
+    //     print(path);
+    //     _init();
+    //   }
+    // });
+    _sequenceSub = Global.player.sequenceStateStream.listen((state) {
+      if (state != null) {
+        _init();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    // _currentIndexSub?.cancel();
+    _sequenceSub?.cancel();
+    super.dispose();
   }
 
   Future<void> _init() async {
@@ -54,9 +76,9 @@ class _LyricPageState extends State<LyricPage> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        path != null
+        metadata?.path != null
             ? LyricView(
-              path: path!,
+              path: metadata!.path,
               paddingTop: 100 + MediaQuery.of(context).padding.top,
               // paddingBottom: MediaQuery.of(context).size.height,
               // padding: EdgeInsets.only(
@@ -105,7 +127,7 @@ class _LyricPageState extends State<LyricPage> {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-  mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             metadata?.title ??
