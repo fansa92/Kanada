@@ -53,16 +53,16 @@ class Lyrics {
         'endTime': timeStamps[lyricWords.length],
         'lyric':
             lyricWords.isEmpty
-                ? {
-                  'word':
-                      lyricWords.isEmpty
-                          ? textParts[0].substring(
-                            textParts[0].lastIndexOf(']') + 1,
-                          )
-                          : buffer.toString(),
-                  'startTime': timeStamps.first,
-                  'endTime': timeStamps[lyricWords.length],
-                }
+                ? [{
+              'word':
+              lyricWords.isEmpty
+                  ? textParts[0].substring(
+                textParts[0].lastIndexOf(']') + 1,
+              )
+                  : buffer.toString(),
+              'startTime': timeStamps.first,
+              'endTime': timeStamps[lyricWords.length],
+            }]
                 : lyricWords,
       });
     }

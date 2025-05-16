@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:kanada_volume/kanada_volume.dart';
@@ -197,7 +198,10 @@ class _PlayerPageState extends State<PlayerPage> {
               ),
               child: Slider(
                 value: pos.inMilliseconds.toDouble(),
-                max: Global.player.duration?.inMilliseconds.toDouble() ?? 1,
+                max: max(
+                  Global.player.duration?.inMilliseconds.toDouble() ?? 1,
+                  pos.inMilliseconds.toDouble(),
+                ),
                 onChangeStart: (value) {
                   isDragging = true;
                 },

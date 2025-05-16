@@ -57,9 +57,11 @@ class _LyricPageState extends State<LyricPage> {
         path != null
             ? LyricView(
               path: path!,
-              padding: EdgeInsets.only(
-                top: 100 + MediaQuery.of(context).padding.top,
-              ),
+              paddingTop: 100 + MediaQuery.of(context).padding.top,
+              // paddingBottom: MediaQuery.of(context).size.height,
+              // padding: EdgeInsets.only(
+              //   top: 100 + MediaQuery.of(context).padding.top,
+              // ),
             )
             : Container(),
         SizedBox(
@@ -77,7 +79,7 @@ class _LyricPageState extends State<LyricPage> {
                     Padding(
                       padding: EdgeInsets.only(left: 25),
                       child: Card(
-                        elevation: 8,
+                        elevation: 0,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: SizedBox(
