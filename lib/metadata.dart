@@ -117,6 +117,7 @@ class Metadata {
       picturePath = pic.path;
       return picturePath;
     }
+    return null;
   }
 
   dynamic metadata;

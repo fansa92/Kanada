@@ -13,7 +13,6 @@ import 'package:kanada/pages/more/debug/player.dart';
 import 'package:kanada/pages/more/debug/toast.dart';
 import 'package:kanada/pages/more/settings.dart';
 import 'package:kanada/pages/more/settings/folders.dart';
-import 'package:kanada/pages/player.dart';
 import 'package:kanada/pages/playing.dart';
 import 'package:kanada/pages/search.dart';
 

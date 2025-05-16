@@ -30,7 +30,7 @@ class _LyricDebugState extends State<LyricDebug> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Lyric Debug')),
-      body: ListView(children: lyrics.lyrics!.map((lyric){
+      body: ListView(children: lyrics.lyrics.map((lyric){
         return Text(lyric.toString());
       }).toList()),
     );

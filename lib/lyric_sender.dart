@@ -1,14 +1,14 @@
-import 'package:audio_service/audio_service.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:kanada/global.dart';
-import 'package:kanada/lyric.dart';
-import 'package:kanada/player.dart';
-import 'package:kanada_lyric_sender/kanada_lyric_sender.dart';
-
-import 'metadata.dart';
+// import 'package:audio_service/audio_service.dart';
+// import 'package:just_audio/just_audio.dart';
+// import 'package:kanada/global.dart';
+// import 'package:kanada/lyric.dart';
+// import 'package:kanada/player.dart';
+// import 'package:kanada_lyric_sender/kanada_lyric_sender.dart';
+//
+// import 'metadata.dart';
 
 Future<void> sendLyrics() async {
-  print('Miraiku sendLyrics');
+  // print('Miraiku sendLyrics');
   // KanadaLyricSenderPlugin.sendLyric(
   //   DateTime.now().toIso8601String(),
   //   1000,

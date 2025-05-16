@@ -15,20 +15,20 @@ class KanadaLyricServerPlugin{
   static const backgroundChannel = MethodChannel('kanada_lyric_server/background');
 
   static Future<void> startForegroundService() async {
-    print('Miraiku startForegroundService');
+    // print('Miraiku startForegroundService');
     await platform.invokeMethod('startForegroundService');
   }
   static Future<void> stopForegroundService() async {
-    print('Miraiku stopForegroundService');
+    // print('Miraiku stopForegroundService');
     await platform.invokeMethod('stopForegroundService');
   }
 
   static Future<void> setMethodCallHandler(Future<void> Function() handler) async {
-    print('Miraiku setMethodCallHandler');
+    // print('Miraiku setMethodCallHandler');
     backgroundChannel.setMethodCallHandler((call){
-      print('Miraiku setMethodCallHandler call ${call.method}');
+      // print('Miraiku setMethodCallHandler call ${call.method}');
       if (call.method == "onLyricUpdate") {
-        print('Miraiku setMethodCallHandler onLyricUpdate');
+        // print('Miraiku setMethodCallHandler onLyricUpdate');
         handler();
       }
       return Future.value(null);
