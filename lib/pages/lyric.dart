@@ -110,9 +110,9 @@ class _LyricPageState extends State<LyricPage> {
             // child: BackdropFilter(
             //   filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
             child: Container(
-              color: Theme.of(
-                context,
-              ).colorScheme.surface.withValues(alpha: .8),
+              // color: Theme.of(
+              //   context,
+              // ).colorScheme.surface.withValues(alpha: .8),
               child: Padding(
                 padding: EdgeInsets.only(
                   top: MediaQuery.of(context).padding.top,
@@ -156,12 +156,8 @@ class _LyricPageState extends State<LyricPage> {
                                 metadata?.title ??
                                     path?.split('/').last ??
                                     'Unknown Title',
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.titleLarge?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface.withValues(alpha: .8),
+                                style: Global.playerTheme.textTheme.titleLarge?.copyWith(
+                                  color: Global.playerTheme.colorScheme.onSurface.withValues(alpha: .8),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -169,12 +165,8 @@ class _LyricPageState extends State<LyricPage> {
                               SizedBox(height: 5),
                               Text(
                                 metadata?.artist ?? 'Unknown Artist',
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface.withValues(alpha: .6),
+                                style: Global.playerTheme.textTheme.bodyMedium?.copyWith(
+                                  color: Global.playerTheme.colorScheme.onSurface.withValues(alpha: .6),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -190,9 +182,7 @@ class _LyricPageState extends State<LyricPage> {
                       right: 0,
                       child: Container(
                         height: 1,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: .1),
+                        color: Global.playerTheme.colorScheme.onSurface.withValues(alpha: .1),
                       ),
                     ),
                     Positioned(
@@ -204,7 +194,7 @@ class _LyricPageState extends State<LyricPage> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              Theme.of(context).colorScheme.primary,
+                              Global.playerTheme.colorScheme.primary,
                               Colors.transparent,
                             ],
                             stops: [_progress-0.005, _progress+0.005],

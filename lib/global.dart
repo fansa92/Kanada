@@ -5,10 +5,12 @@ import 'package:kanada/pages/folders.dart';
 import 'package:kanada/pages/home.dart';
 import 'package:kanada/pages/more.dart';
 import 'package:kanada/pages/more/debug.dart';
+import 'package:kanada/pages/more/debug/color_diffusion.dart';
 import 'package:kanada/pages/more/debug/file_choose.dart';
 import 'package:kanada/pages/more/debug/link.dart';
 import 'package:kanada/pages/more/debug/lyric.dart';
 import 'package:kanada/pages/more/debug/lyric_sender.dart';
+import 'package:kanada/pages/more/debug/pick_color.dart';
 import 'package:kanada/pages/more/debug/player.dart';
 import 'package:kanada/pages/more/debug/toast.dart';
 import 'package:kanada/pages/more/settings.dart';
@@ -30,6 +32,8 @@ class Global {
     '/more/debug/file_choose': (context) => const FileChooseDebug(),
     '/more/debug/lyric_sender': (context) => const LyricSenderDebug(),
     '/more/debug/lyric': (context) => const LyricDebug(),
+    '/more/debug/pick_color': (context) => const PickColorDebug(),
+    '/more/debug/color_diffusion': (context) => const ColorDiffusionDebug(),
     '/more/settings': (context) => const SettingsPage(),
     '/more/settings/folders': (context) => const FoldersSettings(),
     '/player': (context) => const PlayingPage(),
@@ -39,4 +43,5 @@ class Global {
   static String path = '';
   static List<String> playlist = [];
   static String? pictureCache;
+  static ThemeData playerTheme = ThemeData();
 }

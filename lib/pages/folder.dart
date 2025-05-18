@@ -8,7 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 import '../global.dart';
-import '../utools.dart';
+import '../tool.dart';
 import '../widgets/float_playing.dart';
 
 class FolderPage extends StatefulWidget {
@@ -113,6 +113,7 @@ class _FolderPageState extends State<FolderPage> {
             flexibleSpace: FlexibleSpaceBar(
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     widget.path.split('/')[widget.path.split('/').length - 2],
@@ -129,7 +130,7 @@ class _FolderPageState extends State<FolderPage> {
                       padding: EdgeInsets.only(right: 16),
                       child: Text(
                         '共${files.length}首${durationSum != null ? ' ${durationSum?.inMinutes}分钟' : ''}',
-                        style: TextStyle(fontSize: 12),
+                        style: TextStyle(fontSize: 8),
                       ),
                     ),
                   ),

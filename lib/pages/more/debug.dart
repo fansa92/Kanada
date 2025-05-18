@@ -21,6 +21,8 @@ class _DebugPageState extends State<DebugPage>{
         [Icons.folder_copy, 'File Choose Debug Page', '/more/debug/file_choose'],
         [Icons.text_fields, 'Lyric Sender Debug Page', '/more/debug/lyric_sender'],
         [Icons.text_fields, 'Lyric Debug Page', '/more/debug/lyric'],
+        [Icons.color_lens, 'Pick Color Debug Page', '/more/debug/pick_color'],
+        [Icons.color_lens, 'Color Diffusion Debug Page', '/more/debug/color_diffusion'],
       ]),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kanada/pages/folders.dart';
 import 'package:kanada/pages/more.dart';
 import 'package:kanada/pages/search.dart';
+import '../global.dart';
 import '../widgets/float_playing.dart';
 import 'home.dart';
 
@@ -40,6 +41,7 @@ class _AppPageState extends State<AppPage> {
   }
 
   Future<void> _init() async {
+    Global.playerTheme=Theme.of(context);
     // KanadaLyricServerPlugin.setMethodCallHandler(sendLyrics).then((value){
     //   KanadaLyricServerPlugin.startForegroundService();
     // });

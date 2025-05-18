@@ -29,10 +29,10 @@ packages:
     dependency: "direct main"
     description:
       name: audio_metadata_reader
-      sha256: "402b314c7212d04ecc425325d2145a0e406c50cb4c80150972ba2fb447e78688"
+      sha256: "3a8f69540f2c8ffab3d22fad65d3dd91a29170850766843390d2b5beebc902ee"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "1.4.0"
+    version: "1.4.1"
   audio_service:
     dependency: "direct main"
     description:
@@ -276,10 +276,10 @@ packages:
     dependency: "direct main"
     description:
       name: just_audio
-      sha256: f978d5b4ccea08f267dae0232ec5405c1b05d3f3cd63f82097ea46c015d5c09e
+      sha256: d449d6b01ace3343dd8ca7f910db871994942dc58752d2765db35694f9ffe7e2
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "0.9.46"
+    version: "0.10.3"
   just_audio_background:
     dependency: "direct main"
     description:
@@ -388,6 +388,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.0.0"
+  palette_generator:
+    dependency: "direct main"
+    description:
+      name: palette_generator
+      sha256: "4420f7ccc3f0a4a906144e73f8b6267cd940b64f57a7262e95cb8cec3a8ae0ed"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.3.3+7"
   path:
     dependency: "direct main"
     description:

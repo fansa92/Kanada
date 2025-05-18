@@ -51,10 +51,9 @@ class _LyricViewState extends State<LyricView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    LyricView.primaryColor = Theme.of(context).colorScheme.primary;
-    LyricView.secondaryColor = Theme.of(
-      context,
-    ).colorScheme.onSurface.withValues(alpha: .6);
+    LyricView.primaryColor = Global.playerTheme.colorScheme.primary;
+    LyricView.secondaryColor = Global.playerTheme.colorScheme.onSurface
+        .withValues(alpha: .6);
   }
 
   @override

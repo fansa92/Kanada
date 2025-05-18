@@ -21,6 +21,7 @@ class _PlayerPageState extends State<PlayerPage> {
   static const double iconSize = 64;
   String? path;
   Metadata? metadata;
+
   // StreamSubscription<int?>? _currentIndexSub;
   StreamSubscription<SequenceState?>? _sequenceSub;
   StreamSubscription<Duration>? _positionSub;
@@ -51,7 +52,7 @@ class _PlayerPageState extends State<PlayerPage> {
 
     // 监听播放列表元数据变化（包括 setAudioSource）
     _sequenceSub = Global.player.sequenceStateStream.listen((state) {
-      if (state?.currentIndex != null) {
+      if (state.currentIndex != null) {
         _fresh(); // 主动刷新
       }
     });
@@ -164,7 +165,10 @@ class _PlayerPageState extends State<PlayerPage> {
                   metadata?.title ?? '',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 20),
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Global.playerTheme.colorScheme.onSurface,
+                  ),
                 ),
                 Text(
                   metadata?.artist ?? '',
@@ -172,9 +176,9 @@ class _PlayerPageState extends State<PlayerPage> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 16,
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: .6),
+                    color: Global.playerTheme.colorScheme.onSurface.withValues(
+                      alpha: .6,
+                    ),
                   ),
                 ),
               ],
@@ -190,10 +194,9 @@ class _PlayerPageState extends State<PlayerPage> {
                 // 完全移除滑块
                 overlayShape: SliderComponentShape.noOverlay,
                 // 完全移除覆盖层
-                activeTrackColor: Theme.of(context).colorScheme.primary,
-                inactiveTrackColor: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: .2),
+                activeTrackColor: Global.playerTheme.colorScheme.primary,
+                inactiveTrackColor: Global.playerTheme.colorScheme.onSurface
+                    .withValues(alpha: .2),
                 trackHeight: 6,
               ),
               child: Slider(
@@ -227,18 +230,18 @@ class _PlayerPageState extends State<PlayerPage> {
                   '${Global.player.position.inMinutes.toString().padLeft(2, '0')}:${Global.player.position.inSeconds.remainder(60).toString().padLeft(2, '0')}',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: .6),
+                    color: Global.playerTheme.colorScheme.onSurface.withValues(
+                      alpha: .6,
+                    ),
                   ),
                 ),
                 Text(
                   '${Global.player.duration?.inMinutes.toString().padLeft(2, '0')}:${Global.player.duration?.inSeconds.remainder(60).toString().padLeft(2, '0')}',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: .6),
+                    color: Global.playerTheme.colorScheme.onSurface.withValues(
+                      alpha: .6,
+                    ),
                   ),
                 ),
               ],
@@ -250,7 +253,16 @@ class _PlayerPageState extends State<PlayerPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                icon: Icon(Icons.skip_previous, size: iconSize),
+                icon: Icon(
+                  Icons.skip_previous,
+                  size: iconSize,
+                  color:
+                      Global.player.hasPrevious
+                          ? Global.playerTheme.colorScheme.primary
+                          : Global.playerTheme.colorScheme.onSurface.withValues(
+                            alpha: .2,
+                          ),
+                ),
                 onPressed:
                     Global.player.hasPrevious
                         ? Global.player.seekToPrevious
@@ -260,6 +272,7 @@ class _PlayerPageState extends State<PlayerPage> {
                 icon: Icon(
                   Global.player.playing ? Icons.pause : Icons.play_arrow,
                   size: iconSize,
+                  color: Global.playerTheme.colorScheme.primary,
                 ),
                 onPressed:
                     Global.player.playing
@@ -267,7 +280,16 @@ class _PlayerPageState extends State<PlayerPage> {
                         : Global.player.play,
               ),
               IconButton(
-                icon: Icon(Icons.skip_next, size: iconSize),
+                icon: Icon(
+                  Icons.skip_next,
+                  size: iconSize,
+                  color:
+                      Global.player.hasNext
+                          ? Global.playerTheme.colorScheme.primary
+                          : Global.playerTheme.colorScheme.onSurface.withValues(
+                            alpha: .2,
+                          ),
+                ),
                 onPressed:
                     Global.player.hasNext ? Global.player.seekToNext : null,
               ),
@@ -280,16 +302,31 @@ class _PlayerPageState extends State<PlayerPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.volume_down, size: iconSize / 2),
+                IconButton(
+                  onPressed: () {
+                    if (volume != null && volume! > 0) {
+                      volume = max(volume! - maxVolume*0.1, 0);
+                      KanadaVolumePlugin.setVolume(volume!.toInt());
+                      if (mounted) setState(() {});
+                    }
+                  },
+                  icon: Icon(
+                    Icons.volume_down,
+                    size: iconSize / 2,
+                    color: Global.playerTheme.colorScheme.primary,
+                  ),
+                ),
                 Expanded(
                   child: SliderTheme(
                     data: SliderTheme.of(context).copyWith(
                       thumbShape: SliderComponentShape.noThumb,
                       overlayShape: SliderComponentShape.noOverlay,
-                      activeTrackColor: Theme.of(context).colorScheme.primary,
-                      inactiveTrackColor: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: .2),
+                      activeTrackColor: Global.playerTheme.colorScheme.primary,
+                      inactiveTrackColor: Global
+                          .playerTheme
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: .2),
                       trackHeight: 6,
                     ),
                     child: Slider(
@@ -310,7 +347,20 @@ class _PlayerPageState extends State<PlayerPage> {
                     ),
                   ),
                 ),
-                Icon(Icons.volume_up, size: iconSize / 2),
+                IconButton(
+                  onPressed: () {
+                    if (volume != null && volume! < maxVolume) {
+                      volume = min(volume! + maxVolume*0.1, maxVolume);
+                      KanadaVolumePlugin.setVolume(volume!.toInt());
+                      if (mounted) setState(() {});
+                    }
+                  },
+                  icon: Icon(
+                    Icons.volume_up,
+                    size: iconSize / 2,
+                    color: Global.playerTheme.colorScheme.primary,
+                  ),
+                ),
               ],
             ),
           ),
