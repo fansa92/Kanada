@@ -35,6 +35,7 @@ class _PlayerPageState extends State<PlayerPage> {
   void initState() {
     super.initState();
     _init();
+    metadata = Global.metadataCache;
 
     Future.delayed(Duration(milliseconds: 300), () {
       if (mounted) setState(() {});
@@ -114,7 +115,8 @@ class _PlayerPageState extends State<PlayerPage> {
       metadata!.getPicture(cache: false),
     ]);
     if (mounted) setState(() {});
-    Global.pictureCache = metadata!.picturePath;
+    // Global.pictureCache = metadata!.picturePath;
+    Global.metadataCache = metadata;
   }
 
   @override
@@ -133,22 +135,23 @@ class _PlayerPageState extends State<PlayerPage> {
             child: Center(
               child: Card(
                 elevation: 8,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  key: PlayerPage.pictureKey,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    width: width * (Global.player.playing ? 1 : 0.8),
-                    height: width * (Global.player.playing ? 1 : 0.8),
-                    child:
-                        metadata?.picture != null
-                            ? Image.memory(metadata!.picture!)
-                            : (metadata?.pictureCache != null
-                                ? Image.file(File(metadata!.pictureCache!))
-                                : (Global.pictureCache != null
-                                    ? Image.file(File(Global.pictureCache!))
-                                    : Icon(Icons.music_note))),
+                child: Hero(
+                  tag: 'player-image',
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    key: ValueKey('player-image'),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      width: width * (Global.player.playing ? 1 : 0.8),
+                      height: width * (Global.player.playing ? 1 : 0.8),
+                      child:
+                          metadata?.picture != null
+                              ? Image.memory(metadata!.picture!)
+                              : (metadata?.pictureCache != null
+                                  ? Image.file(File(metadata!.pictureCache!))
+                                  : Icon(Icons.music_note)),
+                    ),
                   ),
                 ),
               ),
@@ -305,7 +308,7 @@ class _PlayerPageState extends State<PlayerPage> {
                 IconButton(
                   onPressed: () {
                     if (volume != null && volume! > 0) {
-                      volume = max(volume! - maxVolume*0.1, 0);
+                      volume = max(volume! - maxVolume * 0.1, 0);
                       KanadaVolumePlugin.setVolume(volume!.toInt());
                       if (mounted) setState(() {});
                     }
@@ -350,7 +353,7 @@ class _PlayerPageState extends State<PlayerPage> {
                 IconButton(
                   onPressed: () {
                     if (volume != null && volume! < maxVolume) {
-                      volume = min(volume! + maxVolume*0.1, maxVolume);
+                      volume = min(volume! + maxVolume * 0.1, maxVolume);
                       KanadaVolumePlugin.setVolume(volume!.toInt());
                       if (mounted) setState(() {});
                     }

@@ -25,6 +25,7 @@ class _FloatPlayingState extends State<FloatPlaying> {
   void initState() {
     super.initState();
     _init();
+    metadata = Global.metadataCache;
 
     // 监听 currentIndex 变化
     _currentIndexSub = Global.player.currentIndexStream.listen((index) {
@@ -82,7 +83,8 @@ class _FloatPlayingState extends State<FloatPlaying> {
       metadata!.getPicture(cache: false),
     ]);
     if (mounted) setState(() {});
-    Global.pictureCache = metadata!.picturePath;
+    // Global.pictureCache = metadata!.picturePath;
+    Global.metadataCache = metadata;
   }
 
   @override
@@ -103,18 +105,21 @@ class _FloatPlayingState extends State<FloatPlaying> {
               color: Theme.of(context).colorScheme.primaryContainer,
               child: Row(
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: SizedBox(
-                      key: pictureKey,
-                      width: 50,
-                      height: 50,
-                      child:
-                          metadata?.picture != null
-                              ? Image.memory(metadata!.picture!)
-                              : (metadata?.pictureCache != null
-                                  ? Image.file(File(metadata!.pictureCache!))
-                                  : Icon(Icons.music_note)),
+                  Hero(
+                    tag: 'player-image',
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: SizedBox(
+                        key: pictureKey,
+                        width: 50,
+                        height: 50,
+                        child:
+                            metadata?.picture != null
+                                ? Image.memory(metadata!.picture!)
+                                : (metadata?.pictureCache != null
+                                    ? Image.file(File(metadata!.pictureCache!))
+                                    : Icon(Icons.music_note)),
+                      ),
                     ),
                   ),
                   SizedBox(width: 10),

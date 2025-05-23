@@ -18,6 +18,8 @@ import 'package:kanada/pages/more/settings/folders.dart';
 import 'package:kanada/pages/playing.dart';
 import 'package:kanada/pages/search.dart';
 
+import 'metadata.dart';
+
 class Global {
   static Map<String, WidgetBuilder> routes = {
     '/': (context) => const AppPage(),
@@ -42,6 +44,6 @@ class Global {
   static bool init = false;
   static String path = '';
   static List<String> playlist = [];
-  static String? pictureCache;
+  static Metadata? metadataCache;
   static ThemeData playerTheme = ThemeData();
 }

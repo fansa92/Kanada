@@ -82,16 +82,18 @@ class _FolderPageState extends State<FolderPage> {
     });
     Global.playlist = files.map((e) => e.path).toList();
     setState(() {});
-    for (var element in files) {
-      Metadata(element.path).getMetadata().then((value) {
-        durationSum =
-            (durationSum ?? Duration.zero) + (value.duration ?? Duration.zero);
-        initiated++;
-        if (initiated == files.length) {
-          setState(() {});
-        }
-      });
-    }
+
+    durationSum = Duration.zero;
+    initiated = 0;
+    // 使用 Future.forEach 按顺序处理每个文件
+    await Future.forEach(files, (FileSystemEntity element) async {
+      final value = await Metadata(element.path).getMetadata();
+      durationSum = durationSum! + (value.duration ?? Duration.zero);
+      initiated++;
+      if (initiated == files.length) {
+        if (mounted) setState(() {});
+      }
+    });
   }
 
   @override

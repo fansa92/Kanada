@@ -29,6 +29,7 @@ class _LyricPageState extends State<LyricPage> {
   void initState() {
     super.initState();
     _init();
+    metadata = Global.metadataCache;
     // _currentIndexSub = Global.player.currentIndexStream.listen((index) {
     //   if (index != null) {
     //     print(path);
@@ -36,7 +37,7 @@ class _LyricPageState extends State<LyricPage> {
     //   }
     // });
     _sequenceSub = Global.player.sequenceStateStream.listen((state) {
-        _init();
+      _init();
     });
     // 初始化位置监听
     _positionSub = Global.player.positionStream.listen((position) {
@@ -108,9 +109,7 @@ class _LyricPageState extends State<LyricPage> {
             // child: BackdropFilter(
             //   filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
             child: Padding(
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top,
-              ),
+              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
               child: Stack(
                 children: [
                   Row(
@@ -119,23 +118,23 @@ class _LyricPageState extends State<LyricPage> {
                         padding: EdgeInsets.only(left: 25),
                         child: Card(
                           elevation: 0,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: SizedBox(
-                              width: 80,
-                              height: 80,
-                              child:
-                                  metadata?.picture != null
-                                      ? Image.memory(metadata!.picture!)
-                                      : (metadata?.pictureCache != null
-                                          ? Image.file(
-                                            File(metadata!.pictureCache!),
-                                          )
-                                          : (Global.pictureCache != null
-                                              ? Image.file(
-                                                File(Global.pictureCache!),
-                                              )
-                                              : Icon(Icons.music_note))),
+                          child: Hero(
+                            tag: 'player-image',
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              key: ValueKey('player-image'),
+                              child: SizedBox(
+                                width: 80,
+                                height: 80,
+                                child:
+                                    metadata?.picture != null
+                                        ? Image.memory(metadata!.picture!)
+                                        : (metadata?.pictureCache != null
+                                            ? Image.file(
+                                              File(metadata!.pictureCache!),
+                                            )
+                                            : Icon(Icons.music_note)),
+                              ),
                             ),
                           ),
                         ),
@@ -150,18 +149,28 @@ class _LyricPageState extends State<LyricPage> {
                               metadata?.title ??
                                   path?.split('/').last ??
                                   'Unknown Title',
-                              style: Global.playerTheme.textTheme.titleLarge?.copyWith(
-                                color: Global.playerTheme.colorScheme.onSurface.withValues(alpha: .8),
-                              ),
+                              style: Global.playerTheme.textTheme.titleLarge
+                                  ?.copyWith(
+                                    color: Global
+                                        .playerTheme
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: .8),
+                                  ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             SizedBox(height: 5),
                             Text(
                               metadata?.artist ?? 'Unknown Artist',
-                              style: Global.playerTheme.textTheme.bodyMedium?.copyWith(
-                                color: Global.playerTheme.colorScheme.onSurface.withValues(alpha: .6),
-                              ),
+                              style: Global.playerTheme.textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Global
+                                        .playerTheme
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: .6),
+                                  ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -176,7 +185,8 @@ class _LyricPageState extends State<LyricPage> {
                     right: 0,
                     child: Container(
                       height: 1,
-                      color: Global.playerTheme.colorScheme.onSurface.withValues(alpha: .1),
+                      color: Global.playerTheme.colorScheme.onSurface
+                          .withValues(alpha: .1),
                     ),
                   ),
                   Positioned(
@@ -191,7 +201,7 @@ class _LyricPageState extends State<LyricPage> {
                             Global.playerTheme.colorScheme.primary,
                             Colors.transparent,
                           ],
-                          stops: [_progress-0.005, _progress+0.005],
+                          stops: [_progress - 0.005, _progress + 0.005],
                         ),
                       ),
                     ),

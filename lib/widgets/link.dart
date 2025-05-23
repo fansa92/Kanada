@@ -1,200 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kanada/global.dart';
 
-class CustomRoute<T> extends PageRoute<T> {
-  final WidgetBuilder builder;
-  final List<double> position;
-  final List<double> size;
-  final Duration duration;
-  final Curve curve;
-  final double elevation;
-  final Color shadowColor;
-  final BorderRadius borderRadius;
-  final Clip clipBehavior;
-  final GlobalKey? sourceKey;
-  final GlobalKey? targetKey;
-
-  // 提前获取源元素位置
-  final Rect? sharedStartRect;
-
-  // 监听目标元素位置变化
-  final ValueNotifier<Rect?> sharedEndRectNotifier = ValueNotifier(null);
-
-  CustomRoute({
-    required this.builder,
-    required this.position,
-    required this.size,
-    this.duration = const Duration(milliseconds: 300),
-    this.curve = Curves.easeInOut,
-    this.elevation = 8.0,
-    this.shadowColor = Colors.black,
-    this.borderRadius = BorderRadius.zero,
-    this.clipBehavior = Clip.antiAlias,
-    this.sourceKey,
-    this.targetKey,
-  }) : sharedStartRect = sourceKey != null
-      ? _getWidgetRect(sourceKey)
-      : null;
-
-  static Rect? _getWidgetRect(GlobalKey key) {
-    final renderBox = key.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox == null) return null;
-    final offset = renderBox.localToGlobal(Offset.zero);
-    return offset & renderBox.size;
-  }
-
-  @override
-  Color? get barrierColor => null;
-
-  @override
-  String? get barrierLabel => null;
-
-  @override
-  Duration get transitionDuration => duration;
-
-  @override
-  bool get maintainState => true;
-
-  @override
-  bool get opaque => false;
-
-  @override
-  Widget buildPage(
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-      ) {
-    final page = builder(context);
-
-    // 在布局完成后获取目标元素位置
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (targetKey != null) {
-        final rect = _getWidgetRect(targetKey!);
-        sharedEndRectNotifier.value = rect;
-      }
-    });
-
-    return page;
-  }
-
-  @override
-  Widget buildTransitions(
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-      Widget child,
-      ) {
-    final screenSize = MediaQuery.of(context).size;
-    final curvedAnimation = CurvedAnimation(parent: animation, curve: curve);
-
-    return AnimatedBuilder(
-      animation: Listenable.merge([
-        curvedAnimation,
-        sharedEndRectNotifier,
-      ]),
-      builder: (context, child) {
-        // 页面展开动画
-        final pageRect = _buildPageAnimation(screenSize, curvedAnimation);
-
-        // 共享元素动画
-        final sharedWidget = _buildSharedAnimation(curvedAnimation);
-
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // 主页面动画
-            _buildPageWidget(pageRect, child!),
-
-            // 共享元素动画
-            if (sharedWidget != null && curvedAnimation.value<1) sharedWidget,
-          ],
-        );
-      },
-      child: child,
-    );
-  }
-
-  Widget _buildPageWidget(Rect rect, Widget child) {
-    return CustomSingleChildLayout(
-      delegate: _LayoutDelegate(rect),
-      child: PhysicalModel(
-        color: Colors.transparent,
-        elevation: elevation,
-        shadowColor: shadowColor,
-        borderRadius: borderRadius,
-        clipBehavior: clipBehavior,
-        child: ClipRRect(
-          borderRadius: borderRadius,
-          clipBehavior: clipBehavior,
-          child: child,
-        ),
-      ),
-    );
-  }
-
-  Rect _buildPageAnimation(Size screenSize, Animation<double> animation) {
-    final beginRect = Rect.fromLTWH(
-        position[0],
-        position[1],
-        size[0],
-        size[1]
-    );
-    final endRect = Rect.fromLTWH(0, 0, screenSize.width, screenSize.height);
-    return RectTween(begin: beginRect, end: endRect).evaluate(animation)!;
-  }
-
-  Widget? _buildSharedAnimation(Animation<double> animation) {
-    final endRect = sharedEndRectNotifier.value;
-    if (sharedStartRect == null || endRect == null) return null;
-
-    return _buildSharedElementAnimation(
-      sharedStartRect!,
-      endRect,
-      animation.value,
-    );
-  }
-
-  Widget _buildSharedElementAnimation(
-      Rect startRect,
-      Rect endRect,
-      double progress,
-      ) {
-    final currentLeft = startRect.left + (endRect.left - startRect.left) * progress;
-    final currentTop = startRect.top + (endRect.top - startRect.top) * progress;
-    final currentWidth = startRect.width + (endRect.width - startRect.width) * progress;
-    final currentHeight = startRect.height + (endRect.height - startRect.height) * progress;
-
-    return Positioned(
-      left: currentLeft,
-      top: currentTop,
-      child: SizedBox(
-        width: currentWidth,
-        height: currentHeight,
-        child: targetKey?.currentWidget ?? const SizedBox(),
-      ),
-    );
-  }
-}
-
-class _LayoutDelegate extends SingleChildLayoutDelegate {
-  final Rect rect;
-
-  _LayoutDelegate(this.rect);
-
-  @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    return BoxConstraints.tight(rect.size);
-  }
-
-  @override
-  Offset getPositionForChild(Size size, Size childSize) {
-    return rect.topLeft;
-  }
-
-  @override
-  bool shouldRelayout(_LayoutDelegate oldDelegate) => rect != oldDelegate.rect;
-}
-
 class Link extends StatefulWidget {
   final Widget child;
   final String route;
@@ -244,19 +50,22 @@ class _LinkState extends State<Link> {
     final Size size = renderBox.size;
     await Navigator.push(
       context,
-      CustomRoute(
-        position: [offset.dx, offset.dy],
-        size: [size.width, size.height],
+      MaterialPageRoute(
         builder: (context) => Global.routes[widget.route]!(context),
-        duration: widget.duration ?? const Duration(milliseconds: 300),
-        curve: widget.curve ?? Curves.easeInOut,
-        elevation: widget.elevation ?? 8.0,
-        shadowColor: widget.shadowColor ?? Colors.black,
-        borderRadius: widget.borderRadius ?? BorderRadius.zero,
-        clipBehavior: widget.clipBehavior ?? Clip.antiAlias,
-        sourceKey: widget.sourceKey,
-        targetKey: widget.targetKey,
-      ),
+      )
+      // CustomRoute(
+      //   position: [offset.dx, offset.dy],
+      //   size: [size.width, size.height],
+      //   builder: (context) => Global.routes[widget.route]!(context),
+      //   duration: widget.duration ?? const Duration(milliseconds: 300),
+      //   curve: widget.curve ?? Curves.easeInOut,
+      //   elevation: widget.elevation ?? 8.0,
+      //   shadowColor: widget.shadowColor ?? Colors.black,
+      //   borderRadius: widget.borderRadius ?? BorderRadius.zero,
+      //   clipBehavior: widget.clipBehavior ?? Clip.antiAlias,
+      //   sourceKey: widget.sourceKey,
+      //   targetKey: widget.targetKey,
+      // ),
     );
 
     if (widget.onTapAfter != null) {
@@ -319,16 +128,8 @@ class _LinkBuilderState extends State<LinkBuilder> {
     final Size size = renderBox.size;
     Navigator.push(
       context,
-      CustomRoute(
-        position: [offset.dx, offset.dy],
-        size: [size.width, size.height],
+      MaterialPageRoute(
         builder: widget.builder,
-        duration: widget.duration ?? const Duration(milliseconds: 300),
-        curve: widget.curve ?? Curves.easeInOut,
-        elevation: widget.elevation ?? 8.0,
-        shadowColor: widget.shadowColor ?? Colors.black,
-        borderRadius: widget.borderRadius ?? BorderRadius.zero,
-        clipBehavior: widget.clipBehavior ?? Clip.antiAlias,
       ),
     );
 
