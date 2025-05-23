@@ -42,7 +42,6 @@ class _PickColorDebugState extends State<PickColorDebug> {
     // lightMutedColor = paletteGenerator.lightMutedColor!.color;
     setState(() {});
     colors = paletteGenerator.colors.toList();
-    print(paletteGenerator.colors.toList().toString());
     time = DateTime.now().millisecondsSinceEpoch - t;
     setState(() {});
   }

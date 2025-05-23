@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -54,25 +55,32 @@ class PlayerBackground extends StatefulWidget {
   State<PlayerBackground> createState() => _PlayerBackgroundState();
 }
 
-class _PlayerBackgroundState extends State<PlayerBackground> {
+class _PlayerBackgroundState extends State<PlayerBackground>
+    with SingleTickerProviderStateMixin {
+  static const double radius = 0.5;
   String? path;
   Metadata? metadata;
   StreamSubscription<SequenceState?>? _sequenceSub;
-
-  bool isLoading = true;
+  late AnimationController _controller;
+  late List<Offset> _baseOffsets;
   List<Color> colors = [];
-  List<Offset> offsets = [
-    const Offset(.5, .5),
-    const Offset(0, 0),
-    const Offset(1, 0),
-    const Offset(0, 1),
-    const Offset(1, 1),
-  ];
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _baseOffsets = [
+      const Offset(.5, .5),
+      const Offset(0, 0),
+      const Offset(1, 0),
+      const Offset(0, 1),
+      const Offset(1, 1),
+    ];
     _init();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 5),
+    )..repeat();
     _sequenceSub = Global.player.sequenceStateStream.listen((state) {
       if (state.currentIndex != null) {
         _init(); // 主动刷新
@@ -84,6 +92,14 @@ class _PlayerBackgroundState extends State<PlayerBackground> {
   void dispose() {
     _sequenceSub?.cancel();
     super.dispose();
+  }
+  List<Offset> get _animatedOffsets {
+    final value = _controller.value * 2 * 3.14159; // 转换为弧度
+    return _baseOffsets.map((offset) {
+      final dx = offset.dx + radius * sin(value); // X 轴波动
+      final dy = offset.dy + radius * cos(value); // Y 轴波动
+      return Offset(dx.clamp(0.0, 1.0), dy.clamp(0.0, 1.0));
+    }).toList();
   }
 
   Future<void> _init() async {
@@ -122,7 +138,6 @@ class _PlayerBackgroundState extends State<PlayerBackground> {
         brightness: Brightness.dark,
       ),
     );
-    print(colors);
     colors =
         colors.map((color) {
           final hsv = HSVColor.fromColor(color);
@@ -140,6 +155,6 @@ class _PlayerBackgroundState extends State<PlayerBackground> {
   Widget build(BuildContext context) {
     return isLoading
         ? Container()
-        : ColorDiffusionWidget(colors: colors, offsets: offsets);
+        : ColorDiffusionWidget(colors: colors, offsets: _animatedOffsets);
   }
 }

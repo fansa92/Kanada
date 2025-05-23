@@ -36,9 +36,7 @@ class _LyricPageState extends State<LyricPage> {
     //   }
     // });
     _sequenceSub = Global.player.sequenceStateStream.listen((state) {
-      if (state != null) {
         _init();
-      }
     });
     // 初始化位置监听
     _positionSub = Global.player.positionStream.listen((position) {
@@ -109,101 +107,96 @@ class _LyricPageState extends State<LyricPage> {
           child: ClipRect(
             // child: BackdropFilter(
             //   filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-            child: Container(
-              // color: Theme.of(
-              //   context,
-              // ).colorScheme.surface.withValues(alpha: .8),
-              child: Padding(
-                padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).padding.top,
-                ),
-                child: Stack(
-                  children: [
-                    Row(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(left: 25),
-                          child: Card(
-                            elevation: 0,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: SizedBox(
-                                width: 80,
-                                height: 80,
-                                child:
-                                    metadata?.picture != null
-                                        ? Image.memory(metadata!.picture!)
-                                        : (metadata?.pictureCache != null
-                                            ? Image.file(
-                                              File(metadata!.pictureCache!),
-                                            )
-                                            : (Global.pictureCache != null
-                                                ? Image.file(
-                                                  File(Global.pictureCache!),
-                                                )
-                                                : Icon(Icons.music_note))),
-                              ),
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top,
+              ),
+              child: Stack(
+                children: [
+                  Row(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(left: 25),
+                        child: Card(
+                          elevation: 0,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: SizedBox(
+                              width: 80,
+                              height: 80,
+                              child:
+                                  metadata?.picture != null
+                                      ? Image.memory(metadata!.picture!)
+                                      : (metadata?.pictureCache != null
+                                          ? Image.file(
+                                            File(metadata!.pictureCache!),
+                                          )
+                                          : (Global.pictureCache != null
+                                              ? Image.file(
+                                                File(Global.pictureCache!),
+                                              )
+                                              : Icon(Icons.music_note))),
                             ),
                           ),
                         ),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                metadata?.title ??
-                                    path?.split('/').last ??
-                                    'Unknown Title',
-                                style: Global.playerTheme.textTheme.titleLarge?.copyWith(
-                                  color: Global.playerTheme.colorScheme.onSurface.withValues(alpha: .8),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              SizedBox(height: 5),
-                              Text(
-                                metadata?.artist ?? 'Unknown Artist',
-                                style: Global.playerTheme.textTheme.bodyMedium?.copyWith(
-                                  color: Global.playerTheme.colorScheme.onSurface.withValues(alpha: .6),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        height: 1,
-                        color: Global.playerTheme.colorScheme.onSurface.withValues(alpha: .1),
                       ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        height: 3,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Global.playerTheme.colorScheme.primary,
-                              Colors.transparent,
-                            ],
-                            stops: [_progress-0.005, _progress+0.005],
-                          ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              metadata?.title ??
+                                  path?.split('/').last ??
+                                  'Unknown Title',
+                              style: Global.playerTheme.textTheme.titleLarge?.copyWith(
+                                color: Global.playerTheme.colorScheme.onSurface.withValues(alpha: .8),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            SizedBox(height: 5),
+                            Text(
+                              metadata?.artist ?? 'Unknown Artist',
+                              style: Global.playerTheme.textTheme.bodyMedium?.copyWith(
+                                color: Global.playerTheme.colorScheme.onSurface.withValues(alpha: .6),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                       ),
+                    ],
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      height: 1,
+                      color: Global.playerTheme.colorScheme.onSurface.withValues(alpha: .1),
                     ),
-                  ],
-                ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      height: 3,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Global.playerTheme.colorScheme.primary,
+                            Colors.transparent,
+                          ],
+                          stops: [_progress-0.005, _progress+0.005],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
