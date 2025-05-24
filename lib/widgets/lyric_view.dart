@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:kanada/metadata.dart';
-import 'package:palette_generator/palette_generator.dart';
 import '../global.dart';
 import '../lyric.dart';
 

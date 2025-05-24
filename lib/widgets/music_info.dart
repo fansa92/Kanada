@@ -87,7 +87,7 @@ class _MusicInfoState extends State<MusicInfo> {
     Global.player.seek(Duration.zero);
     Global.player.play();
     if (!Global.lyricSenderInit) {
-      print('sendLyrics');
+      // print('sendLyrics');
       sendLyrics();
       Global.lyricSenderInit = true;
     }

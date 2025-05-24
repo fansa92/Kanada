@@ -48,7 +48,7 @@ class _CurrentLyricDebugState extends State<CurrentLyricDebug> {
               // 获取新位置
               currentLyric.position = Global.player.position.inMilliseconds;
               await currentLyric.getCurrentLyric();
-              print(currentLyric.content);
+              // print(currentLyric.content);
               setState(() {
                 lyric = currentLyric.content;
               });

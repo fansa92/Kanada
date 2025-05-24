@@ -8,8 +8,6 @@ import '../../global.dart';
 import '../metadata.dart';
 
 class PlayerPage extends StatefulWidget {
-  static final GlobalKey pictureKey = GlobalKey();
-
   const PlayerPage({super.key});
 
   @override

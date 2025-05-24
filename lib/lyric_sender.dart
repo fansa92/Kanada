@@ -37,9 +37,9 @@ Future<void> sendLyrics() async {
       return;
     }
     // 发送歌词
-    print(
-      'content: ${currentLyric.content} duration: ${currentLyric.duration}',
-    );
+    // print(
+    //   'content: ${currentLyric.content} duration: ${currentLyric.duration}',
+    // );
     KanadaLyricSenderPlugin.sendLyric(
       currentLyric.content,
       currentLyric.duration,

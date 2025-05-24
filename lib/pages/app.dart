@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:kanada/lyric_sender.dart';
 import 'package:kanada/pages/folders.dart';
 import 'package:kanada/pages/more.dart';
 import 'package:kanada/pages/search.dart';

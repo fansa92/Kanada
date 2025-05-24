@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import '../global.dart';
 import '../metadata.dart';
-import '../pages/player.dart';
 import 'link.dart' as link;
 
 class FloatPlaying extends StatefulWidget {
@@ -15,7 +14,6 @@ class FloatPlaying extends StatefulWidget {
 }
 
 class _FloatPlayingState extends State<FloatPlaying> {
-  final GlobalKey pictureKey = GlobalKey();
   String? path;
   Metadata? metadata;
   StreamSubscription<int?>? _currentIndexSub;
@@ -97,8 +95,6 @@ class _FloatPlayingState extends State<FloatPlaying> {
           borderRadius: BorderRadius.circular(8),
           child: link.Link(
             route: '/player',
-            sourceKey: pictureKey,
-            targetKey: PlayerPage.pictureKey,
             child: Container(
               width: double.infinity,
               height: 50,
@@ -110,7 +106,6 @@ class _FloatPlayingState extends State<FloatPlaying> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: SizedBox(
-                        key: pictureKey,
                         width: 50,
                         height: 50,
                         child:
