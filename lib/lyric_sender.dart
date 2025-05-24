@@ -5,6 +5,7 @@ import 'lyric.dart';
 import 'metadata.dart';
 
 final CurrentLyric currentLyric = CurrentLyric();
+// bool isPlaying= false;
 
 Future<void> sendLyrics() async {
   try {
@@ -42,7 +43,8 @@ Future<void> sendLyrics() async {
     // );
     KanadaLyricSenderPlugin.sendLyric(
       currentLyric.content,
-      currentLyric.duration,
+      // currentLyric.duration,
+      0,
     );
   } catch (e) {
     // print(e);

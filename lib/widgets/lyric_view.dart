@@ -132,10 +132,25 @@ class _LyricViewState extends State<LyricView> {
     });
   }
 
-  Widget buildNestedLyrics(int startIndex) {
+  Widget buildNestedLyrics(int startIndex, int endIndex) {
     if (startIndex >= lyrics!.lyrics.length) return const SizedBox.shrink();
 
     final currentLyric = lyrics!.lyrics[startIndex];
+
+    if (startIndex >= endIndex) {
+      return Column(
+        children: [
+          for (int i = startIndex; i < lyrics!.lyrics.length; i++)
+            LyricWidget(
+              key: startIndex == index ? activeKey : null,
+              ctx: lyrics!.lyrics[i]['content'],
+              startTime: lyrics!.lyrics[i]['startTime'],
+              endTime: lyrics!.lyrics[i]['endTime'],
+              lyric: lyrics!.lyrics[i]['lyric'],
+            ),
+        ],
+      );
+    }
 
     return Column(
       children: [
@@ -150,7 +165,7 @@ class _LyricViewState extends State<LyricView> {
           child: Stack(
             children: [
               // 递归调用构建下一个歌词
-              buildNestedLyrics(startIndex + 1),
+              buildNestedLyrics(startIndex + 1, endIndex),
               // 模糊层覆盖在后续歌词上方
               BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
@@ -184,7 +199,7 @@ class _LyricViewState extends State<LyricView> {
       } else if (i > index) {
         // 从 index+1 开始递归构建
         if (i == index + 1) {
-          widgets.add(buildNestedLyrics(i));
+          widgets.add(buildNestedLyrics(i, i + 8));
         }
         break; // 后续项由递归处理
       } else {
@@ -207,7 +222,7 @@ class _LyricViewState extends State<LyricView> {
         : SingleChildScrollView(
           key: singleChildScrollViewKey,
           controller: _scrollController,
-          // physics: NeverScrollableScrollPhysics(),
+          physics: NeverScrollableScrollPhysics(),
           child: Column(
             key: columnKey,
             children: [

@@ -89,6 +89,8 @@ class _LyricPageState extends State<LyricPage> {
         Padding(
           padding: EdgeInsets.only(
             top: 100 + MediaQuery.of(context).padding.top,
+            left: 12,
+            right: 12,
           ),
           child:
               metadata?.path != null
@@ -177,6 +179,7 @@ class _LyricPageState extends State<LyricPage> {
                           ],
                         ),
                       ),
+                      SizedBox(width: 25),
                     ],
                   ),
                   Positioned(

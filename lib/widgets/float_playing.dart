@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:kanada/pages/playing.dart';
 import '../global.dart';
 import '../metadata.dart';
 import 'link.dart' as link;
+import 'package:animations/animations.dart';
 
 class FloatPlaying extends StatefulWidget {
   const FloatPlaying({super.key});
@@ -87,67 +89,73 @@ class _FloatPlayingState extends State<FloatPlaying> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(left: 16, right: 16),
-      child: Card(
-        elevation: 8,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: link.Link(
-            route: '/player',
-            child: Container(
-              width: double.infinity,
-              height: 50,
-              color: Theme.of(context).colorScheme.primaryContainer,
-              child: Row(
-                children: [
-                  Hero(
-                    tag: 'player-image',
-                    child: ClipRRect(
+    return Hero(
+      tag: 'float-player',
+      child: Padding(
+        padding: EdgeInsets.only(left: 16, right: 16),
+        child: Card(
+          elevation: 8,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: OpenContainer(
+              transitionDuration: Duration(milliseconds: 300),
+              closedBuilder:
+                  (context, action) => Container(
+                width: double.infinity,
+                height: 50,
+                color: Theme.of(context).colorScheme.primaryContainer,
+                child: Row(
+                  children: [
+                    ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: SizedBox(
                         width: 50,
                         height: 50,
                         child:
-                            metadata?.picture != null
-                                ? Image.memory(metadata!.picture!)
-                                : (metadata?.pictureCache != null
-                                    ? Image.file(File(metadata!.pictureCache!))
-                                    : Icon(Icons.music_note)),
+                        metadata?.picture != null
+                            ? Image.memory(metadata!.picture!)
+                            : (metadata?.pictureCache != null
+                            ? Image.file(
+                          File(metadata!.pictureCache!),
+                        )
+                            : Icon(Icons.music_note)),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      metadata?.title ??
-                          path?.split('/').last ??
-                          'Unknown Title',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        metadata?.title ??
+                            path?.split('/').last ??
+                            'Unknown Title',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Global.player.playing ? Icons.pause : Icons.play_arrow,
+                    IconButton(
+                      icon: Icon(
+                        Global.player.playing
+                            ? Icons.pause
+                            : Icons.play_arrow,
+                      ),
+                      onPressed: () {
+                        (Global.player.playing
+                            ? Global.player.pause()
+                            : Global.player.play())
+                            .then((value) {
+                          setState(() {});
+                          _fresh();
+                        });
+                      },
                     ),
-                    onPressed: () {
-                      (Global.player.playing
-                              ? Global.player.pause()
-                              : Global.player.play())
-                          .then((value) {
-                            setState(() {});
-                            _fresh();
-                          });
-                    },
-                  ),
 
-                  IconButton(
-                    icon: Icon(Icons.skip_next),
-                    onPressed: Global.player.seekToNext,
-                  ),
-                ],
+                    IconButton(
+                      icon: Icon(Icons.skip_next),
+                      onPressed: Global.player.seekToNext,
+                    ),
+                  ],
+                ),
               ),
+              openBuilder: (context, action) => PlayingPage(),
             ),
           ),
         ),
