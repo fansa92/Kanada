@@ -6,6 +6,7 @@ import 'package:kanada/pages/home.dart';
 import 'package:kanada/pages/more.dart';
 import 'package:kanada/pages/more/debug.dart';
 import 'package:kanada/pages/more/debug/color_diffusion.dart';
+import 'package:kanada/pages/more/debug/current_lyric.dart';
 import 'package:kanada/pages/more/debug/file_choose.dart';
 import 'package:kanada/pages/more/debug/link.dart';
 import 'package:kanada/pages/more/debug/lyric.dart';
@@ -36,6 +37,7 @@ class Global {
     '/more/debug/lyric': (context) => const LyricDebug(),
     '/more/debug/pick_color': (context) => const PickColorDebug(),
     '/more/debug/color_diffusion': (context) => const ColorDiffusionDebug(),
+    '/more/debug/current_lyric': (context) => const CurrentLyricDebug(),
     '/more/settings': (context) => const SettingsPage(),
     '/more/settings/folders': (context) => const FoldersSettings(),
     '/player': (context) => const PlayingPage(),
@@ -46,4 +48,5 @@ class Global {
   static List<String> playlist = [];
   static Metadata? metadataCache;
   static ThemeData playerTheme = ThemeData();
+  static bool lyricSenderInit = false;
 }

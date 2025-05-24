@@ -4,6 +4,8 @@ import 'package:just_audio/just_audio.dart';
 import 'package:kanada/global.dart';
 import 'package:kanada/metadata.dart';
 
+import '../lyric_sender.dart';
+
 class MusicInfo extends StatefulWidget {
   final String path;
 
@@ -81,7 +83,14 @@ class _MusicInfoState extends State<MusicInfo> {
       initialIndex: idx >= 0 ? idx : null,
     );
     Global.init = true;
+    Global.player.pause();
+    Global.player.seek(Duration.zero);
     Global.player.play();
+    if (!Global.lyricSenderInit) {
+      print('sendLyrics');
+      sendLyrics();
+      Global.lyricSenderInit = true;
+    }
   }
 
   @override
@@ -106,9 +115,11 @@ class _MusicInfoState extends State<MusicInfo> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(metadata.title ?? widget.path.split('/').last,
+                Text(
+                  metadata.title ?? widget.path.split('/').last,
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,),
+                  overflow: TextOverflow.ellipsis,
+                ),
                 Text(
                   metadata.artist ?? 'Unknown Artist',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -116,8 +127,8 @@ class _MusicInfoState extends State<MusicInfo> {
                       context,
                     ).colorScheme.onSurface.withValues(alpha: .6),
                   ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

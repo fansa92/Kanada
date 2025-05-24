@@ -7,6 +7,8 @@ import 'package:kanada/global.dart';
 import 'package:kanada/settings.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'lyric_sender.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Global.audioHandler = await AudioService.init(
