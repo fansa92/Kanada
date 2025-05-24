@@ -145,6 +145,9 @@ class _PlayerBackgroundState extends State<PlayerBackground>
               ? hsv.withValue(hsv.value * 0.8).toColor()
               : color;
         }).toList();
+    final newColors = colors.sublist(1);
+    newColors.shuffle();
+    colors=[colors[0], newColors[0], newColors[1], newColors[2], newColors[3]];
     isLoading = false;
     if (mounted) {
       setState(() {});

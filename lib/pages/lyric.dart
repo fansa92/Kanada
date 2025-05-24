@@ -94,7 +94,7 @@ class _LyricPageState extends State<LyricPage> {
               metadata?.path != null
                   ? LyricView(
                     path: metadata!.path,
-                    paddingTop: 100 + MediaQuery.of(context).padding.top,
+                    // paddingTop: 100 + MediaQuery.of(context).padding.top,
                     // paddingBottom: MediaQuery.of(context).size.height,
                     // padding: EdgeInsets.only(
                     //   top: 100 + MediaQuery.of(context).padding.top,

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:kanada/metadata.dart';
 import '../global.dart';
@@ -34,6 +35,7 @@ class _LyricViewState extends State<LyricView> {
   final GlobalKey activeKey = GlobalKey();
   final ScrollController _scrollController = ScrollController();
   int index = -1;
+  final List<Widget> widgets = [];
 
   @override
   void initState() {
@@ -113,10 +115,7 @@ class _LyricViewState extends State<LyricView> {
               min(
                 max(
                   _scrollController.position.minScrollExtent,
-                  (-childPosition.dy) -
-                      (singleChildRenderBox.size.height - widget.paddingTop) /
-                          2 +
-                      (targetRenderBox.size.height / 2),
+                  (-childPosition.dy) - (targetRenderBox.size.height * 1),
                 ),
                 _scrollController.position.maxScrollExtent,
               ),
@@ -133,26 +132,87 @@ class _LyricViewState extends State<LyricView> {
     });
   }
 
+  Widget buildNestedLyrics(int startIndex) {
+    if (startIndex >= lyrics!.lyrics.length) return const SizedBox.shrink();
+
+    final currentLyric = lyrics!.lyrics[startIndex];
+
+    return Column(
+      children: [
+        LyricWidget(
+          key: startIndex == index ? activeKey : null,
+          ctx: currentLyric['content'],
+          startTime: currentLyric['startTime'],
+          endTime: currentLyric['endTime'],
+          lyric: currentLyric['lyric'],
+        ),
+        ClipRect(
+          child: Stack(
+            children: [
+              // 递归调用构建下一个歌词
+              buildNestedLyrics(startIndex + 1),
+              // 模糊层覆盖在后续歌词上方
+              BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                child: Container(color: Colors.transparent),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    print('lyrics: ${lyrics?.lyrics.length} index: $index');
+    widgets.clear();
+    for (int i = 0; i < lyrics!.lyrics.length; i++) {
+      if (i >= index - 3 && i <= index) {
+        widgets.add(
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+            child: LyricWidget(
+              key: i == index ? activeKey : null,
+              ctx: lyrics!.lyrics[i]['content'],
+              startTime: lyrics!.lyrics[i]['startTime'],
+              endTime: lyrics!.lyrics[i]['endTime'],
+              lyric: lyrics!.lyrics[i]['lyric'],
+            ),
+          ),
+        );
+      } else if (i > index) {
+        // 从 index+1 开始递归构建
+        if (i == index + 1) {
+          widgets.add(buildNestedLyrics(i));
+        }
+        break; // 后续项由递归处理
+      } else {
+        // if (i == index || i == index + 1) {
+        //   print('-----i: $i index: $index');
+        // }
+        widgets.add(
+          LyricWidget(
+            key: i == index ? activeKey : null,
+            ctx: lyrics!.lyrics[i]['content'],
+            startTime: lyrics!.lyrics[i]['startTime'],
+            endTime: lyrics!.lyrics[i]['endTime'],
+            lyric: lyrics!.lyrics[i]['lyric'],
+          ),
+        );
+      }
+    }
     return lyrics == null
         ? Text('正在加载歌词...')
         : SingleChildScrollView(
           key: singleChildScrollViewKey,
           controller: _scrollController,
-          physics: NeverScrollableScrollPhysics(),
+          // physics: NeverScrollableScrollPhysics(),
           child: Column(
             key: columnKey,
             children: [
               SizedBox(height: widget.paddingTop),
-              for (int i = 0; i < lyrics!.lyrics.length; i++)
-                LyricWidget(
-                  key: i == index ? activeKey : null,
-                  ctx: lyrics!.lyrics[i]['content'],
-                  startTime: lyrics!.lyrics[i]['startTime'],
-                  endTime: lyrics!.lyrics[i]['endTime'],
-                  lyric: lyrics!.lyrics[i]['lyric'],
-                ),
+              for (int i = 0; i < widgets.length; i++) widgets[i],
               SizedBox(height: widget.paddingBottom),
             ],
           ),
