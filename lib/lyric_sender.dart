@@ -10,7 +10,7 @@ Future<void> sendLyrics() async {
   try {
     // print('sendLyrics');
     if (Global.player.currentIndex == null) {
-      await Future.delayed(Duration(milliseconds: 1), sendLyrics);
+      // await Future.delayed(Duration(milliseconds: 1), sendLyrics);
       return;
     }
     final playlist = Global.player.audioSource;
@@ -33,7 +33,7 @@ Future<void> sendLyrics() async {
     currentLyric.position = Global.player.position.inMilliseconds;
     // 获取当前歌词
     if (!(await currentLyric.getCurrentLyric())) {
-      await Future.delayed(Duration(milliseconds: 1), sendLyrics);
+      // await Future.delayed(Duration(milliseconds: 1), sendLyrics);
       return;
     }
     // 发送歌词
@@ -47,7 +47,7 @@ Future<void> sendLyrics() async {
   } catch (e) {
     // print(e);
   }
-  await Future.delayed(Duration.zero, sendLyrics);
+  // await Future.delayed(Duration.zero, sendLyrics);
 }
 
 class CurrentLyric {

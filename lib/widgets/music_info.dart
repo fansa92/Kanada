@@ -83,12 +83,13 @@ class _MusicInfoState extends State<MusicInfo> {
       initialIndex: idx >= 0 ? idx : null,
     );
     Global.init = true;
-    Global.player.pause();
-    Global.player.seek(Duration.zero);
     Global.player.play();
     if (!Global.lyricSenderInit) {
       // print('sendLyrics');
-      sendLyrics();
+      // sendLyrics();
+      Global.player.positionStream.listen((position) {
+        sendLyrics();
+      });
       Global.lyricSenderInit = true;
     }
   }
