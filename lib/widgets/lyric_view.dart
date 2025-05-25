@@ -35,7 +35,6 @@ class _LyricViewState extends State<LyricView> {
   final GlobalKey activeKey = GlobalKey();
   final ScrollController _scrollController = ScrollController();
   int index = -1;
-  final List<Widget> widgets = [];
 
   @override
   void initState() {
@@ -138,18 +137,19 @@ class _LyricViewState extends State<LyricView> {
     final currentLyric = lyrics!.lyrics[startIndex];
 
     if (startIndex >= endIndex) {
-      return Column(
-        children: [
-          for (int i = startIndex; i < lyrics!.lyrics.length; i++)
-            LyricWidget(
-              key: startIndex == index ? activeKey : null,
-              ctx: lyrics!.lyrics[i]['content'],
-              startTime: lyrics!.lyrics[i]['startTime'],
-              endTime: lyrics!.lyrics[i]['endTime'],
-              lyric: lyrics!.lyrics[i]['lyric'],
-            ),
-        ],
-      );
+      return const SizedBox.shrink();
+      // return Column(
+      //   children: [
+      //     for (int i = startIndex; i < lyrics!.lyrics.length; i++)
+      //       LyricWidget(
+      //         key: startIndex == index ? activeKey : null,
+      //         ctx: lyrics!.lyrics[i]['content'],
+      //         startTime: lyrics!.lyrics[i]['startTime'],
+      //         endTime: lyrics!.lyrics[i]['endTime'],
+      //         lyric: lyrics!.lyrics[i]['lyric'],
+      //       ),
+      //   ],
+      // );
     }
 
     return Column(
@@ -181,10 +181,11 @@ class _LyricViewState extends State<LyricView> {
   @override
   Widget build(BuildContext context) {
     print('lyrics: ${lyrics?.lyrics.length} index: $index');
-    widgets.clear();
-    for (int i = 0; i < lyrics!.lyrics.length; i++) {
-      if (i >= index - 3 && i <= index) {
-        widgets.add(
+    final List<Widget> widgets = [];
+    final List<Widget> widgets2 = [];
+    for (int i = 0; i < min(lyrics!.lyrics.length, index + 12); i++) {
+      if (i >= index - 5 && i <= index) {
+        widgets2.add(
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
             child: LyricWidget(
@@ -198,9 +199,9 @@ class _LyricViewState extends State<LyricView> {
         );
       } else if (i > index) {
         // 从 index+1 开始递归构建
-        if (i == index + 1) {
-          widgets.add(buildNestedLyrics(i, i + 8));
-        }
+        // if (i == index + 1) {
+        //   widgets.add();
+        // }
         break; // 后续项由递归处理
       } else {
         // if (i == index || i == index + 1) {
@@ -228,6 +229,8 @@ class _LyricViewState extends State<LyricView> {
             children: [
               SizedBox(height: widget.paddingTop),
               for (int i = 0; i < widgets.length; i++) widgets[i],
+              ClipRect(child: Column(children: widgets2)),
+              buildNestedLyrics(index + 1, index + 12),
               SizedBox(height: widget.paddingBottom),
             ],
           ),
