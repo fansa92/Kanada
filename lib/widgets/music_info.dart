@@ -82,6 +82,10 @@ class _MusicInfoState extends State<MusicInfo> {
       ConcatenatingAudioSource(children: sources),
       initialIndex: idx >= 0 ? idx : null,
     );
+    // Global.player.setAudioSources(
+    //   sources,
+    //   initialIndex: idx >= 0? idx : null,
+    // );
     Global.init = true;
     Global.player.play();
     if (!Global.lyricSenderInit) {

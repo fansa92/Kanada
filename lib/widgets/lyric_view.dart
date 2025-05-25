@@ -180,7 +180,7 @@ class _LyricViewState extends State<LyricView> {
 
   @override
   Widget build(BuildContext context) {
-    print('lyrics: ${lyrics?.lyrics.length} index: $index');
+    // print('lyrics: ${lyrics?.lyrics.length} index: $index');
     final List<Widget> widgets = [];
     final List<Widget> widgets2 = [];
     for (int i = 0; i <= index; i++) {
@@ -234,6 +234,7 @@ class LyricWidget extends StatelessWidget {
   final int startTime;
   final int endTime;
   final List<Map<String, dynamic>> lyric;
+  final double fontSize;
 
   const LyricWidget({
     super.key,
@@ -241,6 +242,7 @@ class LyricWidget extends StatelessWidget {
     required this.startTime,
     required this.endTime,
     required this.lyric,
+    this.fontSize = 24,
   });
 
   @override
@@ -262,6 +264,7 @@ class LyricWidget extends StatelessWidget {
                   startTime: word['startTime'],
                   endTime: word['endTime'],
                   currentTime: Global.player.position.inMilliseconds,
+                  fontSize: fontSize,
                 ),
               ),
           ],
@@ -276,6 +279,7 @@ class Word extends StatelessWidget {
   final int startTime;
   final int endTime;
   final int currentTime;
+  final double fontSize;
   static const double padding = 1.0;
 
   const Word({
@@ -284,6 +288,7 @@ class Word extends StatelessWidget {
     required this.startTime,
     required this.endTime,
     required this.currentTime,
+    required this.fontSize,
   });
 
   @override
@@ -301,7 +306,7 @@ class Word extends StatelessWidget {
                   : Global.playerTheme.colorScheme.onSurface.withValues(
                     alpha: .6,
                   ),
-          fontSize: 24,
+          fontSize: fontSize,
           fontWeight: FontWeight.bold,
         ),
       );
@@ -325,7 +330,7 @@ class Word extends StatelessWidget {
           word,
           style: TextStyle(
             color: Colors.white,
-            fontSize: 24,
+            fontSize: fontSize,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -348,6 +353,55 @@ class Word extends StatelessWidget {
             ),
       ),
       child: text,
+    );
+  }
+}
+
+class LyricEasyWidget extends StatelessWidget {
+  final String ctx;
+  final int startTime;
+  final int endTime;
+  final List<Map<String, dynamic>> lyric;
+  final double fontSize;
+  const LyricEasyWidget({
+    super.key,
+    required this.ctx,
+    required this.startTime,
+    required this.endTime,
+    required this.lyric,
+    required this.fontSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+        children: [
+          for (final word in lyric)
+            ShaderMask(
+              shaderCallback:
+                  (bounds) => LinearGradient(
+                colors: [
+                  Global.playerTheme.colorScheme.primary,
+                  Global.playerTheme.colorScheme.onSurface.withValues(alpha: .6),
+                ],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                stops: [
+                  (Global.player.position.inMilliseconds - word['startTime']) / (word['endTime'] - word['startTime']) - 0.1,
+                  (Global.player.position.inMilliseconds - word['startTime']) / (word['endTime'] - word['startTime']) + 0.1,
+                ],
+              ).createShader(bounds),
+              // blendMode: BlendMode.srcATop,
+              child: Text(
+                word['word'],
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: fontSize,
+                  // fontWeight: FontWeight.bold,
+                ),
+              ),
+            )
+        ]
     );
   }
 }

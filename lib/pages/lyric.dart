@@ -206,7 +206,7 @@ class _LyricPageState extends State<LyricPage> {
                             Global.playerTheme.colorScheme.primary,
                             Colors.transparent,
                           ],
-                          stops: [_progress - 0.005, _progress + 0.005],
+                          stops: [_progress, _progress],
                         ),
                       ),
                     ),

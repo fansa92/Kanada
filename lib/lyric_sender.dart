@@ -1,3 +1,4 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:kanada_lyric_sender/kanada_lyric_sender.dart';
 import 'global.dart';
@@ -8,48 +9,77 @@ final CurrentLyric currentLyric = CurrentLyric();
 // bool isPlaying= false;
 
 Future<void> sendLyrics() async {
-  try {
-    // print('sendLyrics');
-    if (Global.player.currentIndex == null) {
-      // await Future.delayed(Duration(milliseconds: 1), sendLyrics);
-      return;
-    }
-    final playlist = Global.player.audioSource;
-    final currentIndex = Global.player.currentIndex;
-
-    // 防御性检查：确保播放列表和索引有效
-    if (playlist is! ConcatenatingAudioSource ||
-        currentIndex == null ||
-        currentIndex >= playlist.children.length) {
-      return;
-    }
-
-    dynamic current = playlist.children[currentIndex];
-    // 获取新路径
-    final newPath = current.tag.id;
-    if (newPath != currentLyric.path) {
-      currentLyric.path = newPath;
-    }
-    // 获取新位置
-    currentLyric.position = Global.player.position.inMilliseconds;
-    // 获取当前歌词
-    if (!(await currentLyric.getCurrentLyric())) {
-      // await Future.delayed(Duration(milliseconds: 1), sendLyrics);
-      return;
-    }
-    // 发送歌词
-    // print(
-    //   'content: ${currentLyric.content} duration: ${currentLyric.duration}',
-    // );
-    KanadaLyricSenderPlugin.sendLyric(
-      currentLyric.content,
-      // currentLyric.duration,
-      0,
-    );
-  } catch (e) {
-    // print(e);
+  // print('sendLyrics');
+  if (Global.player.currentIndex == null) {
+    // await Future.delayed(Duration(milliseconds: 1), sendLyrics);
+    return;
   }
-  // await Future.delayed(Duration.zero, sendLyrics);
+  final playlist = (Global.player.audioSource as ConcatenatingAudioSource).children;
+  final currentIndex = Global.player.currentIndex;
+
+  // 防御性检查：确保播放列表和索引有效
+  if (currentIndex == null) {
+    return;
+  }
+
+  final current = playlist[currentIndex];
+  final tag = (current as UriAudioSource).tag;
+  // 获取新路径
+  final newPath = tag.id;
+  if (newPath != currentLyric.path) {
+    currentLyric.path = newPath;
+  }
+  // 获取新位置
+  currentLyric.position = Global.player.position.inMilliseconds;
+  // 获取当前歌词
+  if (!(await currentLyric.getCurrentLyric())) {
+    // await Future.delayed(Duration(milliseconds: 1), sendLyrics);
+    return;
+  }
+  // 发送歌词
+  // print(
+  //   'content: ${currentLyric.content} duration: ${currentLyric.duration}',
+  // );
+  KanadaLyricSenderPlugin.sendLyric(
+    currentLyric.content,
+    // currentLyric.duration,
+  );
+  // final sources = playlist;
+  // sources[currentIndex] = AudioSource.file(
+  //   tag.id,
+  //   tag: MediaItem(
+  //     id: tag.id,
+  //     album: tag.album,
+  //     title: currentLyric.content,
+  //     artist:
+  //         '${Global.metadataCache?.title} - ${Global.metadataCache?.artist}',
+  //     duration: tag.duration,
+  //     artUri: tag.artUri,
+  //   ),
+  // );
+  // Global.player.setAudioSource(
+  //   ConcatenatingAudioSource(children: sources),
+  //   initialIndex: currentIndex,
+  // );
+  // Global.player.setAudioSources(sources, initialIndex: currentIndex);
+  // final audioSource = AudioSource.file(
+  //   tag.id,
+  //   tag: MediaItem(
+  //     id: tag.id,
+  //     album: tag.album,
+  //     title: currentLyric.content,
+  //     artist:
+  //     '${Global.metadataCache?.title} - ${Global.metadataCache?.artist}',
+  //     duration: tag.duration,
+  //     artUri: tag.artUri,
+  //   ),
+  // );
+  // final position = Global.player.position;
+  // await (Global.player.audioSource as ConcatenatingAudioSource).removeAt(currentIndex);
+  // await (Global.player.audioSource as ConcatenatingAudioSource).insert(currentIndex, audioSource);
+  // // await Global.player.seekToPrevious();
+  // // Global.player.seekToNext();
+  // await Global.player.seek(position, index: currentIndex);
 }
 
 class CurrentLyric {
@@ -60,6 +90,7 @@ class CurrentLyric {
   int duration = 0;
   int startTime = 0;
   int endTime = 0;
+  List<Map<String, dynamic>> words=[];
 
   Future<void> getMetadata() async {
     Global.metadataCache = Metadata(path!);
@@ -88,6 +119,7 @@ class CurrentLyric {
         duration = lyric['endTime'] - lyric['startTime'];
         startTime = lyric['startTime'];
         endTime = lyric['endTime'];
+        words = lyric['lyric'];
         // print(content);
         return f2;
       }

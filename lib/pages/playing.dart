@@ -11,6 +11,7 @@ import 'package:palette_generator/palette_generator.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../global.dart';
+import '../tool.dart';
 import '../widgets/color_diffusion.dart';
 
 class PlayingPage extends StatefulWidget {
@@ -116,19 +117,8 @@ class _PlayerBackgroundState extends State<PlayerBackground>
   }
 
   Future<void> _init() async {
-    final playlist = Global.player.audioSource;
-    final currentIndex = Global.player.currentIndex;
-
-    // 防御性检查：确保播放列表和索引有效
-    if (playlist is! ConcatenatingAudioSource ||
-        currentIndex == null ||
-        currentIndex >= playlist.children.length) {
-      return;
-    }
-
-    dynamic current = playlist.children[currentIndex];
     // 获取新路径
-    final newPath = current.tag.id;
+    final newPath = getCurrentUri();
 
     // 路径未变化时跳过
     if (newPath == metadata?.path) return;
