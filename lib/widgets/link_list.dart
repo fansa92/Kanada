@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kanada/widgets/link.dart';
+import 'package:kanada/widgets/round_list.dart';
 
 class LinkList extends StatelessWidget {
   final List<List<dynamic>> links;
@@ -15,7 +16,7 @@ class LinkList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
+    return RoundListBuilder(
       itemCount: links.length,
       itemBuilder: (context, index) {
         final route = links[index][2] as String; // 明确类型为String

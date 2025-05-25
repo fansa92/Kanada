@@ -183,7 +183,7 @@ class _LyricViewState extends State<LyricView> {
     print('lyrics: ${lyrics?.lyrics.length} index: $index');
     final List<Widget> widgets = [];
     final List<Widget> widgets2 = [];
-    for (int i = 0; i < min(lyrics!.lyrics.length, index + 12); i++) {
+    for (int i = 0; i <= index; i++) {
       if (i >= index - 5 && i <= index) {
         widgets2.add(
           BackdropFilter(
@@ -197,16 +197,7 @@ class _LyricViewState extends State<LyricView> {
             ),
           ),
         );
-      } else if (i > index) {
-        // 从 index+1 开始递归构建
-        // if (i == index + 1) {
-        //   widgets.add();
-        // }
-        break; // 后续项由递归处理
       } else {
-        // if (i == index || i == index + 1) {
-        //   print('-----i: $i index: $index');
-        // }
         widgets.add(
           LyricWidget(
             key: i == index ? activeKey : null,

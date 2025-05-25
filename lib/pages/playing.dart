@@ -8,6 +8,7 @@ import 'package:kanada/metadata.dart';
 import 'package:kanada/pages/player.dart';
 import 'package:kanada/pages/lyric.dart';
 import 'package:palette_generator/palette_generator.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../global.dart';
 import '../widgets/color_diffusion.dart';
@@ -21,6 +22,18 @@ class PlayingPage extends StatefulWidget {
 
 class _PlayingPageState extends State<PlayingPage> {
   static const List<Widget> pages = [PlayerPage(), LyricPage()];
+
+  @override
+  void initState() {
+    super.initState();
+    WakelockPlus.enable();
+  }
+
+  @override
+  void dispose() {
+    WakelockPlus.disable();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
