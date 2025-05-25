@@ -54,6 +54,7 @@ class _AppPageState extends State<AppPage> {
       floatingActionButton: FloatPlaying(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       bottomNavigationBar: NavigationBar(
+        backgroundColor: Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: .3),
         labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
         onDestinationSelected: (int index) {
           setState(() {

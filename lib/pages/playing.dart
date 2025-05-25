@@ -129,12 +129,13 @@ class _PlayerBackgroundState extends State<PlayerBackground>
 
     await metadata!.getPicture(cache: false);
 
-    final PaletteGenerator paletteGenerator =
-        await PaletteGenerator.fromImageProvider(
-          MemoryImage(metadata!.picture!),
-          maximumColorCount: 10,
-        );
-    colors = paletteGenerator.colors.take(5).toList();
+    colors =
+        Global.colorsCache[metadata!.path] ??
+            (await PaletteGenerator.fromImageProvider(
+              MemoryImage(metadata!.picture!),
+              maximumColorCount: 10,
+            )).colors.take(5).toList();
+    Global.colorsCache[metadata!.path] = colors;
     Global.playerTheme = Theme.of(context).copyWith(
       colorScheme: ColorScheme.fromSeed(
         seedColor: colors[0],

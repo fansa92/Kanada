@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:kanada/lyric_sender.dart';
 import 'package:kanada/pages/playing.dart';
+import 'package:palette_generator/palette_generator.dart';
 import '../global.dart';
 import '../metadata.dart';
 import '../tool.dart';
@@ -90,6 +91,20 @@ class _FloatPlayingState extends State<FloatPlaying> {
     if (mounted) setState(() {});
     // Global.pictureCache = metadata!.picturePath;
     Global.metadataCache = metadata;
+    final colors =
+        Global.colorsCache[metadata!.path] ??
+        (await PaletteGenerator.fromImageProvider(
+          MemoryImage(metadata!.picture!),
+          maximumColorCount: 10,
+        )).colors.take(5).toList();
+    Global.colorsCache[metadata!.path] = colors;
+    Global.playerTheme = Theme.of(context).copyWith(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: colors[0],
+        brightness: Brightness.dark,
+      ),
+    );
+    setState(() {});
   }
 
   @override
@@ -116,23 +131,19 @@ class _FloatPlayingState extends State<FloatPlaying> {
                     color: Global.playerTheme.colorScheme.primaryContainer,
                     child: Stack(
                       children: [
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            height: 50,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Global.playerTheme.colorScheme.primary
-                                      .withValues(alpha: .2),
-                                  Colors.transparent,
-                                ],
-                                stops: [progress, progress],
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            // 使用 constraints 获取父容器最大宽度
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                height: 50,
+                                width: constraints.maxWidth * progress,
+                                color: Global.playerTheme.colorScheme.primary
+                                    .withValues(alpha: .2),
                               ),
-                            ),
-                          ),
+                            );
+                          },
                         ),
                         Row(
                           children: [

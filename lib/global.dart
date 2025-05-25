@@ -49,4 +49,5 @@ class Global {
   static Metadata? metadataCache;
   static ThemeData playerTheme = ThemeData();
   static bool lyricSenderInit = false;
+  static Map<String, List<Color>> colorsCache = {};
 }
