@@ -14,6 +14,7 @@ class _MorePageState extends State<MorePage> {
   Widget build(BuildContext context) {
     List<List<dynamic>> settings = <List<dynamic>>[
       [Icons.settings, 'Settings', '/more/settings'],
+      [Icons.file_copy, 'Cache', '/more/cache'],
       if (Settings.debug) [Icons.bug_report, 'Debug', '/more/debug'],
     ];
     return Scaffold(

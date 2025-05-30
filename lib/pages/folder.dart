@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 import '../global.dart';
+import '../settings.dart';
 import '../tool.dart';
 import '../widgets/float_playing.dart';
 
@@ -31,7 +32,6 @@ class _FolderPageState extends State<FolderPage> {
   void initState() {
     super.initState();
     _init();
-    // 添加滚动监听器（示例：滚动到底部时加载更多）
     _scrollController.addListener(() {
       if (_scrollController.position.pixels <= 150) {
         setState(() {});
@@ -41,11 +41,12 @@ class _FolderPageState extends State<FolderPage> {
 
   @override
   void dispose() {
-    _scrollController.dispose(); // 必须销毁控制器
+    _scrollController.dispose();
     super.dispose();
   }
 
   Future<void> _init() async {
+    files.clear();
     if (sortType == 0) {
       final settings = await UserData(
         'folder/settings/${widget.path.hashCode}',
@@ -56,14 +57,28 @@ class _FolderPageState extends State<FolderPage> {
         'folder/settings/${widget.path.hashCode}',
       ).set({'sort': sortType});
     }
-    final dir = Directory(widget.path);
-    List<FileSystemEntity> entities = await dir.list().toList();
+    if(widget.path == '/ALL/') {
+      final dirs = Settings.folders.map((e) => Directory(e)).toList();
+      for (var dir in dirs) {
+        List<FileSystemEntity> entities = await dir.list().toList();
+        files.addAll(
+          entities.where((entity) {
+            String extension = p.extension(entity.path).toLowerCase();
+            return extension == '.mp3' || extension == '.flac';
+          }),
+        );
+      }
+    }
+    else {
+      final dir = Directory(widget.path);
+      List<FileSystemEntity> entities = await dir.list().toList();
 
-    files =
-        entities.where((entity) {
-          String extension = p.extension(entity.path).toLowerCase();
-          return extension == '.mp3' || extension == '.flac';
-        }).toList();
+      files =
+          entities.where((entity) {
+            String extension = p.extension(entity.path).toLowerCase();
+            return extension == '.mp3' || extension == '.flac';
+          }).toList();
+    }
 
     files.sort((a, b) {
       final isAscending = sortType > 0;
@@ -85,15 +100,22 @@ class _FolderPageState extends State<FolderPage> {
 
     durationSum = Duration.zero;
     initiated = 0;
-    // 使用 Future.forEach 按顺序处理每个文件
-    await Future.forEach(files, (FileSystemEntity element) async {
-      final value = await Metadata(element.path).getMetadata();
-      durationSum = durationSum! + (value.duration ?? Duration.zero);
-      initiated++;
-      if (initiated == files.length) {
+    const batchSize = 48;
+    for (var i = 0; i < files.length; i += batchSize) {
+      final batch = files.sublist(
+          i,
+          i + batchSize > files.length ? files.length : i + batchSize
+      );
+
+      await Future.wait(batch.map((element) async {
+        final value = await Metadata(element.path).getMetadata();
+        durationSum = durationSum! + (value.duration ?? Duration.zero);
+        initiated++;
         if (mounted) setState(() {});
-      }
-    });
+      }));
+
+      if (mounted) setState(() {});
+    }
   }
 
   @override

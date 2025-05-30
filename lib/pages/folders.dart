@@ -17,13 +17,22 @@ class _FoldersPageState extends State<FoldersPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Music')),
       body: ListView.builder(
-        itemCount: Settings.folders.length,
+        itemCount: Settings.folders.length+1,
         itemBuilder: (context, index) {
+          if (index == 0) {
+            return LinkBuilder(
+              builder: (context) => FolderPage(path: '/ALL/'),
+              child: ListTile(
+                title: Text('All'),
+                subtitle: Text('All Music'),
+              ),
+            );
+          }
           return LinkBuilder(
-            builder: (context) => FolderPage(path: Settings.folders[index]),
+            builder: (context) => FolderPage(path: Settings.folders[index-1]),
             child: ListTile(
-              title: Text(Settings.folders[index].split('/')[Settings.folders[index].split('/').length - 2]),
-              subtitle: Text(Settings.folders[index]),
+              title: Text(Settings.folders[index-1].split('/')[Settings.folders[index-1].split('/').length - 2]),
+              subtitle: Text(Settings.folders[index-1]),
             ),
           );
         },

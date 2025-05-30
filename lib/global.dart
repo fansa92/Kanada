@@ -4,6 +4,7 @@ import 'package:kanada/pages/app.dart';
 import 'package:kanada/pages/folders.dart';
 import 'package:kanada/pages/home.dart';
 import 'package:kanada/pages/more.dart';
+import 'package:kanada/pages/more/cache.dart';
 import 'package:kanada/pages/more/debug.dart';
 import 'package:kanada/pages/more/debug/color_diffusion.dart';
 import 'package:kanada/pages/more/debug/current_lyric.dart';
@@ -40,6 +41,7 @@ class Global {
     '/more/debug/current_lyric': (context) => const CurrentLyricDebug(),
     '/more/settings': (context) => const SettingsPage(),
     '/more/settings/folders': (context) => const FoldersSettings(),
+    '/more/cache': (context) => const CachePage(),
     '/player': (context) => const PlayingPage(),
   };
   static late AudioPlayer player;
