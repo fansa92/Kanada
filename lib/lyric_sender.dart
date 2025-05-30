@@ -1,9 +1,10 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:kanada_lyric_sender/kanada_lyric_sender.dart';
 import 'global.dart';
 import 'lyric.dart';
 import 'metadata.dart';
+import 'dart:convert';
+import 'dart:io';
 
 final CurrentLyric currentLyric = CurrentLyric();
 // bool isPlaying= false;
@@ -14,7 +15,8 @@ Future<void> sendLyrics() async {
     // await Future.delayed(Duration(milliseconds: 1), sendLyrics);
     return;
   }
-  final playlist = (Global.player.audioSource as ConcatenatingAudioSource).children;
+  final playlist =
+      (Global.player.audioSource as ConcatenatingAudioSource).children;
   final currentIndex = Global.player.currentIndex;
 
   // 防御性检查：确保播放列表和索引有效
@@ -44,6 +46,21 @@ Future<void> sendLyrics() async {
     currentLyric.content,
     // currentLyric.duration,
   );
+  final Map<String, dynamic> state = {
+    'package': 'com.hontouniyuki.kanada',
+    'lyric': currentLyric.content,
+    'playing': Global.player.playing,
+    'name': Global.metadataCache?.title,
+    'singer': Global.metadataCache?.artist,
+    'album': Global.metadataCache?.album,
+  };
+  // /storage/emulated/0/lyric.json
+  final file = File('/storage/emulated/0/lyric.json');
+  final old = await file.readAsString();
+  final st = json.decode(old);
+  if (state != st) {
+    await file.writeAsString(json.encode(state));
+  }
   // final sources = playlist;
   // sources[currentIndex] = AudioSource.file(
   //   tag.id,
@@ -90,7 +107,7 @@ class CurrentLyric {
   int duration = 0;
   int startTime = 0;
   int endTime = 0;
-  List<Map<String, dynamic>> words=[];
+  List<Map<String, dynamic>> words = [];
 
   Future<void> getMetadata() async {
     Global.metadataCache = Metadata(path!);
