@@ -7,6 +7,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:kanada/metadata.dart';
 import 'package:kanada/pages/player.dart';
 import 'package:kanada/pages/lyric.dart';
+import 'package:kanada/pages/playlist.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -22,16 +23,26 @@ class PlayingPage extends StatefulWidget {
 }
 
 class _PlayingPageState extends State<PlayingPage> {
-  static const List<Widget> pages = [PlayerPage(), LyricPage()];
+  static const List<Widget> pages = [PlaylistPage(), PlayerPage(), LyricPage()];
+  final PageController _pageController = PageController();
+  bool _isFirstBuild = true;
 
   @override
   void initState() {
     super.initState();
     WakelockPlus.enable();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isFirstBuild) {
+        // 构建完成后执行的代码
+        _pageController.jumpToPage(1);
+        _isFirstBuild = false;
+      }
+    });
   }
 
   @override
   void dispose() {
+    _pageController.dispose();
     WakelockPlus.disable();
     super.dispose();
   }
@@ -50,6 +61,7 @@ class _PlayingPageState extends State<PlayingPage> {
           children: [
             PlayerBackground(),
             PageView.builder(
+              controller: _pageController,
               itemCount: pages.length,
               itemBuilder: (context, index) {
                 return pages[index];
@@ -107,6 +119,7 @@ class _PlayerBackgroundState extends State<PlayerBackground>
     _sequenceSub?.cancel();
     super.dispose();
   }
+
   List<Offset> get _animatedOffsets {
     final value = _controller.value * 2 * 3.14159; // 转换为弧度
     return _baseOffsets.map((offset) {
@@ -131,12 +144,12 @@ class _PlayerBackgroundState extends State<PlayerBackground>
 
     colors =
         Global.colorsCache[metadata!.path] ??
-            (await PaletteGenerator.fromImageProvider(
-              MemoryImage(metadata!.picture!),
-              maximumColorCount: 10,
-            )).colors.take(5).toList();
+        (await PaletteGenerator.fromImageProvider(
+          MemoryImage(metadata!.picture!),
+          maximumColorCount: 10,
+        )).colors.take(5).toList();
     Global.colorsCache[metadata!.path] = colors;
-    if(mounted){
+    if (mounted) {
       Global.playerTheme = Theme.of(context).copyWith(
         colorScheme: ColorScheme.fromSeed(
           seedColor: colors[0],
@@ -153,7 +166,13 @@ class _PlayerBackgroundState extends State<PlayerBackground>
         }).toList();
     final newColors = colors.sublist(1);
     newColors.shuffle();
-    colors=[colors[0], newColors[0], newColors[1], newColors[2], newColors[3]];
+    colors = [
+      colors[0],
+      newColors[0],
+      newColors[1],
+      newColors[2],
+      newColors[3],
+    ];
     isLoading = false;
     if (mounted) {
       setState(() {});

@@ -23,8 +23,6 @@ dependencies:
     path: ./kanada_album_art
   kanada_lyric_sender:
     path: ./kanada_lyric_sender
-  #  kanada_lyric_server:
-  #    path: ./kanada_lyric_server
   kanada_volume:
     path: ./kanada_volume
   palette_generator: ^0.3.3+7
@@ -47,6 +45,5 @@ flutter_launcher_icons:
   android: true   # 为 Android 生成图标
   ios: false       # 为 iOS 生成图标
   image_path: "assets/icon/Kanade.png"  # 图标源文件路径
-  # 可选参数（按需配置）：
   adaptive_icon_background: "#FFFFFF"  # Android 自适应图标背景色
   adaptive_icon_foreground: "assets/icon/Kanade.png"  # 前景图层

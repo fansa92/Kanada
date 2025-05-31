@@ -8,8 +8,17 @@ import '../lyric_sender.dart';
 
 class MusicInfo extends StatefulWidget {
   final String path;
+  final bool play;
+  final ThemeData? theme;
+  final bool nextPlay;
 
-  const MusicInfo({super.key, required this.path});
+  const MusicInfo({
+    super.key,
+    required this.path,
+    this.play = true,
+    this.theme,
+    this.nextPlay = true,
+  });
 
   @override
   State<MusicInfo> createState() => _MusicInfoState();
@@ -17,6 +26,7 @@ class MusicInfo extends StatefulWidget {
 
 class _MusicInfoState extends State<MusicInfo> {
   late Metadata metadata;
+  late ThemeData theme;
 
   @override
   void initState() {
@@ -82,13 +92,8 @@ class _MusicInfoState extends State<MusicInfo> {
     //   ConcatenatingAudioSource(children: sources),
     //   initialIndex: idx >= 0 ? idx : null,
     // );
-    Global.player.setAudioSources(
-      sources,
-      initialIndex: idx >= 0? idx : null,
-    );
+    await Global.player.setAudioSources(sources, initialIndex: idx >= 0 ? idx : null);
     Global.init = true;
-    Global.player.seek(Duration.zero);
-    Global.player.play();
     if (!Global.lyricSenderInit) {
       // print('sendLyrics');
       // sendLyrics();
@@ -97,12 +102,15 @@ class _MusicInfoState extends State<MusicInfo> {
       });
       Global.lyricSenderInit = true;
     }
+    await Global.player.seek(Duration.zero, index: idx >= 0? idx : null);
+    await Global.player.play();
   }
 
   @override
   Widget build(BuildContext context) {
+    theme = widget.theme ?? Theme.of(context);
     return InkWell(
-      onTap: play,
+      onTap: widget.play ? play : null,
       child: Row(
         children: [
           ClipRRect(
@@ -125,13 +133,14 @@ class _MusicInfoState extends State<MusicInfo> {
                   metadata.title ?? widget.path.split('/').last,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
                 Text(
                   metadata.artist ?? 'Unknown Artist',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: .6),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: .6),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -139,6 +148,26 @@ class _MusicInfoState extends State<MusicInfo> {
               ],
             ),
           ),
+          if (widget.nextPlay)
+            IconButton(
+              onPressed: () {
+                Global.player.audioSources.insert(
+                  (Global.player.currentIndex ?? 0) + 1,
+                  AudioSource.file(
+                    widget.path,
+                    tag: MediaItem(
+                      id: widget.path,
+                      album: metadata.album,
+                      title: metadata.title ?? widget.path.split('/').last,
+                      artist: metadata.artist,
+                      duration: metadata.duration,
+                      artUri: Uri.parse('file://${metadata.picturePath}'),
+                    ),
+                  ),
+                );
+              },
+              icon: Icon(Icons.add_circle, color: theme.colorScheme.onSurface),
+            ),
         ],
       ),
     );

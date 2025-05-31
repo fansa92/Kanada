@@ -327,13 +327,11 @@ class _FolderPageState extends State<FolderPage> {
                       // Global.player.setAudioSource(
                       //   ConcatenatingAudioSource(children: sources),
                       // );
-                      Global.player.setAudioSources(
+                      await Global.player.setAudioSources(
                         sources,
                         // initialIndex: idx >= 0? idx : null,
                       );
                       Global.init = true;
-                      Global.player.seek(Duration.zero);
-                      Global.player.play();
                       if (!Global.lyricSenderInit) {
                         // print('sendLyrics');
                         // sendLyrics();
@@ -342,6 +340,8 @@ class _FolderPageState extends State<FolderPage> {
                         });
                         Global.lyricSenderInit = true;
                       }
+                      await Global.player.seek(Duration.zero);
+                      await Global.player.play();
                     }, child: Text('播放全部'))],
                   )
                       : ListTile(
