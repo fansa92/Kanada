@@ -143,3 +143,78 @@ class _MusicInfoState extends State<MusicInfo> {
     );
   }
 }
+
+class MusicInfoSearch extends StatefulWidget {
+  final String path;
+  final String keywords;
+
+  const MusicInfoSearch({
+    super.key,
+    required this.path,
+    required this.keywords,
+  });
+
+  @override
+  State<MusicInfoSearch> createState() => _MusicInfoSearchState();
+}
+
+class _MusicInfoSearchState extends State<MusicInfoSearch> {
+  bool show = false;
+  Metadata metadata = Metadata('');
+
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  @override
+  void didUpdateWidget(covariant MusicInfoSearch oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.keywords != oldWidget.keywords) {
+      _init();
+    }
+  }
+
+  Future<void> _init() async {
+    if (widget.keywords.isEmpty) {
+      show = true;
+      setState(() {});
+    } else {
+      if (metadata.path != widget.path) {
+        metadata = Metadata(widget.path);
+        await metadata.getMetadata();
+      }
+      if ((metadata.title != null
+              ? metadata.title!.toLowerCase().contains(
+                widget.keywords.toLowerCase(),
+              )
+              : false) ||
+          (metadata.artist != null
+              ? metadata.artist!.toLowerCase().contains(
+                widget.keywords.toLowerCase(),
+              )
+              : false) ||
+          (metadata.album != null
+              ? metadata.album!.toLowerCase().contains(
+                widget.keywords.toLowerCase(),
+              )
+              : false)) {
+        show = true;
+      } else {
+        show = false;
+      }
+    }
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return show
+        ? ListTile(
+          key: ValueKey(widget.path),
+          title: MusicInfo(path: widget.path),
+        )
+        : Container();
+  }
+}

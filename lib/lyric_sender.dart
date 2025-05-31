@@ -44,7 +44,7 @@ Future<void> sendLyrics() async {
   // );
   KanadaLyricSenderPlugin.sendLyric(
     currentLyric.content,
-    // currentLyric.duration,
+    (currentLyric.duration / 1000).ceil().toInt(),
   );
   final Map<String, dynamic> state = {
     'package': 'com.hontouniyuki.kanada',

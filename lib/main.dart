@@ -22,16 +22,6 @@ Future<void> main() async {
     androidNotificationOngoing: true,
   );
   Global.player = AudioPlayer();
-  Global.player.setAudioSource(
-    ConcatenatingAudioSource(
-      children: [
-        AudioSource.uri(Uri.parse("/storage/emulated/0/Music/Yuki/miku/102220648.mp3"), tag: MediaItem(id: "/storage/emulated/0/Music/Yuki/miku/102220648.mp3", title: "Kanada")),
-      ],
-    ),
-    initialIndex: 0,
-  );
-  Global.player.play();
-  Global.player.pause();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(

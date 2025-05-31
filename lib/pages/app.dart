@@ -19,10 +19,10 @@ class _AppPageState extends State<AppPage> {
       NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
       const HomePage(),
     ],
-    [
-      NavigationDestination(icon: Icon(Icons.search), label: 'Search'),
-      const SearchPage(),
-    ],
+    // [
+    //   NavigationDestination(icon: Icon(Icons.search), label: 'Search'),
+    //   const SearchPage(),
+    // ],
     [
       NavigationDestination(icon: Icon(Icons.library_music), label: 'Music'),
       const FoldersPage(),

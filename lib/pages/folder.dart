@@ -1,6 +1,8 @@
 import 'dart:math';
 
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:kanada/metadata.dart';
 import 'package:kanada/userdata.dart';
 import 'package:kanada/widgets/music_info.dart';
@@ -57,7 +59,7 @@ class _FolderPageState extends State<FolderPage> {
         'folder/settings/${widget.path.hashCode}',
       ).set({'sort': sortType});
     }
-    if(widget.path == '/ALL/') {
+    if (widget.path == '/ALL/') {
       final dirs = Settings.folders.map((e) => Directory(e)).toList();
       for (var dir in dirs) {
         List<FileSystemEntity> entities = await dir.list().toList();
@@ -68,8 +70,7 @@ class _FolderPageState extends State<FolderPage> {
           }),
         );
       }
-    }
-    else {
+    } else {
       final dir = Directory(widget.path);
       List<FileSystemEntity> entities = await dir.list().toList();
 
@@ -103,16 +104,18 @@ class _FolderPageState extends State<FolderPage> {
     const batchSize = 48;
     for (var i = 0; i < files.length; i += batchSize) {
       final batch = files.sublist(
-          i,
-          i + batchSize > files.length ? files.length : i + batchSize
+        i,
+        i + batchSize > files.length ? files.length : i + batchSize,
       );
 
-      await Future.wait(batch.map((element) async {
-        final value = await Metadata(element.path).getMetadata();
-        durationSum = durationSum! + (value.duration ?? Duration.zero);
-        initiated++;
-        if (mounted) setState(() {});
-      }));
+      await Future.wait(
+        batch.map((element) async {
+          final value = await Metadata(element.path).getMetadata();
+          durationSum = durationSum! + (value.duration ?? Duration.zero);
+          initiated++;
+          if (mounted) setState(() {});
+        }),
+      );
 
       if (mounted) setState(() {});
     }
@@ -274,11 +277,68 @@ class _FolderPageState extends State<FolderPage> {
           // 列表内容部分
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              (context, index) => ListTile(
-                key: ValueKey(files[index].path),
-                title: MusicInfo(path: files[index].path),
-              ),
-              childCount: files.length,
+              (context, index) =>
+                  index == 0
+                      ? Column(
+                    children: [Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Hero(tag: 'search-bar', child: SearchAnchor.bar(
+                        // isFullScreen: false,
+                        barHintText: 'Search',
+                        suggestionsBuilder:
+                            (context, controller) => List.generate(
+                          files.length,
+                              (index) => MusicInfoSearch(
+                            path: files[index].path,
+                            keywords: controller.text,
+                          ),
+                        ),
+                      )),
+                    ),
+                    SizedBox(height: 10),
+                    ElevatedButton(onPressed: () async {
+                      Global.init = false;
+                      Global.path = widget.path;
+
+                      final playlistPaths = files.map((e) => e.path).toList();
+
+                      playlistPaths.shuffle();
+
+                      // 使用 map+toList 并行化处理
+                      final sources = await Future.wait(
+                        playlistPaths.map((path) async {
+                          final data = Metadata(path);
+                          await Future.wait([data.getMetadata(), data.getPicture()]);
+                          return AudioSource.file(
+                            path,
+                            tag: MediaItem(
+                              id: path,
+                              album: data.album,
+                              title: data.title ?? path.split('/').last,
+                              artist: data.artist,
+                              duration: data.duration ?? const Duration(seconds: 180),
+                              artUri: Uri.parse('file://${data.picturePath}'),
+                            ),
+                          );
+                        }),
+                      );
+
+                      Global.player.setAudioSource(
+                        ConcatenatingAudioSource(children: sources),
+                      );
+                      // Global.player.setAudioSources(
+                      //   sources,
+                      //   initialIndex: idx >= 0? idx : null,
+                      // );
+                      Global.init = true;
+                      Global.player.play();
+                    }, child: Text('播放全部'))],
+                  )
+                      : ListTile(
+                        key: ValueKey(files[index - 1].path),
+                        title: MusicInfo(path: files[index - 1].path),
+                      ),
+              childCount: files.length + 1,
             ),
           ),
 
