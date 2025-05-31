@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 import '../global.dart';
+import '../lyric_sender.dart';
 import '../settings.dart';
 import '../tool.dart';
 import '../widgets/float_playing.dart';
@@ -331,7 +332,16 @@ class _FolderPageState extends State<FolderPage> {
                       //   initialIndex: idx >= 0? idx : null,
                       // );
                       Global.init = true;
+                      Global.player.seek(Duration.zero);
                       Global.player.play();
+                      if (!Global.lyricSenderInit) {
+                        // print('sendLyrics');
+                        // sendLyrics();
+                        Global.player.positionStream.listen((position) {
+                          sendLyrics();
+                        });
+                        Global.lyricSenderInit = true;
+                      }
                     }, child: Text('播放全部'))],
                   )
                       : ListTile(

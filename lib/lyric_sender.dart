@@ -10,7 +10,7 @@ final CurrentLyric currentLyric = CurrentLyric();
 // bool isPlaying= false;
 
 Future<void> sendLyrics() async {
-  // print('sendLyrics');
+  print('sendLyrics');
   if (Global.player.currentIndex == null) {
     // await Future.delayed(Duration(milliseconds: 1), sendLyrics);
     return;

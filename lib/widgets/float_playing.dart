@@ -8,7 +8,6 @@ import 'package:palette_generator/palette_generator.dart';
 import '../global.dart';
 import '../metadata.dart';
 import '../tool.dart';
-import 'link.dart' as link;
 import 'package:animations/animations.dart';
 
 import 'lyric_view.dart';
@@ -71,6 +70,7 @@ class _FloatPlayingState extends State<FloatPlaying> {
   Future<void> _fresh() async {
     // 获取新路径
     final newPath = getCurrentUri();
+    if(newPath.isEmpty)return;
 
     // 路径未变化时跳过
     if (newPath == metadata?.path) return;
@@ -109,6 +109,7 @@ class _FloatPlayingState extends State<FloatPlaying> {
 
   @override
   Widget build(BuildContext context) {
+    if(path==null)return SizedBox.shrink();
     final progress =
         Global.player.duration != null
             ? Global.player.position.inMilliseconds /

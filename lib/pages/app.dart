@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kanada/pages/folders.dart';
 import 'package:kanada/pages/more.dart';
-import 'package:kanada/pages/search.dart';
 import '../global.dart';
 import '../widgets/float_playing.dart';
 import 'home.dart';
