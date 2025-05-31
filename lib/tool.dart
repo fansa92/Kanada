@@ -40,7 +40,7 @@ String getCurrentUri(){
   if (Global.player.currentIndex == null) {
     return '';
   }
-  final playlist = (Global.player.audioSource as ConcatenatingAudioSource).children;
+  final playlist = Global.player.audioSources;
   final currentIndex = Global.player.currentIndex;
 
   // 防御性检查：确保播放列表和索引有效

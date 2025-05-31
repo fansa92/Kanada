@@ -82,17 +82,16 @@ class _PlayerPageState extends State<PlayerPage> {
   }
 
   Future<void> _fresh() async {
-    final playlist = Global.player.audioSource;
+    final playlist = Global.player.audioSources;
     final currentIndex = Global.player.currentIndex;
 
     // 防御性检查：确保播放列表和索引有效
-    if (playlist is! ConcatenatingAudioSource ||
-        currentIndex == null ||
-        currentIndex >= playlist.children.length) {
+    if (        currentIndex == null ||
+        currentIndex >= playlist.length) {
       return;
     }
 
-    dynamic current = playlist.children[currentIndex];
+    dynamic current = playlist[currentIndex];
     // 获取新路径
     final newPath = current.tag.id;
 

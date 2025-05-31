@@ -79,7 +79,7 @@ class _PickColorDebugState extends State<PickColorDebug> {
                 itemBuilder: (context, index) {
                   return Container(
                     color: colors[index],
-                    child: Text('#${colors[index].value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}'),
+                    child: Text('#${colors[index].toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}'),
                   );
                 },
               ),
@@ -106,7 +106,7 @@ class ColorWidget extends StatelessWidget {
         Container(
           color: color,
           child: Text(
-            '#${color.value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}', // 转换为 #RRGGBB 格式
+            '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}', // 转换为 #RRGGBB 格式
           ),
         ),
       ],

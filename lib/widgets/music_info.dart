@@ -78,14 +78,14 @@ class _MusicInfoState extends State<MusicInfo> {
     // 查找索引的优化（避免重复遍历）
     final idx = playlistPaths.indexOf(widget.path);
 
-    Global.player.setAudioSource(
-      ConcatenatingAudioSource(children: sources),
-      initialIndex: idx >= 0 ? idx : null,
-    );
-    // Global.player.setAudioSources(
-    //   sources,
-    //   initialIndex: idx >= 0? idx : null,
+    // Global.player.setAudioSource(
+    //   ConcatenatingAudioSource(children: sources),
+    //   initialIndex: idx >= 0 ? idx : null,
     // );
+    Global.player.setAudioSources(
+      sources,
+      initialIndex: idx >= 0? idx : null,
+    );
     Global.init = true;
     Global.player.seek(Duration.zero);
     Global.player.play();

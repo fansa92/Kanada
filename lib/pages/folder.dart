@@ -324,13 +324,13 @@ class _FolderPageState extends State<FolderPage> {
                         }),
                       );
 
-                      Global.player.setAudioSource(
-                        ConcatenatingAudioSource(children: sources),
-                      );
-                      // Global.player.setAudioSources(
-                      //   sources,
-                      //   initialIndex: idx >= 0? idx : null,
+                      // Global.player.setAudioSource(
+                      //   ConcatenatingAudioSource(children: sources),
                       // );
+                      Global.player.setAudioSources(
+                        sources,
+                        // initialIndex: idx >= 0? idx : null,
+                      );
                       Global.init = true;
                       Global.player.seek(Duration.zero);
                       Global.player.play();

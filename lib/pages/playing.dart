@@ -136,12 +136,14 @@ class _PlayerBackgroundState extends State<PlayerBackground>
               maximumColorCount: 10,
             )).colors.take(5).toList();
     Global.colorsCache[metadata!.path] = colors;
-    Global.playerTheme = Theme.of(context).copyWith(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: colors[0],
-        brightness: Brightness.dark,
-      ),
-    );
+    if(mounted){
+      Global.playerTheme = Theme.of(context).copyWith(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: colors[0],
+          brightness: Brightness.dark,
+        ),
+      );
+    }
     colors =
         colors.map((color) {
           final hsv = HSVColor.fromColor(color);

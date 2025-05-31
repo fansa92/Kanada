@@ -10,13 +10,12 @@ final CurrentLyric currentLyric = CurrentLyric();
 // bool isPlaying= false;
 
 Future<void> sendLyrics() async {
-  print('sendLyrics');
   if (Global.player.currentIndex == null) {
     // await Future.delayed(Duration(milliseconds: 1), sendLyrics);
     return;
   }
   final playlist =
-      (Global.player.audioSource as ConcatenatingAudioSource).children;
+      Global.player.audioSources;
   final currentIndex = Global.player.currentIndex;
 
   // 防御性检查：确保播放列表和索引有效

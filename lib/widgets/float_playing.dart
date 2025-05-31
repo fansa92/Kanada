@@ -70,7 +70,7 @@ class _FloatPlayingState extends State<FloatPlaying> {
   Future<void> _fresh() async {
     // 获取新路径
     final newPath = getCurrentUri();
-    if(newPath.isEmpty)return;
+    if (newPath.isEmpty) return;
 
     // 路径未变化时跳过
     if (newPath == metadata?.path) return;
@@ -98,18 +98,20 @@ class _FloatPlayingState extends State<FloatPlaying> {
           maximumColorCount: 10,
         )).colors.take(5).toList();
     Global.colorsCache[metadata!.path] = colors;
-    Global.playerTheme = Theme.of(context).copyWith(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: colors[0],
-        brightness: Brightness.dark,
-      ),
-    );
+    if (mounted) {
+      Global.playerTheme = Theme.of(context).copyWith(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: colors[0],
+          brightness: Brightness.dark,
+        ),
+      );
+    }
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    if(path==null)return SizedBox.shrink();
+    if (path == null) return SizedBox.shrink();
     final progress =
         Global.player.duration != null
             ? Global.player.position.inMilliseconds /
