@@ -140,12 +140,12 @@ class _PlayerBackgroundState extends State<PlayerBackground>
     path = newPath;
     metadata = Metadata(path!);
 
-    await metadata!.getPicture(cache: false);
+    await metadata!.getCover(cache: false);
 
     colors =
         Global.colorsCache[metadata!.path] ??
         (await PaletteGenerator.fromImageProvider(
-          MemoryImage(metadata!.picture!),
+          MemoryImage(metadata!.cover!),
           maximumColorCount: 10,
         )).colors.take(5).toList();
     Global.colorsCache[metadata!.path] = colors;

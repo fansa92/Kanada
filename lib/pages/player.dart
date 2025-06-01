@@ -103,13 +103,13 @@ class _PlayerPageState extends State<PlayerPage> {
     metadata = Metadata(path!);
 
     // 并行加载元数据（带缓存）
-    await Future.wait([metadata!.getMetadata(), metadata!.getPicture()]);
+    await Future.wait([metadata!.getMetadata(), metadata!.getCover()]);
     if (mounted) setState(() {});
 
     // 并行加载最新数据（无缓存）
     await Future.wait([
       metadata!.getMetadata(cache: false),
-      metadata!.getPicture(cache: false),
+      metadata!.getCover(cache: false),
     ]);
     if (mounted) setState(() {});
     // Global.pictureCache = metadata!.picturePath;
@@ -143,10 +143,10 @@ class _PlayerPageState extends State<PlayerPage> {
                       width: width * (Global.player.playing ? 1 : 0.8),
                       height: width * (Global.player.playing ? 1 : 0.8),
                       child:
-                          metadata?.picture != null
-                              ? Image.memory(metadata!.picture!)
-                              : (metadata?.pictureCache != null
-                                  ? Image.file(File(metadata!.pictureCache!))
+                          metadata?.cover != null
+                              ? Image.memory(metadata!.cover!)
+                              : (metadata?.coverCache != null
+                                  ? Image.file(File(metadata!.coverCache!))
                                   : Icon(Icons.music_note)),
                     ),
                   ),

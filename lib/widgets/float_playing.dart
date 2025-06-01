@@ -80,13 +80,13 @@ class _FloatPlayingState extends State<FloatPlaying> {
     metadata = Metadata(path!);
 
     // 并行加载元数据（带缓存）
-    await Future.wait([metadata!.getMetadata(), metadata!.getPicture()]);
+    await Future.wait([metadata!.getMetadata(), metadata!.getCover()]);
     if (mounted) setState(() {});
 
     // 并行加载最新数据（无缓存）
     await Future.wait([
       metadata!.getMetadata(cache: false),
-      metadata!.getPicture(cache: false),
+      metadata!.getCover(cache: false),
     ]);
     if (mounted) setState(() {});
     // Global.pictureCache = metadata!.picturePath;
@@ -94,7 +94,7 @@ class _FloatPlayingState extends State<FloatPlaying> {
     final colors =
         Global.colorsCache[metadata!.path] ??
         (await PaletteGenerator.fromImageProvider(
-          MemoryImage(metadata!.picture!),
+          MemoryImage(metadata!.cover!),
           maximumColorCount: 10,
         )).colors.take(5).toList();
     Global.colorsCache[metadata!.path] = colors;
@@ -156,11 +156,11 @@ class _FloatPlayingState extends State<FloatPlaying> {
                                 width: 50,
                                 height: 50,
                                 child:
-                                    metadata?.picture != null
-                                        ? Image.memory(metadata!.picture!)
-                                        : (metadata?.pictureCache != null
+                                    metadata?.cover != null
+                                        ? Image.memory(metadata!.cover!)
+                                        : (metadata?.coverCache != null
                                             ? Image.file(
-                                              File(metadata!.pictureCache!),
+                                              File(metadata!.coverCache!),
                                             )
                                             : Icon(Icons.music_note)),
                               ),

@@ -38,7 +38,7 @@ class _MusicInfoState extends State<MusicInfo> {
     metadata = Metadata(widget.path);
     await metadata.getMetadata();
     setState(() {});
-    await metadata.getPicture();
+    await metadata.getCover();
     setState(() {});
   }
 
@@ -70,7 +70,7 @@ class _MusicInfoState extends State<MusicInfo> {
     final sources = await Future.wait(
       playlistPaths.map((path) async {
         final data = Metadata(path);
-        await Future.wait([data.getMetadata(), data.getPicture()]);
+        await Future.wait([data.getMetadata(), data.getCover()]);
         return AudioSource.file(
           path,
           tag: MediaItem(
@@ -79,7 +79,7 @@ class _MusicInfoState extends State<MusicInfo> {
             title: data.title ?? path.split('/').last,
             artist: data.artist,
             duration: data.duration ?? const Duration(seconds: 180),
-            artUri: Uri.parse('file://${data.picturePath}'),
+            artUri: Uri.parse('file://${data.coverPath}'),
           ),
         );
       }),
@@ -119,8 +119,8 @@ class _MusicInfoState extends State<MusicInfo> {
               width: 50,
               height: 50,
               child:
-                  metadata.picture != null
-                      ? Image.memory(metadata.picture!, fit: BoxFit.cover)
+                  metadata.cover != null
+                      ? Image.memory(metadata.cover!, fit: BoxFit.cover)
                       : const Icon(Icons.music_note),
             ),
           ),
@@ -161,7 +161,7 @@ class _MusicInfoState extends State<MusicInfo> {
                       title: metadata.title ?? widget.path.split('/').last,
                       artist: metadata.artist,
                       duration: metadata.duration,
-                      artUri: Uri.parse('file://${metadata.picturePath}'),
+                      artUri: Uri.parse('file://${metadata.coverPath}'),
                     ),
                   ),
                 );

@@ -26,7 +26,7 @@ class _PlayFileDebugState extends State<PlayFileDebug> {
         setState(() {});
       });
     });
-    metadata.getPicture().then((value) {
+    metadata.getCover().then((value) {
       setState(() {});
     });
   }
@@ -44,8 +44,8 @@ class _PlayFileDebugState extends State<PlayFileDebug> {
           Text('Artist: ${metadata.artist}'),
           Text('Album: ${metadata.album}'),
           Text('Duration: ${metadata.duration}'),
-          Text('Picture: ${metadata.picture?.length} bytes'),
-          metadata.picture!=null?Image.memory(metadata.picture!):Container(),
+          Text('Picture: ${metadata.cover?.length} bytes'),
+          metadata.cover!=null?Image.memory(metadata.cover!):Container(),
           Text('Lyric: ${metadata.lyric}'),
           Text('Metadata: ${metadata.metadata}'),
           Text('Lyrics: ${lyrics.lyrics}')

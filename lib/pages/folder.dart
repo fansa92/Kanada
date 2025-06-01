@@ -134,7 +134,7 @@ class _FolderPageState extends State<FolderPage> {
     final sources = await Future.wait(
       playlistPaths.map((path) async {
         final data = Metadata(path);
-        await Future.wait([data.getMetadata(), data.getPicture()]);
+        await Future.wait([data.getMetadata(), data.getCover()]);
         return AudioSource.file(
           path,
           tag: MediaItem(
@@ -143,7 +143,7 @@ class _FolderPageState extends State<FolderPage> {
             title: data.title ?? path.split('/').last,
             artist: data.artist,
             duration: data.duration ?? const Duration(seconds: 180),
-            artUri: Uri.parse('file://${data.picturePath}'),
+            artUri: Uri.parse('file://${data.coverPath}'),
           ),
         );
       }),

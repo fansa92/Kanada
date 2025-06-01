@@ -63,7 +63,7 @@ class _CachePageState extends State<CachePage> {
     // await Future.delayed(Duration(milliseconds: 1));
     metadataMap[path] = Metadata(path);
     await metadataMap[path]?.getMetadata();
-    await metadataMap[path]?.getPicture();
+    await metadataMap[path]?.getCover();
     await metadataMap[path]?.getLyric();
     currentFile = path;
     initiated++;
@@ -86,8 +86,8 @@ class _CachePageState extends State<CachePage> {
             return ListTile(
               title: Text(metadata?.title ?? 'Unknown Title'),
               subtitle: Text(metadata?.artist ?? 'Unknown Artist'),
-              leading: metadata?.picture != null
-                ? Image.memory(metadata!.picture!)
+              leading: metadata?.cover != null
+                ? Image.memory(metadata!.cover!)
                 : null,
             );
           },

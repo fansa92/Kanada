@@ -10,6 +10,18 @@ class Metadata {
 
   Metadata(this.path);
 
+  dynamic metadata;
+  dynamic metadata2;
+  String? title;
+  String? artist;
+  String? album;
+  String? lyric;
+  Uint8List? cover;
+  String? coverPath;
+  String? coverCache;
+
+  Duration? duration;
+
   Future<Metadata> getMetadata({bool cache = false, int timeout = 604800}) async {
     final appDir = await getApplicationDocumentsDirectory();
     final meta = File(
@@ -58,7 +70,7 @@ class Metadata {
     if (File(
       '${appDir.path}/cache/metadata/picture/${path.hashCode}.jpg',
     ).existsSync()) {
-      pictureCache =
+      coverCache =
           '${appDir.path}/cache/metadata/picture/${path.hashCode}.jpg';
     }
     meta.create(recursive: true);
@@ -97,7 +109,7 @@ class Metadata {
     return lyric;
   }
 
-  Future<String?> getPicture({bool cache = true, int timeout = 604800}) async {
+  Future<String?> getCover({bool cache = true, int timeout = 604800}) async {
     final appDir = await getApplicationDocumentsDirectory();
     final pic = File(
       '${appDir.path}/cache/metadata/picture/${path.hashCode}.jpg',
@@ -106,29 +118,17 @@ class Metadata {
         await pic.exists() &&
         DateTime.now().difference(await pic.lastModified()).inSeconds <
             timeout) {
-      picture = await pic.readAsBytes();
-      picturePath = pic.path;
-      return picturePath;
+      cover = await pic.readAsBytes();
+      coverPath = pic.path;
+      return coverPath;
     }
-    picture = await KanadaAlbumArtPlugin.getAlbumArt(path);
-    if (picture != null) {
+    cover = await KanadaAlbumArtPlugin.getAlbumArt(path);
+    if (cover != null) {
       await pic.create(recursive: true);
-      await pic.writeAsBytes(picture!);
-      picturePath = pic.path;
-      return picturePath;
+      await pic.writeAsBytes(cover!);
+      coverPath = pic.path;
+      return coverPath;
     }
     return null;
   }
-
-  dynamic metadata;
-  dynamic metadata2;
-  String? title;
-  String? artist;
-  String? album;
-  String? lyric;
-  Uint8List? picture;
-  String? picturePath;
-  String? pictureCache;
-
-  Duration? duration;
 }
