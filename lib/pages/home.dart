@@ -95,6 +95,14 @@ class _WaterFallState extends State<WaterFall> {
     init = true;
   }
 
+  Future<void> _handleRefresh() async {
+    WaterFall.data.clear(); // 清空现有数据
+    await _init(); // 重新初始化数据
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   Future<void> _fresh({int n = 20}) async {
     for (var i = 0; i < n; i++) {
       WaterFall.data.add(allPaths[random.nextInt(allPaths.length)]);
@@ -106,17 +114,23 @@ class _WaterFallState extends State<WaterFall> {
 
   @override
   Widget build(BuildContext context) {
-    return WaterfallFlow.builder(
-      padding: padding,
-      controller: _scrollController,
-      gridDelegate: SliverWaterfallFlowDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: padding.horizontal / 2,
-        mainAxisSpacing: padding.vertical / 2,
+    return RefreshIndicator(
+      onRefresh: _handleRefresh, // 绑定刷新回调
+      child: WaterfallFlow.builder(
+        padding: padding,
+        controller: _scrollController,
+        gridDelegate: SliverWaterfallFlowDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: padding.horizontal / 2,
+          mainAxisSpacing: padding.vertical / 2,
+        ),
+        itemCount: WaterFall.data.length,
+        itemBuilder:
+            (context, index) => WaterFallItem(
+              key: ValueKey(WaterFall.data[index]),
+              path: WaterFall.data[index],
+            ),
       ),
-      itemCount: WaterFall.data.length,
-      itemBuilder:
-          (context, index) => WaterFallItem(path: WaterFall.data[index]),
     );
   }
 }
