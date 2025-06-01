@@ -53,6 +53,9 @@ class _FoldersPageState extends State<FoldersPage> {
             child: Hero(tag: 'search-bar', child: SearchAnchor.bar(
               // isFullScreen: false,
               barHintText: 'Search',
+              barBackgroundColor: WidgetStateProperty.all(
+                Theme.of(context).colorScheme.secondaryContainer,
+              ),
               suggestionsBuilder:
                   (context, controller) => List.generate(
                 files.length,

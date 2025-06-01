@@ -122,6 +122,53 @@ class _FolderPageState extends State<FolderPage> {
     }
   }
 
+  Future<void> playAll() async {
+    Global.init = false;
+    Global.path = widget.path;
+
+    final playlistPaths = files.map((e) => e.path).toList();
+
+    playlistPaths.shuffle();
+
+    // 使用 map+toList 并行化处理
+    final sources = await Future.wait(
+      playlistPaths.map((path) async {
+        final data = Metadata(path);
+        await Future.wait([data.getMetadata(), data.getPicture()]);
+        return AudioSource.file(
+          path,
+          tag: MediaItem(
+            id: path,
+            album: data.album,
+            title: data.title ?? path.split('/').last,
+            artist: data.artist,
+            duration: data.duration ?? const Duration(seconds: 180),
+            artUri: Uri.parse('file://${data.picturePath}'),
+          ),
+        );
+      }),
+    );
+
+    // Global.player.setAudioSource(
+    //   ConcatenatingAudioSource(children: sources),
+    // );
+    await Global.player.setAudioSources(
+      sources,
+      // initialIndex: idx >= 0? idx : null,
+    );
+    Global.init = true;
+    if (!Global.lyricSenderInit) {
+      // print('sendLyrics');
+      // sendLyrics();
+      Global.player.positionStream.listen((position) {
+        sendLyrics();
+      });
+      Global.lyricSenderInit = true;
+    }
+    await Global.player.seek(Duration.zero);
+    await Global.player.play();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -281,69 +328,34 @@ class _FolderPageState extends State<FolderPage> {
               (context, index) =>
                   index == 0
                       ? Column(
-                    children: [Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Hero(tag: 'search-bar', child: SearchAnchor.bar(
-                        // isFullScreen: false,
-                        barHintText: 'Search',
-                        suggestionsBuilder:
-                            (context, controller) => List.generate(
-                          files.length,
-                              (index) => MusicInfoSearch(
-                            path: files[index].path,
-                            keywords: controller.text,
-                          ),
-                        ),
-                      )),
-                    ),
-                    SizedBox(height: 10),
-                    ElevatedButton(onPressed: () async {
-                      Global.init = false;
-                      Global.path = widget.path;
-
-                      final playlistPaths = files.map((e) => e.path).toList();
-
-                      playlistPaths.shuffle();
-
-                      // 使用 map+toList 并行化处理
-                      final sources = await Future.wait(
-                        playlistPaths.map((path) async {
-                          final data = Metadata(path);
-                          await Future.wait([data.getMetadata(), data.getPicture()]);
-                          return AudioSource.file(
-                            path,
-                            tag: MediaItem(
-                              id: path,
-                              album: data.album,
-                              title: data.title ?? path.split('/').last,
-                              artist: data.artist,
-                              duration: data.duration ?? const Duration(seconds: 180),
-                              artUri: Uri.parse('file://${data.picturePath}'),
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Hero(
+                              tag: 'search-bar',
+                              child: SearchAnchor.bar(
+                                // isFullScreen: false,
+                                barHintText: 'Search',
+                                barBackgroundColor: WidgetStateProperty.all(
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.secondaryContainer,
+                                ),
+                                suggestionsBuilder:
+                                    (context, controller) => List.generate(
+                                      files.length,
+                                      (index) => MusicInfoSearch(
+                                        path: files[index].path,
+                                        keywords: controller.text,
+                                      ),
+                                    ),
+                              ),
                             ),
-                          );
-                        }),
-                      );
-
-                      // Global.player.setAudioSource(
-                      //   ConcatenatingAudioSource(children: sources),
-                      // );
-                      await Global.player.setAudioSources(
-                        sources,
-                        // initialIndex: idx >= 0? idx : null,
-                      );
-                      Global.init = true;
-                      if (!Global.lyricSenderInit) {
-                        // print('sendLyrics');
-                        // sendLyrics();
-                        Global.player.positionStream.listen((position) {
-                          sendLyrics();
-                        });
-                        Global.lyricSenderInit = true;
-                      }
-                      await Global.player.seek(Duration.zero);
-                      await Global.player.play();
-                    }, child: Text('播放全部'))],
-                  )
+                          ),
+                          SizedBox(height: 10),
+                          FilledButton(onPressed: playAll, child: Text('播放全部')),
+                        ],
+                      )
                       : ListTile(
                         key: ValueKey(files[index - 1].path),
                         title: MusicInfo(path: files[index - 1].path),
