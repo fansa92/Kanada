@@ -1,9 +1,13 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:path/path.dart' as p;
 
+import '../global.dart';
+import '../lyric_sender.dart';
 import '../metadata.dart';
 import '../settings.dart';
 
@@ -27,6 +31,9 @@ class _HomePageState extends State<HomePage> {
 }
 
 class WaterFall extends StatefulWidget {
+  static List<String> data = [];
+  static double position = 0;
+
   const WaterFall({super.key});
 
   @override
@@ -36,16 +43,17 @@ class WaterFall extends StatefulWidget {
 class _WaterFallState extends State<WaterFall> {
   final padding = EdgeInsets.all(12);
   final _scrollController = ScrollController();
-  final List<String> data = [];
   final List<String> allPaths = [];
   final Random random = Random();
   bool init = false;
+  bool _firstBuild = true;
 
   @override
   void initState() {
     super.initState();
     _init();
     _scrollController.addListener(() {
+      WaterFall.position = _scrollController.position.pixels;
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 100) {
         if (!init) {
@@ -53,6 +61,12 @@ class _WaterFallState extends State<WaterFall> {
         }
         _fresh();
         setState(() {});
+      }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_firstBuild) {
+        _firstBuild = false;
+        _scrollController.jumpTo(WaterFall.position);
       }
     });
   }
@@ -83,7 +97,7 @@ class _WaterFallState extends State<WaterFall> {
 
   Future<void> _fresh({int n = 20}) async {
     for (var i = 0; i < n; i++) {
-      data.add(allPaths[random.nextInt(allPaths.length)]);
+      WaterFall.data.add(allPaths[random.nextInt(allPaths.length)]);
     }
     if (mounted) {
       setState(() {});
@@ -100,8 +114,9 @@ class _WaterFallState extends State<WaterFall> {
         crossAxisSpacing: padding.horizontal / 2,
         mainAxisSpacing: padding.vertical / 2,
       ),
-      itemCount: data.length,
-      itemBuilder: (context, index) => WaterFallItem(path: data[index]),
+      itemCount: WaterFall.data.length,
+      itemBuilder:
+          (context, index) => WaterFallItem(path: WaterFall.data[index]),
     );
   }
 }
@@ -136,65 +151,119 @@ class _WaterFallItemState extends State<WaterFallItem> {
     }
   }
 
+  Future<void> play() async {
+    Global.init = false;
+    Global.path = widget.path;
+
+    final playlistPaths = WaterFall.data;
+
+    // 使用 map+toList 并行化处理
+    final sources = await Future.wait(
+      playlistPaths.map((path) async {
+        final data = Metadata(path);
+        await Future.wait([data.getMetadata(), data.getCover()]);
+        return AudioSource.file(
+          path,
+          tag: MediaItem(
+            id: path,
+            album: data.album,
+            title: data.title ?? path.split('/').last,
+            artist: data.artist,
+            duration: data.duration ?? const Duration(seconds: 180),
+            artUri: Uri.parse('file://${data.coverPath}'),
+          ),
+        );
+      }),
+    );
+
+    final idx = playlistPaths.indexOf(widget.path);
+
+    // Global.player.setAudioSource(
+    //   ConcatenatingAudioSource(children: sources),
+    // );
+    await Global.player.setAudioSources(
+      sources,
+      initialIndex: idx >= 0 ? idx : null,
+    );
+    Global.init = true;
+    if (!Global.lyricSenderInit) {
+      // print('sendLyrics');
+      // sendLyrics();
+      Global.player.positionStream.listen((position) {
+        sendLyrics();
+      });
+      Global.lyricSenderInit = true;
+    }
+    await Global.player.seek(Duration.zero);
+    await Global.player.play();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          color: Theme.of(context).colorScheme.secondaryContainer,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AspectRatio(
-                aspectRatio: 1,
-                child:
-                    (metadata.cover != null)
-                        ? Image.memory(metadata.cover!)
-                        : ((metadata.cover == null &&
-                                metadata.coverCache != null)
-                            ? Image.file(File(metadata.coverCache!))
-                            : const Icon(Icons.music_note)),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (metadata.title != null)
-                      Text(
-                        metadata.title!,
-                        style: Theme.of(context).textTheme.titleMedium,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    if (metadata.artist != null)
-                      Text(
-                        metadata.artist!,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.8),
-                        ),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    if (metadata.album != null && metadata.album!.isNotEmpty)
-                      Text(
-                        metadata.album!,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.6),
-                        ),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                  ],
+    return InkWell(
+      onTap: play,
+      child: Card(
+        elevation: 4,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            color: Theme.of(context).colorScheme.secondaryContainer,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AspectRatio(
+                  aspectRatio: 1,
+                  child:
+                      (metadata.cover != null)
+                          ? Image.memory(metadata.cover!)
+                          : ((metadata.cover == null &&
+                                  metadata.coverCache != null)
+                              ? Image.file(File(metadata.coverCache!))
+                              : const Icon(Icons.music_note)),
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (metadata.title != null)
+                        Text(
+                          metadata.title!,
+                          style: Theme.of(context).textTheme.titleMedium,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      if (metadata.artist != null)
+                        Text(
+                          metadata.artist!,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.8),
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      if (metadata.album != null && metadata.album!.isNotEmpty)
+                        Text(
+                          metadata.album!,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
