@@ -158,7 +158,6 @@ class Player {
       _currentIndex = initialIndex;
     }
     await update();
-    print(_queue);
   }
 
   Future<void> skipToQueueItem(int index) async {
