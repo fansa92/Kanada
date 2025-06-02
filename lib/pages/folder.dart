@@ -1,14 +1,10 @@
 import 'dart:math';
-
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:kanada/metadata.dart';
 import 'package:kanada/userdata.dart';
 import 'package:kanada/widgets/music_info.dart';
 import 'dart:io';
 import 'package:path/path.dart' as p;
-
 import '../global.dart';
 import '../background.dart';
 import '../settings.dart';
@@ -130,30 +126,11 @@ class _FolderPageState extends State<FolderPage> {
 
     playlistPaths.shuffle();
 
-    // 使用 map+toList 并行化处理
-    final sources = await Future.wait(
-      playlistPaths.map((path) async {
-        final data = Metadata(path);
-        await Future.wait([data.getMetadata(), data.getCover()]);
-        return AudioSource.file(
-          path,
-          tag: MediaItem(
-            id: path,
-            album: data.album,
-            title: data.title ?? path.split('/').last,
-            artist: data.artist,
-            duration: data.duration ?? const Duration(seconds: 180),
-            artUri: Uri.parse('file://${data.coverPath}'),
-          ),
-        );
-      }),
-    );
-
     // Global.player.setAudioSource(
     //   ConcatenatingAudioSource(children: sources),
     // );
-    await Global.player.setAudioSources(
-      sources,
+    await Global.player.setQueue(
+      playlistPaths,
       // initialIndex: idx >= 0? idx : null,
     );
     Global.init = true;

@@ -57,18 +57,7 @@ class _LyricPageState extends State<LyricPage> {
   }
 
   Future<void> _init() async {
-    final playlist = Global.player.audioSources;
-    final currentIndex = Global.player.currentIndex;
-
-    // 防御性检查：确保播放列表和索引有效
-    if (currentIndex == null ||
-        currentIndex >= playlist.length) {
-      return;
-    }
-
-    dynamic current = playlist[currentIndex];
-    // 获取新路径
-    final newPath = current.tag.id;
+    final newPath = Global.player.current;
 
     // 路径未变化时跳过
     if (newPath == metadata?.path) return;

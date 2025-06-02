@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:kanada/pages/app.dart';
 import 'package:kanada/pages/folders.dart';
 import 'package:kanada/pages/home.dart';
@@ -19,6 +18,7 @@ import 'package:kanada/pages/more/settings.dart';
 import 'package:kanada/pages/more/settings/folders.dart';
 import 'package:kanada/pages/playing.dart';
 import 'package:kanada/pages/search.dart';
+import 'package:kanada/player.dart';
 
 import 'metadata.dart';
 
@@ -44,7 +44,7 @@ class Global {
     '/more/cache': (context) => const CachePage(),
     '/player': (context) => const PlayingPage(),
   };
-  static late AudioPlayer player;
+  static late Player player;
   static bool init = false;
   static String path = '';
   static List<String> playlist = [];

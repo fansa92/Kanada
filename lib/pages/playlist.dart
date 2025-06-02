@@ -26,7 +26,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
   void initState() {
     super.initState();
     _init();
-    _currentIndexSub= Global.player.currentIndexStream.listen((index) {
+    _currentIndexSub = Global.player.currentIndexStream.listen((index) {
       if (index != null) {
         _init();
       }
@@ -35,13 +35,13 @@ class _PlaylistPageState extends State<PlaylistPage> {
       _init();
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_firstBuild && Global.player.currentIndex != null) {
+      if (_firstBuild && Global.player.currentIndex != -1) {
         _firstBuild = false;
         _scrollController.jumpTo(
           max(
             _scrollController.position.minScrollExtent,
             _firstItemKey.currentContext!.size!.height *
-                ((Global.player.currentIndex ?? 0) - 3),
+                ((Global.player.currentIndex) - 3),
           ),
           // duration: const Duration(milliseconds: 300),
           // curve: Curves.easeInOut,
@@ -59,11 +59,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
   }
 
   Future<void> _init() async {
-    playlist =
-        Global.player.audioSources
-            .map((e) => (e as UriAudioSource).tag.id)
-            .cast<String>()
-            .toList();
+    playlist = Global.player.queue;
     setState(() {});
   }
 
@@ -98,7 +94,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
               ),
             ),
             onTap: () {
-              Global.player.seek(Duration.zero, index: index);
+              Global.player.skipToQueueItem(index);
               Global.player.play();
             },
           );

@@ -1,6 +1,4 @@
 import 'dart:async';
-
-import 'package:just_audio/just_audio.dart';
 import 'package:kanada_lyric_sender/kanada_lyric_sender.dart';
 import 'package:kanada_volume/kanada_volume.dart';
 import 'global.dart';
@@ -18,7 +16,6 @@ Future<void> startBackground() async {
 }
 
 Future<void> timerFunc(Timer timer) async {
-  print('timerFunc ${DateTime.now().toIso8601String()}');
   background();
   if (Global.player.playing && !isPlaying) {
     isPlaying = true;
@@ -39,22 +36,7 @@ Future<void> background() async {
 }
 
 Future<bool> getCurrentLyric() async {
-  if (Global.player.currentIndex == null) {
-    // await Future.delayed(Duration(milliseconds: 1), sendLyrics);
-    return false;
-  }
-  final playlist = Global.player.audioSources;
-  final currentIndex = Global.player.currentIndex;
-
-  // 防御性检查：确保播放列表和索引有效
-  if (currentIndex == null) {
-    return false;
-  }
-
-  final current = playlist[currentIndex];
-  final tag = (current as UriAudioSource).tag;
-  // 获取新路径
-  final newPath = tag.id;
+  final newPath = Global.player.current;
   if (newPath != currentLyric.path) {
     currentLyric.path = newPath;
   }
@@ -96,7 +78,6 @@ Future<void> writeLyrics() async {
 
 Future<void> mutePause() async {
   final volume = await KanadaVolumePlugin.getVolume();
-  print('$volume ${DateTime.now().toIso8601String()}');
   if (volume == 0) {
     Global.player.pause();
 

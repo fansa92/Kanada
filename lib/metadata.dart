@@ -6,9 +6,14 @@ import 'package:kanada_album_art/kanada_album_art.dart';
 import 'package:path_provider/path_provider.dart';
 
 class Metadata {
-  String path;
+  static final _cache = <String, Metadata>{};
+  final String path;  // 改为final确保path不可变
 
-  Metadata(this.path);
+  factory Metadata(String path) {
+    return _cache.putIfAbsent(path, () => Metadata._internal(path));
+  }
+
+  Metadata._internal(this.path);  // 私有构造方法
 
   dynamic metadata;
   dynamic metadata2;
@@ -19,10 +24,17 @@ class Metadata {
   Uint8List? cover;
   String? coverPath;
   String? coverCache;
-
   Duration? duration;
 
+  bool _gotMetadata = false;
+  bool _gotLyric = false;
+  bool _gotCover = false;
+
   Future<Metadata> getMetadata({bool cache = false, int timeout = 604800}) async {
+    if(cache && _gotMetadata) {
+      return this;
+    }
+    _gotMetadata = true;
     final appDir = await getApplicationDocumentsDirectory();
     final meta = File(
       '${appDir.path}/cache/metadata/metadata/${path.hashCode}.json',
@@ -92,6 +104,10 @@ class Metadata {
   }
 
   Future<String?> getLyric({bool cache = true, int timeout = 604800}) async {
+    if(cache && _gotLyric) {
+      return lyric;
+    }
+    _gotLyric = true;
     final appDir = await getApplicationDocumentsDirectory();
     final lrc = File(
       '${appDir.path}/cache/metadata/lyric/${path.hashCode}.lrc',
@@ -110,6 +126,10 @@ class Metadata {
   }
 
   Future<String?> getCover({bool cache = true, int timeout = 604800}) async {
+    if(cache && _gotCover) {
+      return coverPath;
+    }
+    _gotCover = true;
     final appDir = await getApplicationDocumentsDirectory();
     final pic = File(
       '${appDir.path}/cache/metadata/picture/${path.hashCode}.jpg',

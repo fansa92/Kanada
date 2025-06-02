@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
 import '../../../global.dart';
 
 class PlayerDebug extends StatefulWidget {
@@ -69,21 +67,21 @@ class _PlayerDebugState extends State<PlayerDebug> {
                 //       artUri: Uri.parse('http://192.168.31.151:5244/d/SYSTEM-MEMZ-CAO/D/90422/Desktop/temp/emu.jpg'),
                 //     )
                 // ));
-                Global.player.setAudioSource(
-                  AudioSource.file(
-                    '/storage/emulated/0/Music/Yuki/miku/102220648.mp3',
-                    tag: MediaItem(
-                      id: '102220648.mp3',
-                      album: 'Album name',
-                      title: 'Track title',
-                      artist: 'Artist name',
-                      duration: const Duration(seconds: 160),
-                      artUri: Uri.parse(
-                        'http://192.168.31.151:5244/d/SYSTEM-MEMZ-CAO/D/90422/Desktop/temp/emu.jpg',
-                      ),
-                    ),
-                  ),
-                );
+                // Global.player.setAudioSource(
+                //   AudioSource.file(
+                //     '/storage/emulated/0/Music/Yuki/miku/102220648.mp3',
+                //     tag: MediaItem(
+                //       id: '102220648.mp3',
+                //       album: 'Album name',
+                //       title: 'Track title',
+                //       artist: 'Artist name',
+                //       duration: const Duration(seconds: 160),
+                //       artUri: Uri.parse(
+                //         'http://192.168.31.151:5244/d/SYSTEM-MEMZ-CAO/D/90422/Desktop/temp/emu.jpg',
+                //       ),
+                //     ),
+                //   ),
+                // );
                 setState(() {
                   echo = 'Start() End';
                 });

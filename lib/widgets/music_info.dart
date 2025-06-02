@@ -1,9 +1,6 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:kanada/global.dart';
 import 'package:kanada/metadata.dart';
-
 import '../background.dart';
 
 class MusicInfo extends StatefulWidget {
@@ -66,25 +63,6 @@ class _MusicInfoState extends State<MusicInfo> {
 
     playlistPaths.shuffle();
 
-    // 使用 map+toList 并行化处理
-    final sources = await Future.wait(
-      playlistPaths.map((path) async {
-        final data = Metadata(path);
-        await Future.wait([data.getMetadata(), data.getCover()]);
-        return AudioSource.file(
-          path,
-          tag: MediaItem(
-            id: path,
-            album: data.album,
-            title: data.title ?? path.split('/').last,
-            artist: data.artist,
-            duration: data.duration ?? const Duration(seconds: 180),
-            artUri: Uri.parse('file://${data.coverPath}'),
-          ),
-        );
-      }),
-    );
-
     // 查找索引的优化（避免重复遍历）
     final idx = playlistPaths.indexOf(widget.path);
 
@@ -92,7 +70,7 @@ class _MusicInfoState extends State<MusicInfo> {
     //   ConcatenatingAudioSource(children: sources),
     //   initialIndex: idx >= 0 ? idx : null,
     // );
-    await Global.player.setAudioSources(sources, initialIndex: idx >= 0 ? idx : null);
+    await Global.player.setQueue(playlistPaths, initialIndex: idx >= 0 ? idx : null);
     Global.init = true;
     if (!Global.lyricSenderInit) {
       // print('sendLyrics');
@@ -100,7 +78,9 @@ class _MusicInfoState extends State<MusicInfo> {
       startBackground();
       Global.lyricSenderInit = true;
     }
-    await Global.player.seek(Duration.zero, index: idx >= 0? idx : null);
+    if(idx >= 0) {
+      await Global.player.skipToQueueItem(idx);
+    }
     await Global.player.play();
   }
 

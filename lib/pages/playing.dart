@@ -10,9 +10,7 @@ import 'package:kanada/pages/lyric.dart';
 import 'package:kanada/pages/playlist.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-
 import '../global.dart';
-import '../tool.dart';
 import '../widgets/color_diffusion.dart';
 
 class PlayingPage extends StatefulWidget {
@@ -131,7 +129,7 @@ class _PlayerBackgroundState extends State<PlayerBackground>
 
   Future<void> _init() async {
     // 获取新路径
-    final newPath = getCurrentUri();
+    final newPath = Global.player.current;
 
     // 路径未变化时跳过
     if (newPath == metadata?.path) return;

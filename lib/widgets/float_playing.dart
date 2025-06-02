@@ -7,7 +7,6 @@ import 'package:kanada/pages/playing.dart';
 import 'package:palette_generator/palette_generator.dart';
 import '../global.dart';
 import '../metadata.dart';
-import '../tool.dart';
 import 'package:animations/animations.dart';
 
 import 'lyric_view.dart';
@@ -69,8 +68,8 @@ class _FloatPlayingState extends State<FloatPlaying> {
 
   Future<void> _fresh() async {
     // 获取新路径
-    final newPath = getCurrentUri();
-    if (newPath.isEmpty) return;
+    final newPath = Global.player.current;
+    if (newPath==null) return;
 
     // 路径未变化时跳过
     if (newPath == metadata?.path) return;
@@ -242,7 +241,7 @@ class _FloatPlayingState extends State<FloatPlaying> {
                                         .colorScheme
                                         .onPrimaryContainer,
                               ),
-                              onPressed: Global.player.seekToNext,
+                              onPressed: Global.player.skipToNext,
                             ),
                           ],
                         ),

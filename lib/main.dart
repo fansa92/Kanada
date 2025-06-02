@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/services.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:kanada/global.dart';
+import 'package:kanada/player.dart';
 import 'package:kanada/settings.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -21,7 +21,8 @@ Future<void> main() async {
     androidNotificationChannelName: 'Audio playback',
     androidNotificationOngoing: true,
   );
-  Global.player = AudioPlayer();
+  Global.player = Player();
+  // Global.player = ;
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(

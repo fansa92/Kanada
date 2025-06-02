@@ -1,11 +1,7 @@
 import 'dart:io';
 import 'dart:math';
-
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:path/path.dart' as p;
-
 import '../global.dart';
 import '../background.dart';
 import '../metadata.dart';
@@ -145,7 +141,7 @@ class WaterFallItem extends StatefulWidget {
 }
 
 class _WaterFallItemState extends State<WaterFallItem> {
-  final Metadata metadata = Metadata('');
+  Metadata metadata = Metadata('');
 
   @override
   void initState() {
@@ -154,7 +150,8 @@ class _WaterFallItemState extends State<WaterFallItem> {
   }
 
   Future<void> _init() async {
-    metadata.path = widget.path;
+    // metadata.path = widget.path;
+    metadata = Metadata(widget.path);
     await metadata.getMetadata();
     if (mounted) {
       setState(() {});
@@ -171,32 +168,13 @@ class _WaterFallItemState extends State<WaterFallItem> {
 
     final playlistPaths = WaterFall.data;
 
-    // 使用 map+toList 并行化处理
-    final sources = await Future.wait(
-      playlistPaths.map((path) async {
-        final data = Metadata(path);
-        await Future.wait([data.getMetadata(), data.getCover()]);
-        return AudioSource.file(
-          path,
-          tag: MediaItem(
-            id: path,
-            album: data.album,
-            title: data.title ?? path.split('/').last,
-            artist: data.artist,
-            duration: data.duration ?? const Duration(seconds: 180),
-            artUri: Uri.parse('file://${data.coverPath}'),
-          ),
-        );
-      }),
-    );
-
     final idx = playlistPaths.indexOf(widget.path);
 
     // Global.player.setAudioSource(
     //   ConcatenatingAudioSource(children: sources),
     // );
-    await Global.player.setAudioSources(
-      sources,
+    await Global.player.setQueue(
+      playlistPaths,
       initialIndex: idx >= 0 ? idx : null,
     );
     Global.init = true;

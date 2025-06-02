@@ -26,21 +26,7 @@ class _CurrentLyricDebugState extends State<CurrentLyricDebug> {
           Text(currentLyric.path ?? "<path>"),
           ElevatedButton(
             onPressed: () async {
-              if (Global.player.currentIndex == null) {
-                return;
-              }
-              final playlist = Global.player.audioSources;
-              final currentIndex = Global.player.currentIndex;
-
-              // 防御性检查：确保播放列表和索引有效
-              if (currentIndex == null ||
-                  currentIndex >= playlist.length) {
-                return;
-              }
-
-              dynamic current = playlist[currentIndex];
-              // 获取新路径
-              final newPath = current.tag.id;
+              final newPath = Global.player.current;
               if (newPath != currentLyric.path) {
                 currentLyric.path = newPath;
               }

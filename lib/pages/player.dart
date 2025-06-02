@@ -82,18 +82,7 @@ class _PlayerPageState extends State<PlayerPage> {
   }
 
   Future<void> _fresh() async {
-    final playlist = Global.player.audioSources;
-    final currentIndex = Global.player.currentIndex;
-
-    // 防御性检查：确保播放列表和索引有效
-    if (        currentIndex == null ||
-        currentIndex >= playlist.length) {
-      return;
-    }
-
-    dynamic current = playlist[currentIndex];
-    // 获取新路径
-    final newPath = current.tag.id;
+    final newPath = Global.player.current;
 
     // 路径未变化时跳过
     if (newPath == metadata?.path) return;
@@ -265,7 +254,7 @@ class _PlayerPageState extends State<PlayerPage> {
                 ),
                 onPressed:
                     Global.player.hasPrevious
-                        ? Global.player.seekToPrevious
+                        ? Global.player.skipToPrevious
                         : null,
               ),
               IconButton(
@@ -291,7 +280,7 @@ class _PlayerPageState extends State<PlayerPage> {
                           ),
                 ),
                 onPressed:
-                    Global.player.hasNext ? Global.player.seekToNext : null,
+                    Global.player.hasNext ? Global.player.skipToNext : null,
               ),
             ],
           ),
