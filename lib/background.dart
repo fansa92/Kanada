@@ -10,33 +10,32 @@ import 'dart:convert';
 import 'dart:io';
 
 final CurrentLyric currentLyric = CurrentLyric();
-// bool isPlaying = false;
+bool isPlaying = false;
 
-// Future<void> startBackground() async {
-//   isPlaying = true;
-//   Timer.periodic(Duration(milliseconds: 100), timerFunc);
-// }
-//
-// Future<void> timerFunc(Timer timer) async {
-//   background();
-//   if (Global.player.playing&&!isPlaying) {
-//     isPlaying = true;
-//     timer.cancel();
-//     Timer.periodic(Duration(milliseconds: 100), timerFunc);
-//   }
-//   else if (!Global.player.playing&&isPlaying) {
-//     isPlaying = false;
-//     timer.cancel();
-//     Timer.periodic(Duration(milliseconds: 500), timerFunc);
-//   }
-// }
+Future<void> startBackground() async {
+  isPlaying = true;
+  Timer.periodic(Duration(milliseconds: 100), timerFunc);
+}
+
+Future<void> timerFunc(Timer timer) async {
+  print('timerFunc ${DateTime.now().toIso8601String()}');
+  background();
+  if (Global.player.playing && !isPlaying) {
+    isPlaying = true;
+    timer.cancel();
+    Timer.periodic(Duration(milliseconds: 100), timerFunc);
+  } else if (!Global.player.playing && isPlaying) {
+    isPlaying = false;
+    timer.cancel();
+    Timer.periodic(Duration(milliseconds: 500), timerFunc);
+  }
+}
 
 Future<void> background() async {
+  mutePause();
   if (!await getCurrentLyric()) return;
-
   sendLyrics();
   writeLyrics();
-  mutePause();
 }
 
 Future<bool> getCurrentLyric() async {

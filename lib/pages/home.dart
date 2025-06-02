@@ -203,9 +203,7 @@ class _WaterFallItemState extends State<WaterFallItem> {
     if (!Global.lyricSenderInit) {
       // print('sendLyrics');
       // sendLyrics();
-      Global.player.positionStream.listen((position) {
-        background();
-      });
+      startBackground();
       Global.lyricSenderInit = true;
     }
     await Global.player.seek(Duration.zero);
