@@ -1,7 +1,7 @@
 // import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 // import 'package:just_audio/just_audio.dart';
-import 'package:kanada/lyric_sender.dart';
+import 'package:kanada/background.dart';
 
 import '../../../global.dart';
 
@@ -56,7 +56,7 @@ class _CurrentLyricDebugState extends State<CurrentLyricDebug> {
           ),
           ElevatedButton(
             onPressed: () {
-              sendLyrics();
+              background();
             },
             child: Text('Send Lyric'),
           ),

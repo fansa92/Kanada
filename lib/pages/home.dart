@@ -7,7 +7,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:path/path.dart' as p;
 
 import '../global.dart';
-import '../lyric_sender.dart';
+import '../background.dart';
 import '../metadata.dart';
 import '../settings.dart';
 
@@ -204,7 +204,7 @@ class _WaterFallItemState extends State<WaterFallItem> {
       // print('sendLyrics');
       // sendLyrics();
       Global.player.positionStream.listen((position) {
-        sendLyrics();
+        background();
       });
       Global.lyricSenderInit = true;
     }

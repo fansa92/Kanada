@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:kanada/lyric_sender.dart';
+import 'package:kanada/background.dart';
 import 'package:kanada/pages/playing.dart';
 import 'package:palette_generator/palette_generator.dart';
 import '../global.dart';

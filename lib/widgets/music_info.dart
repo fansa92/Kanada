@@ -4,7 +4,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:kanada/global.dart';
 import 'package:kanada/metadata.dart';
 
-import '../lyric_sender.dart';
+import '../background.dart';
 
 class MusicInfo extends StatefulWidget {
   final String path;
@@ -98,7 +98,7 @@ class _MusicInfoState extends State<MusicInfo> {
       // print('sendLyrics');
       // sendLyrics();
       Global.player.positionStream.listen((position) {
-        sendLyrics();
+        background();
       });
       Global.lyricSenderInit = true;
     }
@@ -148,26 +148,26 @@ class _MusicInfoState extends State<MusicInfo> {
               ],
             ),
           ),
-          if (widget.nextPlay)
-            IconButton(
-              onPressed: () {
-                Global.player.audioSources.insert(
-                  (Global.player.currentIndex ?? 0) + 1,
-                  AudioSource.file(
-                    widget.path,
-                    tag: MediaItem(
-                      id: widget.path,
-                      album: metadata.album,
-                      title: metadata.title ?? widget.path.split('/').last,
-                      artist: metadata.artist,
-                      duration: metadata.duration,
-                      artUri: Uri.parse('file://${metadata.coverPath}'),
-                    ),
-                  ),
-                );
-              },
-              icon: Icon(Icons.add_circle, color: theme.colorScheme.onSurface),
-            ),
+          // if (widget.nextPlay)
+          //   IconButton(
+          //     onPressed: () {
+          //       Global.player.audioSources.insert(
+          //         (Global.player.currentIndex ?? 0) + 1,
+          //         AudioSource.file(
+          //           widget.path,
+          //           tag: MediaItem(
+          //             id: widget.path,
+          //             album: metadata.album,
+          //             title: metadata.title ?? widget.path.split('/').last,
+          //             artist: metadata.artist,
+          //             duration: metadata.duration,
+          //             artUri: Uri.parse('file://${metadata.coverPath}'),
+          //           ),
+          //         ),
+          //       );
+          //     },
+          //     icon: Icon(Icons.add_circle, color: theme.colorScheme.onSurface),
+          //   ),
         ],
       ),
     );

@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:just_audio/just_audio.dart';
 import 'package:kanada_lyric_sender/kanada_lyric_sender.dart';
+import 'package:kanada_volume/kanada_volume.dart';
 import 'global.dart';
 import 'lyric.dart';
 import 'metadata.dart';
@@ -7,20 +10,46 @@ import 'dart:convert';
 import 'dart:io';
 
 final CurrentLyric currentLyric = CurrentLyric();
-// bool isPlaying= false;
+// bool isPlaying = false;
 
-Future<void> sendLyrics() async {
+// Future<void> startBackground() async {
+//   isPlaying = true;
+//   Timer.periodic(Duration(milliseconds: 100), timerFunc);
+// }
+//
+// Future<void> timerFunc(Timer timer) async {
+//   background();
+//   if (Global.player.playing&&!isPlaying) {
+//     isPlaying = true;
+//     timer.cancel();
+//     Timer.periodic(Duration(milliseconds: 100), timerFunc);
+//   }
+//   else if (!Global.player.playing&&isPlaying) {
+//     isPlaying = false;
+//     timer.cancel();
+//     Timer.periodic(Duration(milliseconds: 500), timerFunc);
+//   }
+// }
+
+Future<void> background() async {
+  if (!await getCurrentLyric()) return;
+
+  sendLyrics();
+  writeLyrics();
+  mutePause();
+}
+
+Future<bool> getCurrentLyric() async {
   if (Global.player.currentIndex == null) {
     // await Future.delayed(Duration(milliseconds: 1), sendLyrics);
-    return;
+    return false;
   }
-  final playlist =
-      Global.player.audioSources;
+  final playlist = Global.player.audioSources;
   final currentIndex = Global.player.currentIndex;
 
   // 防御性检查：确保播放列表和索引有效
   if (currentIndex == null) {
-    return;
+    return false;
   }
 
   final current = playlist[currentIndex];
@@ -35,16 +64,19 @@ Future<void> sendLyrics() async {
   // 获取当前歌词
   if (!(await currentLyric.getCurrentLyric())) {
     // await Future.delayed(Duration(milliseconds: 1), sendLyrics);
-    return;
+    return false;
   }
-  // 发送歌词
-  // print(
-  //   'content: ${currentLyric.content} duration: ${currentLyric.duration}',
-  // );
+  return true;
+}
+
+Future<void> sendLyrics() async {
   KanadaLyricSenderPlugin.sendLyric(
     currentLyric.content,
     (currentLyric.duration / 1000).ceil().toInt(),
   );
+}
+
+Future<void> writeLyrics() async {
   final Map<String, dynamic> state = {
     'package': 'com.hontouniyuki.kanada',
     'lyric': currentLyric.content,
@@ -56,46 +88,34 @@ Future<void> sendLyrics() async {
   // /storage/emulated/0/lyric.json
   final file = File('/storage/emulated/0/lyric.json');
   final old = await file.readAsString();
-  final st = json.decode(old);
-  if (state != st) {
-    await file.writeAsString(json.encode(state));
+  final encoded = json.encode(state);
+  final st = old;
+  if (st != encoded) {
+    await file.writeAsString(encoded);
   }
-  // final sources = playlist;
-  // sources[currentIndex] = AudioSource.file(
-  //   tag.id,
-  //   tag: MediaItem(
-  //     id: tag.id,
-  //     album: tag.album,
-  //     title: currentLyric.content,
-  //     artist:
-  //         '${Global.metadataCache?.title} - ${Global.metadataCache?.artist}',
-  //     duration: tag.duration,
-  //     artUri: tag.artUri,
-  //   ),
-  // );
-  // Global.player.setAudioSource(
-  //   ConcatenatingAudioSource(children: sources),
-  //   initialIndex: currentIndex,
-  // );
-  // Global.player.setAudioSources(sources, initialIndex: currentIndex);
-  // final audioSource = AudioSource.file(
-  //   tag.id,
-  //   tag: MediaItem(
-  //     id: tag.id,
-  //     album: tag.album,
-  //     title: currentLyric.content,
-  //     artist:
-  //     '${Global.metadataCache?.title} - ${Global.metadataCache?.artist}',
-  //     duration: tag.duration,
-  //     artUri: tag.artUri,
-  //   ),
-  // );
-  // final position = Global.player.position;
-  // await (Global.player.audioSource as ConcatenatingAudioSource).removeAt(currentIndex);
-  // await (Global.player.audioSource as ConcatenatingAudioSource).insert(currentIndex, audioSource);
-  // // await Global.player.seekToPrevious();
-  // // Global.player.seekToNext();
-  // await Global.player.seek(position, index: currentIndex);
+}
+
+Future<void> mutePause() async {
+  final volume = await KanadaVolumePlugin.getVolume();
+  print('$volume ${DateTime.now().toIso8601String()}');
+  if (volume == 0) {
+    Global.player.pause();
+
+    final startTime = DateTime.now().millisecondsSinceEpoch;
+    Timer.periodic(Duration(milliseconds: 100), (timer) async {
+      final elapsed = DateTime.now().millisecondsSinceEpoch - startTime;
+
+      if (await KanadaVolumePlugin.getVolume() != 0) {
+        Global.player.play();
+        timer.cancel();
+      }
+
+      if (elapsed >= 5000) {
+        // 5秒后停止
+        timer.cancel();
+      }
+    });
+  }
 }
 
 class CurrentLyric {

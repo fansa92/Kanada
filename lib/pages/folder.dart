@@ -10,7 +10,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 import '../global.dart';
-import '../lyric_sender.dart';
+import '../background.dart';
 import '../settings.dart';
 import '../tool.dart';
 import '../widgets/float_playing.dart';
@@ -161,7 +161,7 @@ class _FolderPageState extends State<FolderPage> {
       // print('sendLyrics');
       // sendLyrics();
       Global.player.positionStream.listen((position) {
-        sendLyrics();
+        background();
       });
       Global.lyricSenderInit = true;
     }
