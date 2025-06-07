@@ -6,10 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:kanada/metadata.dart';
 import '../global.dart';
 import '../lyric.dart';
+import '../settings.dart';
 
 /// 歌词显示主组件
 class LyricView extends StatefulWidget {
-  final String path;        // 音频文件路径
+  final String path; // 音频文件路径
   final double paddingTop; // 顶部内边距
   final double paddingBottom; // 底部内边距
 
@@ -27,19 +28,19 @@ class LyricView extends StatefulWidget {
 /// 歌词视图状态管理
 class _LyricViewState extends State<LyricView> {
   String text = '';
-  Metadata? metadata;         // 元数据解析器
-  Lyrics? lyrics;             // 歌词数据
+  Metadata? metadata; // 元数据解析器
+  Lyrics? lyrics; // 歌词数据
   final GlobalKey singleChildScrollViewKey = GlobalKey(); // 滚动视图Key
-  final GlobalKey columnKey = GlobalKey();                // 列布局Key
-  final GlobalKey activeKey = GlobalKey();                // 当前激活歌词Key
+  final GlobalKey columnKey = GlobalKey(); // 列布局Key
+  final GlobalKey activeKey = GlobalKey(); // 当前激活歌词Key
   final ScrollController _scrollController = ScrollController(); // 滚动控制器
   int index = -1; // 当前歌词索引
 
   @override
   void initState() {
     super.initState();
-    _init();   // 初始化数据
-    _fresh();  // 启动刷新循环
+    _init(); // 初始化数据
+    _fresh(); // 启动刷新循环
   }
 
   @override
@@ -92,12 +93,12 @@ class _LyricViewState extends State<LyricView> {
         if (_scrollController.hasClients && lyrics!.lyrics.isNotEmpty) {
           // 获取布局信息用于滚动计算
           RenderBox? singleChildRenderBox =
-          singleChildScrollViewKey.currentContext?.findRenderObject()
-          as RenderBox?;
+              singleChildScrollViewKey.currentContext?.findRenderObject()
+                  as RenderBox?;
           RenderBox? columnRenderBox =
-          columnKey.currentContext?.findRenderObject() as RenderBox?;
+              columnKey.currentContext?.findRenderObject() as RenderBox?;
           RenderBox? targetRenderBox =
-          activeKey.currentContext?.findRenderObject() as RenderBox?;
+              activeKey.currentContext?.findRenderObject() as RenderBox?;
 
           if (singleChildRenderBox != null &&
               columnRenderBox != null &&
@@ -168,7 +169,31 @@ class _LyricViewState extends State<LyricView> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> widgets = [];  // 普通歌词组件列表
+    if (!Settings.lyricBlur) {
+      return lyrics == null
+          ? Text('正在加载歌词...')
+          : SingleChildScrollView(
+            key: singleChildScrollViewKey,
+            controller: _scrollController,
+            physics: NeverScrollableScrollPhysics(), // 禁用用户滚动
+            child: Column(
+              key: columnKey,
+              children: [
+                SizedBox(height: widget.paddingTop),
+                for (int i = 0; i < lyrics!.lyrics.length; i++)
+                  LyricWidget(
+                    key: i == index ? activeKey : null,
+                    ctx: lyrics!.lyrics[i]['content'],
+                    startTime: lyrics!.lyrics[i]['startTime'],
+                    endTime: lyrics!.lyrics[i]['endTime'],
+                    lyric: lyrics!.lyrics[i]['lyric'],
+                  ),
+                SizedBox(height: widget.paddingBottom),
+              ],
+            ),
+          );
+    }
+    final List<Widget> widgets = []; // 普通歌词组件列表
     final List<Widget> widgets2 = []; // 模糊歌词组件列表
 
     // 构建歌词列表
@@ -204,30 +229,30 @@ class _LyricViewState extends State<LyricView> {
     return lyrics == null
         ? Text('正在加载歌词...')
         : SingleChildScrollView(
-      key: singleChildScrollViewKey,
-      controller: _scrollController,
-      physics: NeverScrollableScrollPhysics(), // 禁用用户滚动
-      child: Column(
-        key: columnKey,
-        children: [
-          SizedBox(height: widget.paddingTop),
-          ...widgets, // 展开普通歌词
-          ClipRect(child: Column(children: widgets2)), // 模糊歌词区域
-          buildNestedLyrics(index + 1, index + 12), // 构建后续歌词
-          SizedBox(height: widget.paddingBottom),
-        ],
-      ),
-    );
+          key: singleChildScrollViewKey,
+          controller: _scrollController,
+          physics: NeverScrollableScrollPhysics(), // 禁用用户滚动
+          child: Column(
+            key: columnKey,
+            children: [
+              SizedBox(height: widget.paddingTop),
+              ...widgets, // 展开普通歌词
+              ClipRect(child: Column(children: widgets2)), // 模糊歌词区域
+              buildNestedLyrics(index + 1, index + 12), // 构建后续歌词
+              SizedBox(height: widget.paddingBottom),
+            ],
+          ),
+        );
   }
 }
 
 // 单个歌词组件
 class LyricWidget extends StatelessWidget {
-  final String ctx;           // 歌词内容
-  final int startTime;        // 开始时间
-  final int endTime;          // 结束时间
+  final String ctx; // 歌词内容
+  final int startTime; // 开始时间
+  final int endTime; // 结束时间
   final List<Map<String, dynamic>> lyric; // 分词数据
-  final double fontSize;      // 字体大小
+  final double fontSize; // 字体大小
 
   const LyricWidget({
     super.key,
@@ -266,11 +291,11 @@ class LyricWidget extends StatelessWidget {
 
 // 单个文字组件
 class Word extends StatelessWidget {
-  final String word;        // 文字内容
-  final int startTime;      // 开始时间
-  final int endTime;        // 结束时间
-  final int currentTime;    // 当前时间
-  final double fontSize;    // 字体大小
+  final String word; // 文字内容
+  final int startTime; // 开始时间
+  final int endTime; // 结束时间
+  final int currentTime; // 当前时间
+  final double fontSize; // 字体大小
   static const double padding = 1.0; // 动态间距
 
   const Word({
@@ -292,9 +317,12 @@ class Word extends StatelessWidget {
       text = Text(
         word,
         style: TextStyle(
-          color: currentTime > startTime
-              ? Global.playerTheme.colorScheme.primary
-              : Global.playerTheme.colorScheme.onSurface.withValues(alpha: .6),
+          color:
+              currentTime > startTime
+                  ? Global.playerTheme.colorScheme.primary
+                  : Global.playerTheme.colorScheme.onSurface.withValues(
+                    alpha: .6,
+                  ),
           fontSize: fontSize,
           fontWeight: FontWeight.bold,
         ),
@@ -302,18 +330,19 @@ class Word extends StatelessWidget {
     } else {
       // 激活状态渐变效果
       text = ShaderMask(
-        shaderCallback: (bounds) => LinearGradient(
-          colors: [
-            Global.playerTheme.colorScheme.primary,
-            Global.playerTheme.colorScheme.onSurface.withValues(alpha: .6),
-          ],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          stops: [
-            (currentTime - startTime) / (endTime - startTime) - 0.1,
-            (currentTime - startTime) / (endTime - startTime) + 0.1,
-          ],
-        ).createShader(bounds),
+        shaderCallback:
+            (bounds) => LinearGradient(
+              colors: [
+                Global.playerTheme.colorScheme.primary,
+                Global.playerTheme.colorScheme.onSurface.withValues(alpha: .6),
+              ],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              stops: [
+                (currentTime - startTime) / (endTime - startTime) - 0.1,
+                (currentTime - startTime) / (endTime - startTime) + 0.1,
+              ],
+            ).createShader(bounds),
         child: Text(
           word,
           style: TextStyle(
@@ -327,12 +356,19 @@ class Word extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(
-        top: padding * Curves.easeInOut.transform(
-          max(0, min(1 - (currentTime - startTime) / (endTime - startTime), 1)),
-        ),
-        bottom: padding * Curves.easeInOut.transform(
-          max(0, min((currentTime - startTime) / (endTime - startTime), 1)),
-        ),
+        top:
+            padding *
+            Curves.easeInOut.transform(
+              max(
+                0,
+                min(1 - (currentTime - startTime) / (endTime - startTime), 1),
+              ),
+            ),
+        bottom:
+            padding *
+            Curves.easeInOut.transform(
+              max(0, min((currentTime - startTime) / (endTime - startTime), 1)),
+            ),
       ),
       child: text,
     );
@@ -359,32 +395,36 @@ class LyricEasyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-        children: [
-          for (final word in lyric)
-            ShaderMask(
-              shaderCallback: (bounds) => LinearGradient(
-                colors: [
-                  Global.playerTheme.colorScheme.primary,
-                  Global.playerTheme.colorScheme.onSurface.withValues(alpha: .6),
-                ],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                stops: [
-                  (Global.player.position.inMilliseconds - word['startTime']) /
-                      (word['endTime'] - word['startTime']) - 0.1,
-                  (Global.player.position.inMilliseconds - word['startTime']) /
-                      (word['endTime'] - word['startTime']) + 0.1,
-                ],
-              ).createShader(bounds),
-              child: Text(
-                word['word'],
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: fontSize,
-                ),
-              ),
-            )
-        ]
+      children: [
+        for (final word in lyric)
+          ShaderMask(
+            shaderCallback:
+                (bounds) => LinearGradient(
+                  colors: [
+                    Global.playerTheme.colorScheme.primary,
+                    Global.playerTheme.colorScheme.onSurface.withValues(
+                      alpha: .6,
+                    ),
+                  ],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  stops: [
+                    (Global.player.position.inMilliseconds -
+                                word['startTime']) /
+                            (word['endTime'] - word['startTime']) -
+                        0.1,
+                    (Global.player.position.inMilliseconds -
+                                word['startTime']) /
+                            (word['endTime'] - word['startTime']) +
+                        0.1,
+                  ],
+                ).createShader(bounds),
+            child: Text(
+              word['word'],
+              style: TextStyle(color: Colors.white, fontSize: fontSize),
+            ),
+          ),
+      ],
     );
   }
 }

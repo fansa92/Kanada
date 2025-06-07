@@ -17,6 +17,7 @@ import 'package:kanada/pages/more/debug/player.dart';
 import 'package:kanada/pages/more/debug/toast.dart';
 import 'package:kanada/pages/more/settings.dart';
 import 'package:kanada/pages/more/settings/folders.dart';
+import 'package:kanada/pages/more/settings/player.dart';
 import 'package:kanada/pages/playing.dart';
 import 'package:kanada/pages/search.dart';
 import 'package:kanada/player.dart';
@@ -45,6 +46,7 @@ class Global {
     '/more/debug/color': (context) => const ColorDebug(),
     '/more/settings': (context) => const SettingsPage(),
     '/more/settings/folders': (context) => const FoldersSettings(),
+    '/more/settings/player': (context) => const PlayerSettings(),
     '/more/cache': (context) => const CachePage(),
     '/player': (context) => const PlayingPage(),
   };

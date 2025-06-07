@@ -29,6 +29,13 @@ class _SettingsPageState extends State<SettingsPage> {
               trailing: Icon(Icons.arrow_forward_ios),
             ),
           ),
+          Link(
+            route: '/more/settings/player',
+            child: ListTile(
+              title: Text('播放器设置'),
+              trailing: Icon(Icons.arrow_forward_ios),
+            ),
+          ),
           ListTile(
             title: Text('Debug模式'),
             trailing: Switch(

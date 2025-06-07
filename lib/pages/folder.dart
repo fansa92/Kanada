@@ -48,12 +48,12 @@ class _FolderPageState extends State<FolderPage> {
     files.clear();
     if (sortType == 0) {
       final settings = await UserData(
-        'folder/settings/${widget.path.hashCode}',
+        'folder/settings/${widget.path.hashCode}.json',
       ).get(defaultValue: {'sort': 1});
       sortType = settings['sort'];
     } else {
       await UserData(
-        'folder/settings/${widget.path.hashCode}',
+        'folder/settings/${widget.path.hashCode}.json',
       ).set({'sort': sortType});
     }
     if (widget.path == '/ALL/') {
