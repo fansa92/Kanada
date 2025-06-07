@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 class UserData {
   /// 数据存储的相对路径（基于应用文档目录）
   final String path;
+  String? absPath;
   UserData(this.path);
 
   /// 保存数据到本地
@@ -16,7 +17,8 @@ class UserData {
   /// 会自动创建不存在的目录结构
   Future<void> set(dynamic data) async {
     final appDir = await getApplicationDocumentsDirectory();
-    final file = File('${appDir.path}/$path');
+    absPath = '${appDir.path}/$path';
+    final file = File(absPath!);
     await file.create(recursive: true);
     await file.writeAsString(json.encode(data)); // 序列化为JSON字符串
   }
@@ -27,7 +29,8 @@ class UserData {
   /// 返回动态类型，调用方需自行处理类型转换
   Future<dynamic> get({Object? defaultValue}) async {
     final appDir = await getApplicationDocumentsDirectory();
-    final file = File('${appDir.path}/$path');
+    absPath = '${appDir.path}/$path';
+    final file = File(absPath!);
 
     if (!await file.exists()) {
       final value = defaultValue ?? {};  // 优先使用调用方提供的默认值
@@ -35,7 +38,11 @@ class UserData {
       await file.writeAsString(json.encode(value));
       return value;
     }
-
-    return json.decode(await file.readAsString()); // 反序列化JSON数据
+    try {
+      return json.decode(await file.readAsString()); // 反序列化JSON数据
+    }
+    catch(e) {
+      return defaultValue?? {};  // 读取失败返回默认值
+    }
   }
 }

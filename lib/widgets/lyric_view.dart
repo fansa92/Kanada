@@ -93,12 +93,12 @@ class _LyricViewState extends State<LyricView> {
         if (_scrollController.hasClients && lyrics!.lyrics.isNotEmpty) {
           // 获取布局信息用于滚动计算
           RenderBox? singleChildRenderBox =
-              singleChildScrollViewKey.currentContext?.findRenderObject()
-                  as RenderBox?;
+          singleChildScrollViewKey.currentContext?.findRenderObject()
+          as RenderBox?;
           RenderBox? columnRenderBox =
-              columnKey.currentContext?.findRenderObject() as RenderBox?;
+          columnKey.currentContext?.findRenderObject() as RenderBox?;
           RenderBox? targetRenderBox =
-              activeKey.currentContext?.findRenderObject() as RenderBox?;
+          activeKey.currentContext?.findRenderObject() as RenderBox?;
 
           if (singleChildRenderBox != null &&
               columnRenderBox != null &&
@@ -173,25 +173,25 @@ class _LyricViewState extends State<LyricView> {
       return lyrics == null
           ? Text('正在加载歌词...')
           : SingleChildScrollView(
-            key: singleChildScrollViewKey,
-            controller: _scrollController,
-            physics: NeverScrollableScrollPhysics(), // 禁用用户滚动
-            child: Column(
-              key: columnKey,
-              children: [
-                SizedBox(height: widget.paddingTop),
-                for (int i = 0; i < lyrics!.lyrics.length; i++)
-                  LyricWidget(
-                    key: i == index ? activeKey : null,
-                    ctx: lyrics!.lyrics[i]['content'],
-                    startTime: lyrics!.lyrics[i]['startTime'],
-                    endTime: lyrics!.lyrics[i]['endTime'],
-                    lyric: lyrics!.lyrics[i]['lyric'],
-                  ),
-                SizedBox(height: widget.paddingBottom),
-              ],
-            ),
-          );
+        key: singleChildScrollViewKey,
+        controller: _scrollController,
+        physics: NeverScrollableScrollPhysics(), // 禁用用户滚动
+        child: Column(
+          key: columnKey,
+          children: [
+            SizedBox(height: widget.paddingTop),
+            for (int i = 0; i < lyrics!.lyrics.length; i++)
+              LyricWidget(
+                key: i == index ? activeKey : null,
+                ctx: lyrics!.lyrics[i]['content'],
+                startTime: lyrics!.lyrics[i]['startTime'],
+                endTime: lyrics!.lyrics[i]['endTime'],
+                lyric: lyrics!.lyrics[i]['lyric'],
+              ),
+            SizedBox(height: widget.paddingBottom),
+          ],
+        ),
+      );
     }
     final List<Widget> widgets = []; // 普通歌词组件列表
     final List<Widget> widgets2 = []; // 模糊歌词组件列表
@@ -229,20 +229,20 @@ class _LyricViewState extends State<LyricView> {
     return lyrics == null
         ? Text('正在加载歌词...')
         : SingleChildScrollView(
-          key: singleChildScrollViewKey,
-          controller: _scrollController,
-          physics: NeverScrollableScrollPhysics(), // 禁用用户滚动
-          child: Column(
-            key: columnKey,
-            children: [
-              SizedBox(height: widget.paddingTop),
-              ...widgets, // 展开普通歌词
-              ClipRect(child: Column(children: widgets2)), // 模糊歌词区域
-              buildNestedLyrics(index + 1, index + 12), // 构建后续歌词
-              SizedBox(height: widget.paddingBottom),
-            ],
-          ),
-        );
+      key: singleChildScrollViewKey,
+      controller: _scrollController,
+      physics: NeverScrollableScrollPhysics(), // 禁用用户滚动
+      child: Column(
+        key: columnKey,
+        children: [
+          SizedBox(height: widget.paddingTop),
+          ...widgets, // 展开普通歌词
+          ClipRect(child: Column(children: widgets2)), // 模糊歌词区域
+          buildNestedLyrics(index + 1, index + 12), // 构建后续歌词
+          SizedBox(height: widget.paddingBottom),
+        ],
+      ),
+    );
   }
 }
 
@@ -265,6 +265,39 @@ class LyricWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (Global.player.position.inMilliseconds < startTime) {
+      return ListTile(
+          title: Padding(
+              padding: const EdgeInsets.only(top: 3 + Word.padding) +
+                  const EdgeInsets.symmetric(vertical: 4),
+              child: Text(
+                ctx,
+                style: TextStyle(
+                  color: Global.playerTheme.colorScheme.onSurface.withValues(
+                      alpha: .6),
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+          )
+      );
+    }
+    else if (Global.player.position.inMilliseconds > endTime) {
+      return ListTile(
+          title: Padding(
+              padding: const EdgeInsets.only(top: 3, bottom: Word.padding) +
+                  const EdgeInsets.symmetric(vertical: 4),
+              child: Text(
+                  ctx,
+                  style: TextStyle(
+                    color: Global.playerTheme.colorScheme.primary,
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.bold,
+                  )
+              )
+          )
+      );
+    }
     return ListTile(
       title: Padding(
         padding: const EdgeInsets.only(top: 3),
@@ -318,11 +351,11 @@ class Word extends StatelessWidget {
         word,
         style: TextStyle(
           color:
-              currentTime > startTime
-                  ? Global.playerTheme.colorScheme.primary
-                  : Global.playerTheme.colorScheme.onSurface.withValues(
-                    alpha: .6,
-                  ),
+          currentTime > startTime
+              ? Global.playerTheme.colorScheme.primary
+              : Global.playerTheme.colorScheme.onSurface.withValues(
+            alpha: .6,
+          ),
           fontSize: fontSize,
           fontWeight: FontWeight.bold,
         ),
@@ -331,7 +364,8 @@ class Word extends StatelessWidget {
       // 激活状态渐变效果
       text = ShaderMask(
         shaderCallback:
-            (bounds) => LinearGradient(
+            (bounds) =>
+            LinearGradient(
               colors: [
                 Global.playerTheme.colorScheme.primary,
                 Global.playerTheme.colorScheme.onSurface.withValues(alpha: .6),
@@ -357,7 +391,7 @@ class Word extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(
         top:
-            padding *
+        padding *
             Curves.easeInOut.transform(
               max(
                 0,
@@ -365,7 +399,7 @@ class Word extends StatelessWidget {
               ),
             ),
         bottom:
-            padding *
+        padding *
             Curves.easeInOut.transform(
               max(0, min((currentTime - startTime) / (endTime - startTime), 1)),
             ),
@@ -399,7 +433,8 @@ class LyricEasyWidget extends StatelessWidget {
         for (final word in lyric)
           ShaderMask(
             shaderCallback:
-                (bounds) => LinearGradient(
+                (bounds) =>
+                LinearGradient(
                   colors: [
                     Global.playerTheme.colorScheme.primary,
                     Global.playerTheme.colorScheme.onSurface.withValues(
@@ -410,12 +445,12 @@ class LyricEasyWidget extends StatelessWidget {
                   end: Alignment.centerRight,
                   stops: [
                     (Global.player.position.inMilliseconds -
-                                word['startTime']) /
-                            (word['endTime'] - word['startTime']) -
+                        word['startTime']) /
+                        (word['endTime'] - word['startTime']) -
                         0.1,
                     (Global.player.position.inMilliseconds -
-                                word['startTime']) /
-                            (word['endTime'] - word['startTime']) +
+                        word['startTime']) /
+                        (word['endTime'] - word['startTime']) +
                         0.1,
                   ],
                 ).createShader(bounds),

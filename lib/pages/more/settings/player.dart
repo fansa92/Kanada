@@ -13,9 +13,7 @@ class _PlayerSettingsState extends State<PlayerSettings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Player Settings'),
-      ),
+      appBar: AppBar(title: Text('Player Settings')),
       body: ListView(
         children: [
           ListTile(
@@ -34,7 +32,24 @@ class _PlayerSettingsState extends State<PlayerSettings> {
               setState(() {});
             },
           ),
-        ]
+          ListTile(
+            title: Text('歌词复杂动画效果'),
+            trailing: Switch(
+              value: Settings.lyricComplicatedAnimation,
+              onChanged: (bool value) {
+                Settings.lyricComplicatedAnimation = value;
+                Settings.save();
+                setState(() {});
+              },
+            ),
+            onTap: () {
+              Settings.lyricComplicatedAnimation =
+                  !Settings.lyricComplicatedAnimation;
+              Settings.save();
+              setState(() {});
+            },
+          ),
+        ],
       ),
     );
   }

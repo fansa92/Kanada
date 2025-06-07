@@ -14,6 +14,9 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
+    Settings.fresh().then((value) {
+      setState(() {});
+    });
   }
 
   @override
