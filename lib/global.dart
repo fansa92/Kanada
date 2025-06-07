@@ -5,6 +5,7 @@ import 'package:kanada/pages/home.dart';
 import 'package:kanada/pages/more.dart';
 import 'package:kanada/pages/more/cache.dart';
 import 'package:kanada/pages/more/debug.dart';
+import 'package:kanada/pages/more/debug/color.dart';
 import 'package:kanada/pages/more/debug/color_diffusion.dart';
 import 'package:kanada/pages/more/debug/current_lyric.dart';
 import 'package:kanada/pages/more/debug/file_choose.dart';
@@ -41,6 +42,7 @@ class Global {
     '/more/debug/pick_color': (context) => const PickColorDebug(),
     '/more/debug/color_diffusion': (context) => const ColorDiffusionDebug(),
     '/more/debug/current_lyric': (context) => const CurrentLyricDebug(),
+    '/more/debug/color': (context) => const ColorDebug(),
     '/more/settings': (context) => const SettingsPage(),
     '/more/settings/folders': (context) => const FoldersSettings(),
     '/more/cache': (context) => const CachePage(),

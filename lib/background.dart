@@ -36,10 +36,10 @@ Future<void> timerFunc(Timer timer) async {
 
 /// 后台任务主逻辑
 Future<void> background() async {
-  await mutePause();       // 静音暂停处理
-  if (!await getCurrentLyric()) return; // 获取当前歌词
-  await sendLyrics();      // 发送歌词到其他组件
-  await writeLyrics();     // 写入歌词到文件
+  await mutePause(); // 静音暂停处理
+  await getCurrentLyric(); // 获取当前歌词
+  await sendLyrics(); // 发送歌词到其他组件
+  await writeLyrics(); // 写入歌词到文件
 }
 
 /// 获取当前播放歌词
@@ -70,7 +70,10 @@ Future<void> writeLyrics() async {
   // 转义非ASCII字符为Unicode
   String escapeToUnicode(String input) {
     return input.replaceAllMapped(RegExp(r'[^\x00-\x7F]'),
-            (match) => '\\u${match.group(0)!.codeUnitAt(0).toRadixString(16).padLeft(4, '0')}');
+            (match) => '\\u${match.group(0)!
+            .codeUnitAt(0)
+            .toRadixString(16)
+            .padLeft(4, '0')}');
   }
 
   // 构建状态数据
@@ -102,13 +105,18 @@ Future<void> writeLyrics() async {
 
 /// 静音暂停处理逻辑
 Future<void> mutePause() async {
+  if (!Global.player.playing) return;
   final volume = await KanadaVolumePlugin.getVolume();
   if (volume == 0) {
     Global.player.pause();
 
-    final startTime = DateTime.now().millisecondsSinceEpoch;
+    final startTime = DateTime
+        .now()
+        .millisecondsSinceEpoch;
     Timer.periodic(Duration(milliseconds: 100), (timer) async {
-      final elapsed = DateTime.now().millisecondsSinceEpoch - startTime;
+      final elapsed = DateTime
+          .now()
+          .millisecondsSinceEpoch - startTime;
 
       // 检测音量恢复
       if (await KanadaVolumePlugin.getVolume() != 0) {
@@ -126,13 +134,13 @@ Future<void> mutePause() async {
 
 /// 当前歌词数据模型
 class CurrentLyric {
-  String? path;         // 文件路径
-  int? position;         // 当前播放位置（毫秒）
-  Lyrics? lyrics;        // 歌词解析器
-  String content = '';   // 当前歌词内容
-  int duration = 0;      // 歌词持续时间（毫秒）
-  int startTime = 0;     // 歌词开始时间
-  int endTime = 0;       // 歌词结束时间
+  String? path; // 文件路径
+  int? position; // 当前播放位置（毫秒）
+  Lyrics? lyrics; // 歌词解析器
+  String content = ''; // 当前歌词内容
+  int duration = 0; // 歌词持续时间（毫秒）
+  int startTime = 0; // 歌词开始时间
+  int endTime = 0; // 歌词结束时间
   List<Map<String, dynamic>> words = []; // 逐字时间数据
 
   /// 获取元数据
