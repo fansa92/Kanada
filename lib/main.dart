@@ -7,68 +7,64 @@ import 'package:kanada/player.dart';
 import 'package:kanada/settings.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+/// 应用入口点
 Future<void> main() async {
+  // 初始化Flutter引擎绑定
   WidgetsFlutterBinding.ensureInitialized();
-  // Global.audioHandler = await AudioService.init(
-  //   builder: () => MyAudioHandler(),
-  //   config: AudioServiceConfig(
-  //     androidNotificationChannelId: 'com.hontouniyuki.kanada.channel.audio',
-  //     androidNotificationChannelName: 'Music playback',
-  //   ),
-  // );
+
+  // 初始化音频后台服务
   await JustAudioBackground.init(
     androidNotificationChannelId: 'com.hontouniyuki.kanada.channel.audio',
     androidNotificationChannelName: 'Audio playback',
-    androidNotificationOngoing: true,
+    androidNotificationOngoing: true, // 保持持续通知
   );
+
+  // 初始化播放器实例
   Global.player = Player();
-  // Global.player = ;
+
+  // 配置系统UI
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
-      // 设置状态栏和导航栏背景为透明
-      // statusBarColor: Colors.transparent,
-      systemNavigationBarColor: Colors.transparent,
-      // 设置状态栏和导航栏图标颜色为白色
-      // statusBarIconBrightness: Brightness.dark,
-      // systemNavigationBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.transparent, // 透明导航栏
     ),
   );
-  requestPermission();
-  Settings.fresh();
+
+  // 请求必要权限
+  await requestPermission();
+
+  // 加载应用设置
+  await Settings.fresh();
+
+  // 启动应用
   runApp(const MyApp());
 }
 
+/// 请求运行时权限
 Future<void> requestPermission() async {
-  // Toast.showToast('请求权限中...');
-  // PermissionStatus audio = await Permission.audio.request();
-  // PermissionStatus manageExternalStorage = await Permission.manageExternalStorage.request();
-  // PermissionStatus notification = await Permission.notification.request();
-  // if (audio.isDenied || manageExternalStorage.isDenied || notification.isDenied) {
-  //   requestPermission();
-  // }
-  // else if (audio.isPermanentlyDenied || manageExternalStorage.isPermanentlyDenied || notification.isPermanentlyDenied) {
-  //   openAppSettings();
-  // }
   final permissions = [
-    Permission.audio,
-    Permission.manageExternalStorage,
-    Permission.notification,
+    Permission.audio,               // 音频播放权限
+    Permission.manageExternalStorage, // 文件管理权限
+    Permission.notification,        // 通知权限
   ];
-  bool flag1 = false;
-  bool flag2 = false;
+
+  bool hasDenied = false;          // 存在暂时拒绝的权限
+  bool hasPermanentDenied = false; // 存在永久拒绝的权限
+
   for (final permission in permissions) {
     final status = await permission.request();
     if (status.isPermanentlyDenied) {
-      flag2 = true;
+      hasPermanentDenied = true;
     } else if (status.isDenied) {
-      flag1 = true;
+      hasDenied = true;
     }
   }
-  if (flag1) requestPermission();
-  if (flag2) openAppSettings();
+
+  if (hasDenied) requestPermission();   // 重新请求暂时拒绝的权限
+  if (hasPermanentDenied) openAppSettings(); // 引导到设置页面
 }
 
+/// 主应用组件
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -76,36 +72,39 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-        // 创建默认颜色方案（当动态颜色不可用时使用）
+        // 动态颜色处理（支持Android 12+的主题取色）
         final ColorScheme lightColorScheme;
         final ColorScheme darkColorScheme;
 
         if (lightDynamic != null && darkDynamic != null) {
-          // 使用动态颜色方案
+          // 使用系统动态颜色
           lightColorScheme = lightDynamic.harmonized();
           darkColorScheme = darkDynamic.harmonized();
         } else {
-          // 回退到自定义颜色方案（这里使用蓝色主题）
+          // 回退到默认蓝色主题
+          const seedColor = Color(0xFF39C5BB); // 主色调
           lightColorScheme = ColorScheme.fromSeed(
-            seedColor: Color(0xFF39C5BB),
+            seedColor: seedColor,
             brightness: Brightness.light,
           );
           darkColorScheme = ColorScheme.fromSeed(
-            seedColor: Color(0xFF39C5BB),
+            seedColor: seedColor,
             brightness: Brightness.dark,
           );
         }
 
         return MaterialApp(
-          theme: ThemeData(colorScheme: lightColorScheme, useMaterial3: true),
+          theme: ThemeData(
+            colorScheme: lightColorScheme,
+            useMaterial3: true, // 启用Material 3设计
+          ),
           darkTheme: ThemeData(
             colorScheme: darkColorScheme,
             useMaterial3: true,
           ),
-          themeMode: ThemeMode.system,
-          // 跟随系统主题设置
+          themeMode: ThemeMode.system, // 跟随系统主题
           initialRoute: '/',
-          routes: Global.routes,
+          routes: Global.routes, // 应用路由配置
         );
       },
     );

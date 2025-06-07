@@ -1,121 +1,78 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
-
 import 'metadata.dart';
 
+/// 播放器核心类，管理音频播放、队列和播放状态
 class Player {
-  // final AudioPlayer _player;
+  // 静态音频播放器实例，全局唯一
   static final AudioPlayer _player = AudioPlayer();
+  // 播放队列存储文件路径
   final List<String> _queue = [];
 
+  /// 构造函数：初始化当前曲目索引监听
   Player() {
     _player.currentIndexStream.listen((index) {
-      // if (index == null || index == _playerIndex) {
-      //   return;
-      // }
-      // _currentIndex += index - _playerIndex;
-      // update();
-      _currentIndex = index ?? -1;
+      _currentIndex = index ?? -1; // 更新当前播放索引
     });
   }
 
+  // 当前播放索引（内部存储）
   int _currentIndex = -1;
+  // 播放模式控制
+  bool shuffle = false;    // 随机播放
+  bool repeat = false;     // 列表循环
+  bool repeatOne = false;  // 单曲循环
 
-  // int _playerIndex = -1;
-  bool shuffle = false;
-  bool repeat = false;
-  bool repeatOne = false;
-
+  /// 播放状态 getter
   bool get playing => _player.playing;
 
+  /// 获取当前播放队列
   List<String> get queue => _queue;
 
-  // int get currentIndex => _currentIndex;
+  /// 当前曲目索引（从播放器直接获取）
   int get currentIndex => _player.currentIndex ?? -1;
 
+  /// 音频时长和位置
   Duration? get duration => _player.duration;
-
   Duration get position => _player.position;
 
+  /// 当前播放文件路径
   String? get current =>
       _currentIndex >= 0 && _currentIndex < _queue.length
           ? _queue[_currentIndex]
           : null;
 
-  bool get hasPrevious => _currentIndex > 0;
+  /// 导航控制
+  bool get hasPrevious => _currentIndex > 0;          // 是否有上一首
+  bool get hasNext => _currentIndex < _queue.length - 1; // 是否有下一首
 
-  bool get hasNext => _currentIndex < _queue.length - 1;
-
+  /// 播放器状态流
   Stream<SequenceState?> get sequenceStateStream => _player.sequenceStateStream;
-
   Stream<Duration> get positionStream => _player.positionStream;
-
   Stream<int?> get currentIndexStream => _player.currentIndexStream;
 
+  /// 更新播放队列和音频源
   Future<void> update() async {
-    // List<String> newQueue = _queue;
-    // int newIndex = _currentIndex;
-
-    // if (queue.length <= 5) {
-    //   newQueue.addAll(queue);
-    //   newIndex = currentIndex;
-    // } else if (repeat ||
-    //     (currentIndex >= 2 && currentIndex <= queue.length - 3)) {
-    //   // 循环队列模式
-    //   newIndex = currentIndex;
-    //   for (int j = -2; j <= 2; j++) {
-    //     newQueue.add(queue[(newIndex + j) % queue.length]);
-    //   }
-    //   newIndex = 2; // 保持中间位置
-    // } else {
-    //   // 线性截取模式
-    //   final start = (currentIndex - 2).clamp(0, queue.length - 1);
-    //   final end = (currentIndex + 2).clamp(start, queue.length - 1);
-    //
-    //   for (int i = start; i <= end; i++) {
-    //     newQueue.add(queue[i]);
-    //   }
-    //   newIndex = currentIndex - start;
-    // }
-
+    // 创建固定长度的音频源数组
     final sources = List<AudioSource?>.filled(
       _queue.length,
       null,
       growable: false,
     );
 
-    // for (final path in _queue) {
-    //   final metadata = Metadata(path);
-    //   await metadata.getMetadata();
-    //   sources.add(
-    //     AudioSource.uri(
-    //       Uri.parse(path),
-    //       tag: MediaItem(
-    //         id: path,
-    //         title: metadata.title ?? path.split('/').last,
-    //         artist: metadata.artist,
-    //         album: metadata.album,
-    //       ),
-    //     ),
-    //   );
-    // }
-
-    await Metadata(current?? '').getCover();
-
+    // 批量处理元数据并创建音频源
     Future<void> batch(int index) async {
       final path = _queue[index];
       final metadata = Metadata(path);
-      await metadata.getMetadata();
-      metadata.getCover();
-      // await Future.wait([
-      //   metadata.getMetadata(),
-      //   metadata.getCover(),
-      // ]);
+      await metadata.getMetadata();  // 获取元数据
+      metadata.getCover();           // 获取封面
+
+      // 创建带元数据的音频源
       sources[index] = AudioSource.uri(
         Uri.parse(path),
         tag: MediaItem(
           id: path,
-          title: metadata.title ?? path.split('/').last,
+          title: metadata.title ?? path.split('/').last, // 默认使用文件名
           artist: metadata.artist,
           album: metadata.album,
           artUri: Uri.parse('file://${metadata.coverCache}'),
@@ -123,40 +80,29 @@ class Player {
       );
     }
 
+    // 并行处理所有元数据
     await Future.wait(List.generate(_queue.length, (index) => batch(index)));
 
-    // _playerIndex = newIndex;
+    // 重置播放器并设置新源
     await stop();
-    // await _player.setAudioSources(
-    //   sources.cast<AudioSource>(),
-    //   initialIndex: _currentIndex,
-    // );
     await _player.setAudioSource(
-      ConcatenatingAudioSource(
+      ConcatenatingAudioSource(  // 使用连接音频源处理队列
         children: sources.cast<AudioSource>(),
       ),
-      initialIndex: _currentIndex,
+      initialIndex: _currentIndex, // 保持当前播放位置
     );
-    // await _player.seek(Duration.zero, index: _currentIndex);
-    // await play();
   }
 
-  Future<void> play() async {
-    await _player.play();
-  }
+  // 基础播放控制 --------------------------
+  Future<void> play() async => await _player.play();
+  Future<void> pause() async => await _player.pause();
+  Future<void> stop() async => await _player.stop();
 
-  Future<void> pause() async {
-    await _player.pause();
-  }
+  /// 跳转到指定位置
+  Future<void> seek(Duration position, {int? index}) async =>
+      await _player.seek(position, index: index);
 
-  Future<void> stop() async {
-    await _player.stop();
-  }
-
-  Future<void> seek(Duration position, {int? index}) async {
-    await _player.seek(position, index: index);
-  }
-
+  /// 设置播放队列
   Future<void> setQueue(List<String> queue, {int? initialIndex}) async {
     _queue.clear();
     _queue.addAll(queue);
@@ -166,47 +112,11 @@ class Player {
     await update();
   }
 
-  Future<void> skipToQueueItem(int index) async {
-    await _player.seek(Duration.zero, index: index);
-    // _currentIndex = index;
-    // await update();
-    // await play();
-  }
+  /// 跳转到指定队列项
+  Future<void> skipToQueueItem(int index) async =>
+      await _player.seek(Duration.zero, index: index);
 
-  Future<void> skipToPrevious() async {
-    await skipToQueueItem(_currentIndex - 1);
-    // if (hasPrevious) {
-    //   _currentIndex--;
-    //   await skipToQueueItem(_currentIndex);
-    // }
-  }
-
-  Future<void> skipToNext() async {
-    await skipToQueueItem(_currentIndex + 1);
-    // if (hasNext) {
-    //   _currentIndex++;
-    //   await skipToQueueItem(_currentIndex);
-    // }
-  }
+  /// 上一首/下一首控制
+  Future<void> skipToPrevious() async => await skipToQueueItem(_currentIndex - 1);
+  Future<void> skipToNext() async => await skipToQueueItem(_currentIndex + 1);
 }
-
-// class KanadaAudioHandler extends BaseAudioHandler
-//     with QueueHandler, SeekHandler {
-//   final _player = Player(AudioPlayer());
-//
-//   @override
-//   Future<void> play() => _player.play();
-//
-//   @override
-//   Future<void> pause() => _player.pause();
-//
-//   @override
-//   Future<void> stop() => _player.stop();
-//
-//   @override
-//   Future<void> seek(Duration position) => _player.seek(position);
-//
-//   @override
-//   Future<void> skipToQueueItem(int index) =>
-//       _player.seek(Duration.zero, index: index);
-// }

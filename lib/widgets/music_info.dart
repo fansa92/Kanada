@@ -3,11 +3,12 @@ import 'package:kanada/global.dart';
 import 'package:kanada/metadata.dart';
 import '../background.dart';
 
+/// 音乐信息展示组件，包含封面、标题、艺术家信息和播放功能
 class MusicInfo extends StatefulWidget {
-  final String path;
-  final bool play;
-  final ThemeData? theme;
-  final bool nextPlay;
+  final String path;          // 音乐文件路径
+  final bool play;            // 是否启用播放功能
+  final ThemeData? theme;     // 自定义主题
+  final bool nextPlay;        // 是否显示添加到下一首播放按钮
 
   const MusicInfo({
     super.key,
@@ -22,8 +23,8 @@ class MusicInfo extends StatefulWidget {
 }
 
 class _MusicInfoState extends State<MusicInfo> {
-  late Metadata metadata;
-  late ThemeData theme;
+  late Metadata metadata;     // 音乐元数据
+  late ThemeData theme;       // 当前使用的主题
 
   @override
   void initState() {
@@ -31,6 +32,7 @@ class _MusicInfoState extends State<MusicInfo> {
     _init();
   }
 
+  /// 初始化元数据和封面
   Future<void> _init() async {
     metadata = Metadata(widget.path);
     await metadata.getMetadata();
@@ -39,45 +41,27 @@ class _MusicInfoState extends State<MusicInfo> {
     if(mounted) setState(() {});
   }
 
+  /// 播放控制方法
   Future<void> play() async {
-    // Global.player.setAudioSource(
-    //   AudioSource.file(
-    //     widget.path,
-    //     tag: MediaItem(
-    //       id: widget.path,
-    //       album: metadata.album,
-    //       title: metadata.title?? widget.path.split('/').last,
-    //       artist: metadata.artist,
-    //       duration: metadata.duration,
-    //       artUri: Uri.parse(
-    //         'file://${metadata.picturePath}',
-    //       ),
-    //     ),
-    //   ),
-    // );
     Global.init = false;
     Global.path = widget.path;
 
-    // 提前提取路径列表，避免多次访问 Global.playlist
+    // 准备播放队列
     final playlistPaths = Global.playlist;
-
     playlistPaths.shuffle();
-
-    // 查找索引的优化（避免重复遍历）
     final idx = playlistPaths.indexOf(widget.path);
 
-    // Global.player.setAudioSource(
-    //   ConcatenatingAudioSource(children: sources),
-    //   initialIndex: idx >= 0 ? idx : null,
-    // );
+    // 设置播放队列
     await Global.player.setQueue(playlistPaths, initialIndex: idx >= 0 ? idx : null);
     Global.init = true;
+
+    // 初始化歌词后台服务
     if (!Global.lyricSenderInit) {
-      // print('sendLyrics');
-      // sendLyrics();
       startBackground();
       Global.lyricSenderInit = true;
     }
+
+    // 跳转到当前曲目并开始播放
     if(idx >= 0) {
       await Global.player.skipToQueueItem(idx);
     }
@@ -91,18 +75,19 @@ class _MusicInfoState extends State<MusicInfo> {
       onTap: widget.play ? play : null,
       child: Row(
         children: [
+          // 封面显示区域
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: SizedBox(
               width: 50,
               height: 50,
-              child:
-                  metadata.cover != null
-                      ? Image.memory(metadata.cover!, fit: BoxFit.cover)
-                      : const Icon(Icons.music_note),
+              child: metadata.cover != null
+                  ? Image.memory(metadata.cover!, fit: BoxFit.cover)
+                  : const Icon(Icons.music_note),
             ),
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
+          // 文字信息区域
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,35 +111,16 @@ class _MusicInfoState extends State<MusicInfo> {
               ],
             ),
           ),
-          // if (widget.nextPlay)
-          //   IconButton(
-          //     onPressed: () {
-          //       Global.player.audioSources.insert(
-          //         (Global.player.currentIndex ?? 0) + 1,
-          //         AudioSource.file(
-          //           widget.path,
-          //           tag: MediaItem(
-          //             id: widget.path,
-          //             album: metadata.album,
-          //             title: metadata.title ?? widget.path.split('/').last,
-          //             artist: metadata.artist,
-          //             duration: metadata.duration,
-          //             artUri: Uri.parse('file://${metadata.coverPath}'),
-          //           ),
-          //         ),
-          //       );
-          //     },
-          //     icon: Icon(Icons.add_circle, color: theme.colorScheme.onSurface),
-          //   ),
         ],
       ),
     );
   }
 }
 
+/// 支持搜索的音乐信息组件，继承自MusicInfo
 class MusicInfoSearch extends StatefulWidget {
-  final String path;
-  final String keywords;
+  final String path;      // 文件路径
+  final String keywords;  // 搜索关键词
 
   const MusicInfoSearch({
     super.key,
@@ -167,8 +133,8 @@ class MusicInfoSearch extends StatefulWidget {
 }
 
 class _MusicInfoSearchState extends State<MusicInfoSearch> {
-  bool show = false;
-  Metadata metadata = Metadata('');
+  bool show = false;            // 是否显示组件
+  Metadata metadata = Metadata('');  // 元数据实例
 
   @override
   void initState() {
@@ -184,6 +150,7 @@ class _MusicInfoSearchState extends State<MusicInfoSearch> {
     }
   }
 
+  /// 初始化并过滤搜索结果
   Future<void> _init() async {
     if (widget.keywords.isEmpty) {
       show = true;
@@ -193,36 +160,24 @@ class _MusicInfoSearchState extends State<MusicInfoSearch> {
         metadata = Metadata(widget.path);
         await metadata.getMetadata();
       }
-      if ((metadata.title != null
-              ? metadata.title!.toLowerCase().contains(
-                widget.keywords.toLowerCase(),
-              )
-              : false) ||
-          (metadata.artist != null
-              ? metadata.artist!.toLowerCase().contains(
-                widget.keywords.toLowerCase(),
-              )
-              : false) ||
-          (metadata.album != null
-              ? metadata.album!.toLowerCase().contains(
-                widget.keywords.toLowerCase(),
-              )
-              : false)) {
-        show = true;
-      } else {
-        show = false;
-      }
+      // 关键词匹配逻辑（标题、艺术家、专辑）
+      final keywordLower = widget.keywords.toLowerCase();
+      final matchTitle = metadata.title?.toLowerCase().contains(keywordLower) ?? false;
+      final matchArtist = metadata.artist?.toLowerCase().contains(keywordLower) ?? false;
+      final matchAlbum = metadata.album?.toLowerCase().contains(keywordLower) ?? false;
+
+      show = matchTitle || matchArtist || matchAlbum;
+      setState(() {});
     }
-    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return show
         ? ListTile(
-          key: ValueKey(widget.path),
-          title: MusicInfo(path: widget.path),
-        )
+      key: ValueKey(widget.path),
+      title: MusicInfo(path: widget.path),
+    )
         : Container();
   }
 }

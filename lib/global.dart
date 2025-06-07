@@ -23,6 +23,8 @@ import 'package:kanada/player.dart';
 import 'metadata.dart';
 
 class Global {
+  /// 应用路由表
+  /// 键：路由路径，值：对应的页面组件构造器
   static Map<String, WidgetBuilder> routes = {
     '/': (context) => const AppPage(),
     '/home': (context) => const HomePage(),
@@ -44,12 +46,29 @@ class Global {
     '/more/cache': (context) => const CachePage(),
     '/player': (context) => const PlayingPage(),
   };
+
+  /// 全局播放器实例（延迟初始化）
   static late Player player;
+
+  /// 应用初始化状态标记
   static bool init = false;
+
+  /// 当前播放文件路径
   static String path = '';
+
+  /// 当前播放列表
   static List<String> playlist = [];
+
+  /// 元数据缓存（用于快速访问当前播放文件的元信息）
   static Metadata? metadataCache;
+
+  /// 播放器页面专用主题
   static ThemeData playerTheme = ThemeData();
+
+  /// 歌词发送器初始化状态标记
   static bool lyricSenderInit = false;
+
+  /// 颜色缓存表
+  /// 键：文件路径，值：从文件中提取的颜色列表
   static Map<String, List<Color>> colorsCache = {};
 }
