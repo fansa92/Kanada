@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:kanada/widgets/lyric_complicated_view.dart';
 import 'package:kanada/widgets/lyric_view.dart';
 
 import '../global.dart';
 import '../metadata.dart';
+import '../settings.dart';
 
 class LyricPage extends StatefulWidget {
   const LyricPage({super.key});
@@ -82,16 +84,18 @@ class _LyricPageState extends State<LyricPage> {
           ),
           child:
               metadata?.path != null
-                  ? LyricView(
-                    path: metadata!.path,
-                    paddingTop: MediaQuery.of(context).size.height*0.5,
-                    paddingBottom: MediaQuery.of(context).size.height,
-                    // paddingTop: 100 + MediaQuery.of(context).padding.top,
-                    // paddingBottom: MediaQuery.of(context).size.height,
-                    // padding: EdgeInsets.only(
-                    //   top: 100 + MediaQuery.of(context).padding.top,
-                    // ),
-                  )
+                  ? (Settings.lyricComplicatedAnimation
+                      ? LyricComplicatedView(path: metadata!.path)
+                      : LyricView(
+                        path: metadata!.path,
+                        paddingTop: MediaQuery.of(context).size.height * 0.5,
+                        paddingBottom: MediaQuery.of(context).size.height,
+                        // paddingTop: 100 + MediaQuery.of(context).padding.top,
+                        // paddingBottom: MediaQuery.of(context).size.height,
+                        // padding: EdgeInsets.only(
+                        //   top: 100 + MediaQuery.of(context).padding.top,
+                        // ),
+                      ))
                   : Container(),
         ),
         SizedBox(
@@ -172,38 +176,31 @@ class _LyricPageState extends State<LyricPage> {
                       SizedBox(width: 25),
                     ],
                   ),
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      height: 1,
-                      color: Global.playerTheme.colorScheme.onSurface
-                          .withValues(alpha: .1),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      height: 3,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Global.playerTheme.colorScheme.primary,
-                            Colors.transparent,
-                          ],
-                          stops: [_progress, _progress],
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
           ),
         ),
+        if (Settings.lyricShowProgressBar)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: MediaQuery.of(context).padding.bottom * .3,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Global.playerTheme.colorScheme.primary.withValues(
+                      alpha: .6,
+                    ),
+                    Colors.transparent,
+                  ],
+                  stops: [_progress, _progress],
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }

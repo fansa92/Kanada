@@ -11,8 +11,10 @@ class Settings {
   // 以下为全局设置字段
   static late String name; // 当前用户名
   static late List<String> folders; // 监控的音乐文件夹路径列表
+  static late bool lyricShowProgressBar; // 歌曲进度开关状态
   static late bool lyricBlur; // 歌词模糊效果开关状态
   static late bool lyricComplicatedAnimation; // 歌词动画效果开关状态
+  static late bool lyricGlow; // 歌词发光开关状态
   static late bool debug; // 调试模式开关状态
 
   /// 从持久化存储初始化设置
@@ -24,16 +26,20 @@ class Settings {
       final Map json = await userdata.get(
         defaultValue: {
           'name': 'Kanade',
-          'folders': ['/storage/emulated/0/Music/Yuki/ミクセカイ/'],
+          'folders': ['/storage/emulated/0/Music/'],
+          'lyricShowProgressBar': true,
           'lyricBlur': false,
-          'lyricComplicatedAnimation': false,
+          'lyricComplicatedAnimation': true,
+          'lyricGlow': false,
           'debug': false,
         },
       );
       name = json['name'];
       folders = json['folders'].cast<String>();
+      lyricShowProgressBar = json['lyricShowProgressBar'];
       lyricBlur = json['lyricBlur'];
       lyricComplicatedAnimation = json['lyricComplicatedAnimation'];
+      lyricGlow = json['lyricGlow'];
       debug = json['debug'];
     } catch (e) {
       if (userdata.absPath != null) {
@@ -48,8 +54,10 @@ class Settings {
     await UserData('settings.json').set({
       'name': name,
       'folders': folders,
+      'lyricShowProgressBar': lyricShowProgressBar,
       'lyricBlur': lyricBlur,
       'lyricComplicatedAnimation': lyricComplicatedAnimation,
+      'lyricGlow': lyricGlow,
       'debug': debug,
     });
   }
