@@ -34,9 +34,9 @@ class _MusicInfoState extends State<MusicInfo> {
   Future<void> _init() async {
     metadata = Metadata(widget.path);
     await metadata.getMetadata();
-    setState(() {});
+    if(mounted) setState(() {});
     await metadata.getCover();
-    setState(() {});
+    if(mounted) setState(() {});
   }
 
   Future<void> play() async {

@@ -58,18 +58,29 @@ Future<void> sendLyrics() async {
 }
 
 Future<void> writeLyrics() async {
+  String escapeToUnicode(String input) {
+    return input.replaceAllMapped(RegExp(r'[^\x00-\x7F]'),
+            (match) => '\\u${match.group(0)!.codeUnitAt(0).toRadixString(16).padLeft(4, '0')}');
+  }
+
   final Map<String, dynamic> state = {
     'package': 'com.hontouniyuki.kanada',
-    'lyric': currentLyric.content,
+    'lyric': escapeToUnicode(currentLyric.content),
     'playing': Global.player.playing,
-    'name': Global.metadataCache?.title,
-    'singer': Global.metadataCache?.artist,
-    'album': Global.metadataCache?.album,
+    'name': Global.metadataCache?.title != null
+        ? escapeToUnicode(Global.metadataCache!.title!)
+        : null,
+    'singer': Global.metadataCache?.artist != null
+        ? escapeToUnicode(Global.metadataCache!.artist!)
+        : null,
+    'album': Global.metadataCache?.album != null
+        ? escapeToUnicode(Global.metadataCache!.album!)
+        : null,
   };
   // /storage/emulated/0/lyric.json
   final file = File('/storage/emulated/0/lyric.json');
   final old = await file.readAsString();
-  final encoded = json.encode(state);
+  final encoded = json.encode(state).replaceAll('\\\\', '\\');
   final st = old;
   if (st != encoded) {
     await file.writeAsString(encoded);

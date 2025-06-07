@@ -106,7 +106,7 @@ class _PlayerBackgroundState extends State<PlayerBackground>
       duration: const Duration(seconds: 5),
     )..repeat();
     _sequenceSub = Global.player.sequenceStateStream.listen((state) {
-      if (state.currentIndex != null) {
+      if (state?.currentIndex != null) {
         _init(); // 主动刷新
       }
     });

@@ -51,7 +51,7 @@ class _PlayerPageState extends State<PlayerPage> {
 
     // 监听播放列表元数据变化（包括 setAudioSource）
     _sequenceSub = Global.player.sequenceStateStream.listen((state) {
-      if (state.currentIndex != null) {
+      if (state?.currentIndex != null) {
         _fresh(); // 主动刷新
       }
     });

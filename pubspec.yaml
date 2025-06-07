@@ -16,7 +16,7 @@ dependencies:
   dynamic_color: ^1.7.0
   flutter_launcher_icons: ^0.14.3
   fluttertoast: ^8.2.12
-  just_audio: ^0.10.3
+  just_audio: ^0.9.46
   just_audio_background:
     path: ./just_audio_background
   kanada_album_art:

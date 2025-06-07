@@ -46,7 +46,7 @@ class Player {
 
   bool get hasNext => _currentIndex < _queue.length - 1;
 
-  Stream<SequenceState> get sequenceStateStream => _player.sequenceStateStream;
+  Stream<SequenceState?> get sequenceStateStream => _player.sequenceStateStream;
 
   Stream<Duration> get positionStream => _player.positionStream;
 
@@ -127,8 +127,14 @@ class Player {
 
     // _playerIndex = newIndex;
     await stop();
-    await _player.setAudioSources(
-      sources.cast<AudioSource>(),
+    // await _player.setAudioSources(
+    //   sources.cast<AudioSource>(),
+    //   initialIndex: _currentIndex,
+    // );
+    await _player.setAudioSource(
+      ConcatenatingAudioSource(
+        children: sources.cast<AudioSource>(),
+      ),
       initialIndex: _currentIndex,
     );
     // await _player.seek(Duration.zero, index: _currentIndex);
