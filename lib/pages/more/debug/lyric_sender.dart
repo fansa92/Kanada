@@ -10,6 +10,18 @@ class LyricSenderDebug extends StatefulWidget {
 class _LyricSenderDebugState extends State<LyricSenderDebug> {
   final TextEditingController _controller = TextEditingController();
   final TextEditingController _delayController = TextEditingController();
+  bool state=false;
+
+  @override
+  void initState() {
+    super.initState();
+    KanadaLyricSenderPlugin.hasEnable().then((value) {
+      setState(() {
+        state=value;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,7 +63,8 @@ class _LyricSenderDebugState extends State<LyricSenderDebug> {
                 KanadaLyricSenderPlugin.clearLyric();
               },
               child: const Text('Clear Lyric'),
-            )
+            ),
+            Text('状态: $state')
           ]
         )
       )
