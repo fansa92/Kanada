@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:path_provider/path_provider.dart';
 
 import 'metadata.dart';
@@ -91,12 +89,10 @@ class MetadataNetEase extends Metadata {
   /// 获取歌词（带缓存功能）
   @override
   Future<String?> getLyric({bool cache = true, int timeout = 604800}) async {
-    print('getLyric');
     if (cache && gotLyric && lyric != null) {
       return lyric;
     }
     gotLyric = true;
-    print('getLyric--');
 
     final appDir = await getApplicationDocumentsDirectory();
     final lrc = File(
@@ -114,7 +110,6 @@ class MetadataNetEase extends Metadata {
 
     // 从文件读取歌词
     lyric = await NetEase.getLyric(mid);
-    print('lyric$lyric');
 
     // 写入歌词缓存
     if (lyric != null) {
@@ -225,14 +220,13 @@ class NetEase {
         // 'Cookie': cookie,
       },
     );
-    print(response.body);
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     }
     return null;
   }
 
-  static Future<String?> getLyric(int id) async {
+  static Future<String?> getLyric(int id, {bool translate = true}) async {
     // POST https://interface3.music.163.com/api/song/lyric?id=514774040&cp=false&tv=0&lv=0&rv=0&kv=0&yv=0&ytv=0&yrv=0
     final url = Uri.https('interface3.music.163.com', '/api/song/lyric', {
       'id': id.toString(),
@@ -257,7 +251,8 @@ class NetEase {
     // print(response.body);
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return data?['lrc']?['lyric'];
+      print(translate);
+      return '${data?['lrc']?['lyric']}${translate?data?['tlyric']?['lyric']:''}';
     }
     return null;
   }

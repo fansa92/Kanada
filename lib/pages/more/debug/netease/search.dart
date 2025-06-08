@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:kanada/widgets/music_info.dart';
 
@@ -14,7 +12,6 @@ class NetEaseSearchDebug extends StatefulWidget {
 
 class _NetEaseSearchDebugState extends State<NetEaseSearchDebug> {
   final _controller = TextEditingController();
-  String _json = '';
   Map? data;
 
   @override
@@ -38,9 +35,7 @@ class _NetEaseSearchDebugState extends State<NetEaseSearchDebug> {
                 if (data == null) {
                   return;
                 }
-                setState(() {
-                  _json = jsonEncode(data);
-                });
+                setState(() {});
               },
               child: Text('搜索歌曲'),
             ),

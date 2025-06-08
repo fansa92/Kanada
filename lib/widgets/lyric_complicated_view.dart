@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -48,7 +47,6 @@ class _LyricComplicatedViewState extends State<LyricComplicatedView> {
     final path = widget.path;
     final metadata = Metadata(path);
     await metadata.getLyric();
-    print(metadata);
     lyrics = Lyrics(metadata.lyric!);
     lyrics?.parse();
     // widgets.clear();
