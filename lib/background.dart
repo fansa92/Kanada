@@ -160,7 +160,7 @@ class CurrentLyric {
   Future<bool> getCurrentLyric() async {
     // 检查是否需要重新加载歌词
     if (Global.metadataCache == null ||
-        Global.metadataCache!.path != path ||
+        Global.metadataCache!.id != path ||
         lyrics == null) {
       await getMetadata();
       await getLyrics();

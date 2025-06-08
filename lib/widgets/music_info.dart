@@ -162,7 +162,7 @@ class _MusicInfoSearchState extends State<MusicInfoSearch> {
       show = true;
       setState(() {});
     } else {
-      if (metadata.path != widget.path) {
+      if (metadata.id != widget.path) {
         metadata = Metadata(widget.path);
         await metadata.getMetadata();
       }

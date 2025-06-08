@@ -133,7 +133,7 @@ class _PlayerBackgroundState extends State<PlayerBackground>
     final newPath = Global.player.current;
 
     // 路径未变化时跳过
-    if (newPath == metadata?.path) return;
+    if (newPath == metadata?.id) return;
 
     // 更新元数据
     path = newPath;
@@ -146,13 +146,13 @@ class _PlayerBackgroundState extends State<PlayerBackground>
     }
 
     colors =
-        Global.colorsCache[metadata!.path] ??
+        Global.colorsCache[metadata!.id] ??
         (await PaletteGenerator.fromImageProvider(
           // MemoryImage(metadata!.cover!),
           FileImage(File(metadata!.coverPath!)),
           maximumColorCount: 10,
         )).colors.take(5).toList();
-    Global.colorsCache[metadata!.path] = colors;
+    Global.colorsCache[metadata!.id] = colors;
     if (mounted) {
       Global.playerTheme = Theme.of(context).copyWith(
         colorScheme: ColorScheme.fromSeed(

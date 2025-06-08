@@ -1,22 +1,35 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:audio_metadata_reader/audio_metadata_reader.dart';
 import 'package:kanada_album_art/kanada_album_art.dart';
 import 'package:path_provider/path_provider.dart';
 
-/// 元数据管理类，负责音频文件的元数据读取和缓存
-class Metadata {
+class Metadata{
   // 使用缓存避免重复创建相同路径的元数据对象
   static final _cache = <String, Metadata>{};
-  final String path;  // 音频文件路径（不可变）
+  final String id;  // 音频文件路径（不可变）
 
   /// 工厂构造函数，保证同一路径只有一个实例
-  factory Metadata(String path) {
-    return _cache.putIfAbsent(path, () => Metadata._internal(path));
+  factory Metadata(String id) {
+    return _cache.putIfAbsent(id, () {
+      // 将原来的get方法逻辑移动到此处
+      if(id.startsWith('/')){
+        return MetadataFile(id);
+      }
+      return Metadata._internal(id);
+    });
   }
 
-  Metadata._internal(this.path);  // 私有构造方法
+  Metadata._internal(this.id);  // 私有构造方法
+
+  // static Metadata get(String id){
+  //   if(id.startsWith('/')){
+  //     return MetadataFile(id);
+  //   }
+  //   return Metadata(id);
+  // }
+
+  static MetadataFile file(String id) => MetadataFile(id);
 
   // 元数据相关字段
   dynamic metadata;       // 原始元数据对象
@@ -29,7 +42,6 @@ class Metadata {
   String? coverPath;      // 封面图片文件路径
   String? coverCache;     // 封面缓存路径
   Duration? duration;     // 歌曲时长
-
   // 缓存状态标志
   bool _gotMetadata = false;  // 元数据是否已获取
   bool _gotLyric = false;     // 歌词是否已获取
@@ -39,6 +51,29 @@ class Metadata {
   /// [cache] 是否使用缓存
   /// [timeout] 缓存超时时间（秒），默认7天
   Future<Metadata> getMetadata({bool cache = false, int timeout = 604800}) async {
+    return this;
+  }
+  Future<String?> getLyric({bool cache = true, int timeout = 604800}) async {
+    return lyric;
+  }
+  Future<String?> getCover({bool cache = true, int timeout = 604800}) async {
+    return coverPath;
+  }
+
+  @override
+  String toString() {
+    return 'Metadata{id: $id, title: $title, artist: $artist, album: $album, duration: $duration}';
+  }
+}
+
+/// 元数据管理类，负责音频文件的元数据读取和缓存
+class MetadataFile extends Metadata {
+  MetadataFile(super.id) : super._internal();
+  /// 获取元数据（带缓存功能）
+  /// [cache] 是否使用缓存
+  /// [timeout] 缓存超时时间（秒），默认7天
+  @override
+  Future<Metadata> getMetadata({bool cache = false, int timeout = 604800}) async {
     if(cache && _gotMetadata) {
       return this;
     }
@@ -46,7 +81,7 @@ class Metadata {
 
     final appDir = await getApplicationDocumentsDirectory();
     final meta = File(
-      '${appDir.path}/cache/metadata/metadata/${path.hashCode}.json',
+      '${appDir.path}/cache/metadata/metadata/${id.hashCode}.json',
     );
 
     // 检查缓存有效性
@@ -62,7 +97,7 @@ class Metadata {
     }
 
     // 从文件读取元数据
-    final file = File(path);
+    final file = File(id);
     metadata = readMetadata(file, getImage: false);
 
     // 解析不同格式的元数据
@@ -81,8 +116,8 @@ class Metadata {
     duration = metadata.duration;
 
     // 检查封面缓存
-    if (File('${appDir.path}/cache/metadata/picture/${path.hashCode}.jpg').existsSync()) {
-      coverCache = '${appDir.path}/cache/metadata/picture/${path.hashCode}.jpg';
+    if (File('${appDir.path}/cache/metadata/picture/${id.hashCode}.jpg').existsSync()) {
+      coverCache = '${appDir.path}/cache/metadata/picture/${id.hashCode}.jpg';
     }
 
     // 写入元数据缓存
@@ -99,12 +134,8 @@ class Metadata {
     return this;
   }
 
-  @override
-  String toString() {
-    return 'Metadata{path: $path, title: $title, artist: $artist, album: $album, duration: $duration}';
-  }
-
   /// 获取歌词（带缓存功能）
+  @override
   Future<String?> getLyric({bool cache = true, int timeout = 604800}) async {
     if(cache && _gotLyric) {
       return lyric;
@@ -113,7 +144,7 @@ class Metadata {
 
     final appDir = await getApplicationDocumentsDirectory();
     final lrc = File(
-      '${appDir.path}/cache/metadata/lyric/${path.hashCode}.lrc',
+      '${appDir.path}/cache/metadata/lyric/${id.hashCode}.lrc',
     );
 
     // 检查歌词缓存
@@ -124,13 +155,14 @@ class Metadata {
     }
 
     // 从文件读取歌词
-    final file = File(path);
+    final file = File(id);
     final dynamic meta = readAllMetadata(file, getImage: false);
     lyric = meta.lyric;
     return lyric;
   }
 
   /// 获取专辑封面（带缓存功能）
+  @override
   Future<String?> getCover({bool cache = true, int timeout = 604800}) async {
     if(cache && _gotCover) {
       return coverPath;
@@ -139,7 +171,7 @@ class Metadata {
 
     final appDir = await getApplicationDocumentsDirectory();
     final pic = File(
-      '${appDir.path}/cache/metadata/picture/${path.hashCode}.jpg',
+      '${appDir.path}/cache/metadata/picture/${id.hashCode}.jpg',
     );
 
     // 检查封面缓存
@@ -151,7 +183,7 @@ class Metadata {
     }
 
     // 获取专辑封面并保存
-    final cover = await KanadaAlbumArtPlugin.getAlbumArt(path);
+    final cover = await KanadaAlbumArtPlugin.getAlbumArt(id);
     if (cover != null) {
       await pic.create(recursive: true);
       await pic.writeAsBytes(cover);

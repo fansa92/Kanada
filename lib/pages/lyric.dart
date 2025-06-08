@@ -62,7 +62,7 @@ class _LyricPageState extends State<LyricPage> {
     final newPath = Global.player.current;
 
     // 路径未变化时跳过
-    if (newPath == metadata?.path) return;
+    if (newPath == metadata?.id) return;
 
     // 更新元数据
     path = newPath;
@@ -83,11 +83,11 @@ class _LyricPageState extends State<LyricPage> {
             right: 12,
           ),
           child:
-              metadata?.path != null
+              metadata?.id != null
                   ? (Settings.lyricComplicatedAnimation
-                      ? LyricComplicatedView(path: metadata!.path)
+                      ? LyricComplicatedView(path: metadata!.id)
                       : LyricView(
-                        path: metadata!.path,
+                        path: metadata!.id,
                         paddingTop: MediaQuery.of(context).size.height * 0.5,
                         paddingBottom: MediaQuery.of(context).size.height,
                         // paddingTop: 100 + MediaQuery.of(context).padding.top,

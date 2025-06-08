@@ -85,7 +85,7 @@ class _PlayerPageState extends State<PlayerPage> {
     final newPath = Global.player.current;
 
     // 路径未变化时跳过
-    if (newPath == metadata?.path) return;
+    if (newPath == metadata?.id) return;
 
     // 更新元数据
     path = newPath;
