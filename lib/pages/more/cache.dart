@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 
 class CachePage extends StatefulWidget {
   const CachePage({super.key});
+
   @override
   State<CachePage> createState() => _CachePageState();
 }
@@ -74,7 +75,7 @@ class _CachePageState extends State<CachePage> {
 
   @override
   Widget build(BuildContext context) {
-    if(initiated==files.length&&initiated!=0){
+    if (initiated == files.length && initiated != 0) {
       // Navigator.pop(context);
       return Scaffold(
         appBar: AppBar(title: const Text('Cache')),
@@ -86,12 +87,13 @@ class _CachePageState extends State<CachePage> {
             return ListTile(
               title: Text(metadata?.title ?? 'Unknown Title'),
               subtitle: Text(metadata?.artist ?? 'Unknown Artist'),
-              leading: metadata?.cover != null
-                ? Image.memory(metadata!.cover!)
-                : null,
+              leading:
+              metadata?.coverPath != null
+                      ? Image.file(File(metadata!.coverPath!))
+                      : null,
             );
           },
-        )
+        ),
       );
     }
     return Scaffold(
@@ -102,15 +104,15 @@ class _CachePageState extends State<CachePage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CircularProgressIndicator(
-              value: initiated / (files.isEmpty?1:files.length),
+              value: initiated / (files.isEmpty ? 1 : files.length),
             ),
             SizedBox(height: 10),
             Text('$initiated/${files.length} files'),
             SizedBox(height: 10),
             Text(currentFile),
-            Text(currentFile!=''?'finished':''),
-          ]
-        )
+            Text(currentFile != '' ? 'finished' : ''),
+          ],
+        ),
       ),
     );
   }

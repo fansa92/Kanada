@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:kanada/global.dart';
 import 'package:kanada/metadata.dart';
@@ -5,10 +7,10 @@ import '../background.dart';
 
 /// 音乐信息展示组件，包含封面、标题、艺术家信息和播放功能
 class MusicInfo extends StatefulWidget {
-  final String path;          // 音乐文件路径
-  final bool play;            // 是否启用播放功能
-  final ThemeData? theme;     // 自定义主题
-  final bool nextPlay;        // 是否显示添加到下一首播放按钮
+  final String path; // 音乐文件路径
+  final bool play; // 是否启用播放功能
+  final ThemeData? theme; // 自定义主题
+  final bool nextPlay; // 是否显示添加到下一首播放按钮
 
   const MusicInfo({
     super.key,
@@ -23,8 +25,8 @@ class MusicInfo extends StatefulWidget {
 }
 
 class _MusicInfoState extends State<MusicInfo> {
-  late Metadata metadata;     // 音乐元数据
-  late ThemeData theme;       // 当前使用的主题
+  late Metadata metadata; // 音乐元数据
+  late ThemeData theme; // 当前使用的主题
 
   @override
   void initState() {
@@ -36,9 +38,9 @@ class _MusicInfoState extends State<MusicInfo> {
   Future<void> _init() async {
     metadata = Metadata(widget.path);
     await metadata.getMetadata();
-    if(mounted) setState(() {});
+    if (mounted) setState(() {});
     await metadata.getCover();
-    if(mounted) setState(() {});
+    if (mounted) setState(() {});
   }
 
   /// 播放控制方法
@@ -52,7 +54,10 @@ class _MusicInfoState extends State<MusicInfo> {
     final idx = playlistPaths.indexOf(widget.path);
 
     // 设置播放队列
-    await Global.player.setQueue(playlistPaths, initialIndex: idx >= 0 ? idx : null);
+    await Global.player.setQueue(
+      playlistPaths,
+      initialIndex: idx >= 0 ? idx : null,
+    );
     Global.init = true;
 
     // 初始化歌词后台服务
@@ -62,7 +67,7 @@ class _MusicInfoState extends State<MusicInfo> {
     }
 
     // 跳转到当前曲目并开始播放
-    if(idx >= 0) {
+    if (idx >= 0) {
       await Global.player.skipToQueueItem(idx);
     }
     await Global.player.play();
@@ -81,9 +86,10 @@ class _MusicInfoState extends State<MusicInfo> {
             child: SizedBox(
               width: 50,
               height: 50,
-              child: metadata.cover != null
-                  ? Image.memory(metadata.cover!, fit: BoxFit.cover)
-                  : const Icon(Icons.music_note),
+              child:
+                  metadata.coverPath != null
+                      ? Image.file(File(metadata.coverPath!), fit: BoxFit.cover)
+                      : const Icon(Icons.music_note),
             ),
           ),
           const SizedBox(width: 10),
@@ -119,8 +125,8 @@ class _MusicInfoState extends State<MusicInfo> {
 
 /// 支持搜索的音乐信息组件，继承自MusicInfo
 class MusicInfoSearch extends StatefulWidget {
-  final String path;      // 文件路径
-  final String keywords;  // 搜索关键词
+  final String path; // 文件路径
+  final String keywords; // 搜索关键词
 
   const MusicInfoSearch({
     super.key,
@@ -133,8 +139,8 @@ class MusicInfoSearch extends StatefulWidget {
 }
 
 class _MusicInfoSearchState extends State<MusicInfoSearch> {
-  bool show = false;            // 是否显示组件
-  Metadata metadata = Metadata('');  // 元数据实例
+  bool show = false; // 是否显示组件
+  Metadata metadata = Metadata(''); // 元数据实例
 
   @override
   void initState() {
@@ -162,9 +168,12 @@ class _MusicInfoSearchState extends State<MusicInfoSearch> {
       }
       // 关键词匹配逻辑（标题、艺术家、专辑）
       final keywordLower = widget.keywords.toLowerCase();
-      final matchTitle = metadata.title?.toLowerCase().contains(keywordLower) ?? false;
-      final matchArtist = metadata.artist?.toLowerCase().contains(keywordLower) ?? false;
-      final matchAlbum = metadata.album?.toLowerCase().contains(keywordLower) ?? false;
+      final matchTitle =
+          metadata.title?.toLowerCase().contains(keywordLower) ?? false;
+      final matchArtist =
+          metadata.artist?.toLowerCase().contains(keywordLower) ?? false;
+      final matchAlbum =
+          metadata.album?.toLowerCase().contains(keywordLower) ?? false;
 
       show = matchTitle || matchArtist || matchAlbum;
       setState(() {});
@@ -175,9 +184,9 @@ class _MusicInfoSearchState extends State<MusicInfoSearch> {
   Widget build(BuildContext context) {
     return show
         ? ListTile(
-      key: ValueKey(widget.path),
-      title: MusicInfo(path: widget.path),
-    )
+          key: ValueKey(widget.path),
+          title: MusicInfo(path: widget.path),
+        )
         : Container();
   }
 }

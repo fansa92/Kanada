@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ class LyricComplicatedView extends StatefulWidget {
 class _LyricComplicatedViewState extends State<LyricComplicatedView> {
   // final List<Widget> widgets = [];
   final List<GlobalKey> keys = [];
+  final Map<int, double> paddingTopCache = {};
   Lyrics? lyrics;
   int index = -1;
 
@@ -77,15 +79,19 @@ class _LyricComplicatedViewState extends State<LyricComplicatedView> {
         break;
       }
     }
-    // if (idx == index) return;
-    index = idx;
+    if (idx != index) {
+      paddingTopCache.clear();
+      index = idx;
+    }
     // print('index: $index');
     // widgets.clear();
     // final double offset = -index * 20;
-    setState(() {});
-    Future.delayed(Duration(milliseconds: 10), () {
-      _fresh();
-    });
+    if (mounted) {
+      setState(() {});
+      Future.delayed(Duration(milliseconds: 10), () {
+        _fresh();
+      });
+    }
   }
 
   @override
@@ -94,6 +100,7 @@ class _LyricComplicatedViewState extends State<LyricComplicatedView> {
       builder: (BuildContext context, BoxConstraints constraints) {
         LyricComplicatedView.constraints = constraints;
         // print('width: ${_constraints!.maxWidth}');
+        if (lyrics == null) return Center(child: CircularProgressIndicator());
         return ShaderMask(
           // 关键：使用线性渐变作为遮罩
           shaderCallback: (Rect bounds) {
@@ -121,33 +128,46 @@ class _LyricComplicatedViewState extends State<LyricComplicatedView> {
                   builder: (context) {
                     return AnimatedPositioned(
                       key: keys[i],
-                      duration: Duration(milliseconds: 300),
+                      duration: Duration(
+                        milliseconds: (500 + (i - index) * 40).clamp(200, 800),
+                      ),
                       curve: Curves.easeInOut,
                       // top: offsetY,
                       top: calcPaddingTop(i),
                       left: 0,
                       right: 0,
                       child: ClipRect(
-                        child: Stack(
-                          children: [
-                            LyricWidget(
-                              ctx: lyrics!.lyrics[i]['content'],
-                              startTime: lyrics!.lyrics[i]['startTime'],
-                              endTime: lyrics!.lyrics[i]['endTime'],
-                              lyric: lyrics!.lyrics[i]['lyric'],
-                              blurRadius: Settings.lyricBlur?abs(index - i).toDouble():0,
-                            ),
-                            if (Settings.lyricGlow)
-                              Positioned.fill(
-                                child: BackdropFilter(
-                                  filter: ImageFilter.blur(
-                                    sigmaX: 2,
-                                    sigmaY: 2,
-                                  ),
-                                  child: Container(color: Colors.transparent),
-                                ),
+                        child: ImageFiltered(
+                          imageFilter: ImageFilter.blur(
+                            sigmaX:
+                                Settings.lyricBlur
+                                    ? abs(index - i).toDouble()
+                                    : 0,
+                            sigmaY:
+                                Settings.lyricBlur
+                                    ? abs(index - i).toDouble()
+                                    : 0,
+                          ),
+                          child: Stack(
+                            children: [
+                              LyricWidget(
+                                ctx: lyrics!.lyrics[i]['content'],
+                                startTime: lyrics!.lyrics[i]['startTime'],
+                                endTime: lyrics!.lyrics[i]['endTime'],
+                                lyric: lyrics!.lyrics[i]['lyric'],
                               ),
-                          ],
+                              if (Settings.lyricGlow)
+                                Positioned.fill(
+                                  child: BackdropFilter(
+                                    filter: ImageFilter.blur(
+                                      sigmaX: 2,
+                                      sigmaY: 2,
+                                    ),
+                                    child: Container(color: Colors.transparent),
+                                  ),
+                                ),
+                            ],
+                          ), // 你的目标组件
                         ),
                       ),
                     );
@@ -161,6 +181,7 @@ class _LyricComplicatedViewState extends State<LyricComplicatedView> {
   }
 
   double calcPaddingTop(int i) {
+    if (paddingTopCache.containsKey(i)) return paddingTopCache[i]!;
     // if (i == 0) return 0;
     if (i == index) return 180;
     int lineCount(i) => calculateLineCount(
@@ -170,10 +191,13 @@ class _LyricComplicatedViewState extends State<LyricComplicatedView> {
       FontWeight.bold,
     );
     if (i < index) {
-      return calcPaddingTop(i + 1) - lineCount(i) * 60;
+      // return calcPaddingTop(i + 1) - lineCount(i) * 60;
+      paddingTopCache[i] = calcPaddingTop(i + 1) - lineCount(i) * 60;
     } else {
-      return calcPaddingTop(i - 1) + lineCount(i - 1) * 60;
+      // return calcPaddingTop(i - 1) + lineCount(i - 1) * 60;
+      paddingTopCache[i] = calcPaddingTop(i - 1) + lineCount(i - 1) * 60;
     }
     // return i*60 - (index-3)*60;
+    return paddingTopCache[i]!;
   }
 }

@@ -40,10 +40,15 @@ class _AppPageState extends State<AppPage> {
   }
 
   Future<void> _init() async {
-    Global.playerTheme = Theme.of(context);
     // KanadaLyricServerPlugin.setMethodCallHandler(sendLyrics).then((value){
     //   KanadaLyricServerPlugin.startForegroundService();
     // });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    Global.playerTheme = Theme.of(context);
   }
 
   @override

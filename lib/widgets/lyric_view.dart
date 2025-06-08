@@ -258,7 +258,6 @@ class LyricWidget extends StatelessWidget {
   final int endTime; // 结束时间
   final List<Map<String, dynamic>> lyric; // 分词数据
   final double fontSize; // 字体大小
-  final double blurRadius; // 模糊半径;
 
   const LyricWidget({
     super.key,
@@ -267,7 +266,6 @@ class LyricWidget extends StatelessWidget {
     required this.endTime,
     required this.lyric,
     this.fontSize = 28,
-    this.blurRadius = 0,
   });
 
   // lineheight = 40
@@ -327,7 +325,7 @@ class LyricWidget extends StatelessWidget {
     //     ),
     //   );
     // }
-    final w= ListTile(
+    return ListTile(
       title: Padding(
         padding: const EdgeInsets.only(top: 3),
         child: Column(
@@ -360,16 +358,6 @@ class LyricWidget extends StatelessWidget {
         ),
       ),
     );
-    if (blurRadius > 0) {
-      return ImageFiltered(
-        imageFilter: ImageFilter.blur(
-          sigmaX: blurRadius,
-          sigmaY: blurRadius,
-        ),
-        child: w, // 你的目标组件
-      );
-    }
-    return w;
   }
 }
 

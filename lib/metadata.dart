@@ -25,7 +25,7 @@ class Metadata {
   String? artist;         // 艺术家
   String? album;          // 专辑名称
   String? lyric;          // 歌词
-  Uint8List? cover;       // 封面图片字节数据
+  // Uint8List? cover;       // 封面图片字节数据
   String? coverPath;      // 封面图片文件路径
   String? coverCache;     // 封面缓存路径
   Duration? duration;     // 歌曲时长
@@ -145,16 +145,16 @@ class Metadata {
     // 检查封面缓存
     if (cache && await pic.exists() &&
         DateTime.now().difference(await pic.lastModified()).inSeconds < timeout) {
-      cover = await pic.readAsBytes();
+      // cover = await pic.readAsBytes();
       coverPath = pic.path;
       return coverPath;
     }
 
     // 获取专辑封面并保存
-    cover = await KanadaAlbumArtPlugin.getAlbumArt(path);
+    final cover = await KanadaAlbumArtPlugin.getAlbumArt(path);
     if (cover != null) {
       await pic.create(recursive: true);
-      await pic.writeAsBytes(cover!);
+      await pic.writeAsBytes(cover);
       coverPath = pic.path;
       return coverPath;
     }

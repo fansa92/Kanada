@@ -204,12 +204,11 @@ class _WaterFallItemState extends State<WaterFallItem> {
                 AspectRatio(
                   aspectRatio: 1,
                   child:
-                      (metadata.cover != null)
-                          ? Image.memory(metadata.cover!)
-                          : ((metadata.cover == null &&
-                                  metadata.coverCache != null)
-                              ? Image.file(File(metadata.coverCache!))
-                              : const Icon(Icons.music_note)),
+                      metadata.coverPath != null
+                          ? Image.file(File(metadata.coverPath!))
+                          : (metadata.coverCache != null)
+                          ? Image.file(File(metadata.coverCache!))
+                          : const Icon(Icons.music_note),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),

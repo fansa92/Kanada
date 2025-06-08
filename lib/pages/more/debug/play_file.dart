@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../../../lyric.dart';
 import '../../../metadata.dart';
@@ -44,8 +46,8 @@ class _PlayFileDebugState extends State<PlayFileDebug> {
           Text('Artist: ${metadata.artist}'),
           Text('Album: ${metadata.album}'),
           Text('Duration: ${metadata.duration}'),
-          Text('Picture: ${metadata.cover?.length} bytes'),
-          metadata.cover!=null?Image.memory(metadata.cover!):Container(),
+          // Text('Picture: ${metadata.cover?.length} bytes'),
+          metadata.coverPath!=null?Image.file(File(metadata.coverPath!)):Container(),
           Text('Lyric: ${metadata.lyric}'),
           Text('Metadata: ${metadata.metadata}'),
           Text('Lyrics: ${lyrics.lyrics}')

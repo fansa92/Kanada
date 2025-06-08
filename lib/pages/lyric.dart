@@ -123,8 +123,8 @@ class _LyricPageState extends State<LyricPage> {
                                 width: 80,
                                 height: 80,
                                 child:
-                                    metadata?.cover != null
-                                        ? Image.memory(metadata!.cover!)
+                                    metadata?.coverPath != null
+                                        ? Image.file(File(metadata!.coverPath!))
                                         : (metadata?.coverCache != null
                                             ? Image.file(
                                               File(metadata!.coverCache!),

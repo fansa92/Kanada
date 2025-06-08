@@ -69,7 +69,7 @@ class _FloatPlayingState extends State<FloatPlaying> {
   Future<void> _fresh() async {
     // 获取新路径
     final newPath = Global.player.current;
-    if (newPath==null) return;
+    if (newPath == null) return;
 
     // 路径未变化时跳过
     if (newPath == metadata?.path) return;
@@ -90,10 +90,12 @@ class _FloatPlayingState extends State<FloatPlaying> {
     if (mounted) setState(() {});
     // Global.pictureCache = metadata!.picturePath;
     Global.metadataCache = metadata;
+    if (metadata?.coverPath == null) return;
     final colors =
         Global.colorsCache[metadata!.path] ??
         (await PaletteGenerator.fromImageProvider(
-          MemoryImage(metadata!.cover!),
+          // MemoryImage(metadata!.cover!),
+          FileImage(File(metadata!.coverPath!)),
           maximumColorCount: 10,
         )).colors.take(5).toList();
     Global.colorsCache[metadata!.path] = colors;
@@ -155,8 +157,8 @@ class _FloatPlayingState extends State<FloatPlaying> {
                                 width: 50,
                                 height: 50,
                                 child:
-                                    metadata?.cover != null
-                                        ? Image.memory(metadata!.cover!)
+                                    metadata?.coverPath != null
+                                        ? Image.file(File(metadata!.coverPath!))
                                         : (metadata?.coverCache != null
                                             ? Image.file(
                                               File(metadata!.coverCache!),

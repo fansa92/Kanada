@@ -31,15 +31,20 @@ Future<void> timerFunc(Timer timer) async {
     isPlaying = false;
     timer.cancel();
     Timer.periodic(Duration(milliseconds: 500), timerFunc);
+    KanadaLyricSenderPlugin.clearLyric();
   }
 }
 
 /// 后台任务主逻辑
 Future<void> background() async {
-  await mutePause(); // 静音暂停处理
-  await getCurrentLyric(); // 获取当前歌词
-  await sendLyrics(); // 发送歌词到其他组件
-  await writeLyrics(); // 写入歌词到文件
+  mutePause(); // 静音暂停处理
+  // 获取当前歌词
+  getCurrentLyric().then((bool state) {
+    if (Global.player.playing) {
+      sendLyrics(); // 发送歌词到其他组件
+    }
+    writeLyrics(); // 写入歌词到文件
+  });
 }
 
 /// 获取当前播放歌词
@@ -51,10 +56,7 @@ Future<bool> getCurrentLyric() async {
   // 更新播放位置（毫秒）
   currentLyric.position = Global.player.position.inMilliseconds;
   // 获取并更新当前歌词
-  if (!(await currentLyric.getCurrentLyric())) {
-    return false;
-  }
-  return true;
+  return await currentLyric.getCurrentLyric();
 }
 
 /// 发送歌词到其他组件
@@ -69,11 +71,11 @@ Future<void> sendLyrics() async {
 Future<void> writeLyrics() async {
   // 转义非ASCII字符为Unicode
   String escapeToUnicode(String input) {
-    return input.replaceAllMapped(RegExp(r'[^\x00-\x7F]'),
-            (match) => '\\u${match.group(0)!
-            .codeUnitAt(0)
-            .toRadixString(16)
-            .padLeft(4, '0')}');
+    return input.replaceAllMapped(
+      RegExp(r'[^\x00-\x7F]'),
+      (match) =>
+          '\\u${match.group(0)!.codeUnitAt(0).toRadixString(16).padLeft(4, '0')}',
+    );
   }
 
   // 构建状态数据
@@ -81,15 +83,18 @@ Future<void> writeLyrics() async {
     'package': 'com.hontouniyuki.kanada',
     'lyric': escapeToUnicode(currentLyric.content),
     'playing': Global.player.playing,
-    'name': Global.metadataCache?.title != null
-        ? escapeToUnicode(Global.metadataCache!.title!)
-        : null,
-    'singer': Global.metadataCache?.artist != null
-        ? escapeToUnicode(Global.metadataCache!.artist!)
-        : null,
-    'album': Global.metadataCache?.album != null
-        ? escapeToUnicode(Global.metadataCache!.album!)
-        : null,
+    'name':
+        Global.metadataCache?.title != null
+            ? escapeToUnicode(Global.metadataCache!.title!)
+            : null,
+    'singer':
+        Global.metadataCache?.artist != null
+            ? escapeToUnicode(Global.metadataCache!.artist!)
+            : null,
+    'album':
+        Global.metadataCache?.album != null
+            ? escapeToUnicode(Global.metadataCache!.album!)
+            : null,
   };
 
   // 写入外部存储
@@ -110,13 +115,9 @@ Future<void> mutePause() async {
   if (volume == 0) {
     Global.player.pause();
 
-    final startTime = DateTime
-        .now()
-        .millisecondsSinceEpoch;
+    final startTime = DateTime.now().millisecondsSinceEpoch;
     Timer.periodic(Duration(milliseconds: 100), (timer) async {
-      final elapsed = DateTime
-          .now()
-          .millisecondsSinceEpoch - startTime;
+      final elapsed = DateTime.now().millisecondsSinceEpoch - startTime;
 
       // 检测音量恢复
       if (await KanadaVolumePlugin.getVolume() != 0) {

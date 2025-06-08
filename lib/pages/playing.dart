@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -140,10 +141,15 @@ class _PlayerBackgroundState extends State<PlayerBackground>
 
     await metadata!.getCover(cache: false);
 
+    if (metadata!.coverPath== null) {
+      return;
+    }
+
     colors =
         Global.colorsCache[metadata!.path] ??
         (await PaletteGenerator.fromImageProvider(
-          MemoryImage(metadata!.cover!),
+          // MemoryImage(metadata!.cover!),
+          FileImage(File(metadata!.coverPath!)),
           maximumColorCount: 10,
         )).colors.take(5).toList();
     Global.colorsCache[metadata!.path] = colors;

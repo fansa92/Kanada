@@ -1,0 +1,2 @@
+-keep class cn.lyric.getter.api.data.*{*;}
+-keep class cn.lyric.getter.api.API{*;}
