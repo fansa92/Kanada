@@ -48,6 +48,7 @@ class _LyricComplicatedViewState extends State<LyricComplicatedView> {
     final path = widget.path;
     final metadata = Metadata(path);
     await metadata.getLyric();
+    print(metadata);
     lyrics = Lyrics(metadata.lyric!);
     lyrics?.parse();
     // widgets.clear();
@@ -100,7 +101,7 @@ class _LyricComplicatedViewState extends State<LyricComplicatedView> {
       builder: (BuildContext context, BoxConstraints constraints) {
         LyricComplicatedView.constraints = constraints;
         // print('width: ${_constraints!.maxWidth}');
-        if (lyrics == null) return Center(child: CircularProgressIndicator());
+        if (lyrics == null || lyrics!.lyrics.isEmpty) return Center(child: CircularProgressIndicator());
         return ShaderMask(
           // 关键：使用线性渐变作为遮罩
           shaderCallback: (Rect bounds) {

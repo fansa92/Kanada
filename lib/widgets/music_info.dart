@@ -49,9 +49,13 @@ class _MusicInfoState extends State<MusicInfo> {
     Global.path = widget.path;
 
     // 准备播放队列
-    final playlistPaths = Global.playlist;
+    List<String> playlistPaths = Global.playlist;
     playlistPaths.shuffle();
-    final idx = playlistPaths.indexOf(widget.path);
+    int idx = playlistPaths.indexOf(widget.path);
+    if (idx < 0) {
+      playlistPaths = [widget.path];
+      idx = 0;
+    }
 
     // 设置播放队列
     await Global.player.setQueue(

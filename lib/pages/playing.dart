@@ -116,6 +116,8 @@ class _PlayerBackgroundState extends State<PlayerBackground>
   @override
   void dispose() {
     _sequenceSub?.cancel();
+    _controller.stop();
+    _controller.dispose();
     super.dispose();
   }
 

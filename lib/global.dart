@@ -12,6 +12,9 @@ import 'package:kanada/pages/more/debug/file_choose.dart';
 import 'package:kanada/pages/more/debug/link.dart';
 import 'package:kanada/pages/more/debug/lyric.dart';
 import 'package:kanada/pages/more/debug/lyric_sender.dart';
+import 'package:kanada/pages/more/debug/netease.dart';
+import 'package:kanada/pages/more/debug/netease/detail.dart';
+import 'package:kanada/pages/more/debug/netease/search.dart';
 import 'package:kanada/pages/more/debug/pick_color.dart';
 import 'package:kanada/pages/more/debug/player.dart';
 import 'package:kanada/pages/more/debug/toast.dart';
@@ -44,6 +47,9 @@ class Global {
     '/more/debug/color_diffusion': (context) => const ColorDiffusionDebug(),
     '/more/debug/current_lyric': (context) => const CurrentLyricDebug(),
     '/more/debug/color': (context) => const ColorDebug(),
+    '/more/debug/netease': (context) => const NetEaseDebug(),
+    '/more/debug/netease/search': (context) => const NetEaseSearchDebug(),
+    '/more/debug/netease/detail': (context) => const NetEaseDetailDebug(),
     '/more/settings': (context) => const SettingsPage(),
     '/more/settings/folders': (context) => const FoldersSettings(),
     '/more/settings/player': (context) => const PlayerSettings(),
