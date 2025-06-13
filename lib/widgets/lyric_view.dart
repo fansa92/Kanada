@@ -271,16 +271,31 @@ class LyricWidget extends StatelessWidget {
   // lineheight = 40
   @override
   Widget build(BuildContext context) {
-    final lineCount = calculateLineCount(ctx, LyricComplicatedView.constraints!.maxWidth*.8, fontSize, FontWeight.bold);
+    final lineCount = calculateLineCount(
+      ctx,
+      LyricComplicatedView.constraints!.maxWidth * .8,
+      fontSize,
+      FontWeight.bold,
+    );
     List<Map<String, dynamic>> lrc = lyric;
-    if(lyric.length==1){
+    if (lyric.length == 1) {
+      final totalDuration = endTime - startTime;
+      final chars = ctx.split('');
+      if (chars.isEmpty) {
+        return const SizedBox.shrink();
+      }
+      final durationPerChar = totalDuration ~/ chars.length;
+
       lrc = [
-        for(final word in ctx.split(''))
+        for (int i = 0; i < chars.length; i++)
           {
-            'word': word,
-            'startTime': startTime,
-            'endTime': endTime,
-          }
+            'word': chars[i],
+            'startTime': startTime + i * durationPerChar,
+            'endTime':
+                (i == chars.length - 1)
+                    ? endTime
+                    : startTime + (i + 1) * durationPerChar,
+          },
       ];
     }
     // final last = Global.player.position.inMilliseconds < startTime;
@@ -336,10 +351,7 @@ class LyricWidget extends StatelessWidget {
                 children: [
                   for (final word in lrc.sublist(
                     (lrc.length / lineCount * i).toInt(),
-                    min(
-                      (lrc.length / lineCount * (i + 1)).toInt(),
-                      lrc.length,
-                    ),
+                    min((lrc.length / lineCount * (i + 1)).toInt(), lrc.length),
                   ))
                     Padding(
                       key: ValueKey(word),

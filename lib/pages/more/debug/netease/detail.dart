@@ -62,7 +62,7 @@ class _NetEaseDetailDebugState extends State<NetEaseDetailDebug> {
               ? Image.file(File(metadata!.coverPath!))
               : Container(),
           Text('Lyric: ${metadata?.lyric}'),
-          Text(lyrics?.lyrics.map((e)=>e['content']).toList().join('\n') ?? ''),
+          Text('${lyrics?.lyrics}'),
         ],
       ),
     );

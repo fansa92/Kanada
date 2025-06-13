@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:palette_generator/palette_generator.dart';
 
@@ -70,4 +71,21 @@ int calculateLineCount(
   // 获取文本行信息
   final lines = textPainter.computeLineMetrics();
   return lines.length;
+}
+
+/// 将时间字符串转换为毫秒数
+int parseTimeToMs(String time) {
+  final parts = time.split(':');
+  final minute = int.parse(parts[0]);
+  final secondParts = parts[1].split('.');
+  final second = int.parse(secondParts[0]);
+  final ms = int.parse(secondParts[1]) * pow(10, 3-secondParts[1].length).toInt(); // 百分秒转毫秒
+  return minute * 60 * 1000 + second * 1000 + ms;
+}
+
+String formatTime(int time) {
+  final minute = (time / 60000).floor();
+  final second = ((time % 60000) / 1000).floor();
+  final ms = (time % 1000).floor();
+  return '${minute.toString().padLeft(2, '0')}:${second.toString().padLeft(2, '0')}.${ms.toString().padLeft(2, '0')}';
 }

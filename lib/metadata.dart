@@ -63,10 +63,10 @@ class Metadata{
   Future<String?> getCover({bool cache = true, int timeout = 604800}) async {
     return coverPath;
   }
-  Future<String?> getPath({bool cache = true, int timeout = 604800}) async {
+  Future<String> getPath() async {
     return id;
   }
-  Future<void> download({bool cache = true, int timeout = 604800}) async {
+  Future<void> download({bool cache = true}) async {
     return;
   }
 

@@ -1,8 +1,12 @@
+import 'dart:convert';
+
+import 'package:kanada/tool.dart';
+
 /// 歌词解析类，用于处理带时间戳的歌词格式
 class Lyrics {
   /// 正则表达式匹配歌词时间戳格式 <分:秒.百分秒>
-  static var timeRegex = RegExp(r'<(\d{2}:\d{2}\.\d{2})>');
-  static var timeRegex2 = RegExp(r'\[(\d{2}:\d{2}\.\d{2})]');
+  static var timeRegex = RegExp(r'<(\d+:\d+\.\d+)>');
+  static var timeRegex2 = RegExp(r'\[(\d+:\d+\.\d+)]');
 
   /// 原始歌词字符串
   String string;
@@ -17,6 +21,11 @@ class Lyrics {
   Future<void> parse() async {
     lyrics = [];
     List<String> lines = string.split('\n');
+    Map<String, dynamic> header = {};
+    if (lines[0].startsWith('[extra]')) {
+      header = {'extra': jsonDecode(lines[0].substring(7))};
+      lines = lines.sublist(1);
+    }
 
     for (final line in lines) {
       // 匹配行内所有时间戳
@@ -28,7 +37,7 @@ class Lyrics {
 
       // 转换时间戳为毫秒格式
       final timeStamps = [
-        for (final match in timeMatches) _parseTimeToMs(match.group(1)!),
+        for (final match in timeMatches) parseTimeToMs(match.group(1)!),
       ];
 
       // 过滤空字符串并获取歌词内容部分
@@ -44,7 +53,7 @@ class Lyrics {
         lyricWords.add({
           'word': content,
           'startTime': timeStamps[i],
-          'endTime': timeStamps[i + 1],
+          'endTime': timeStamps[(i + 1).clamp(0, timeStamps.length - 1)],
         });
         buffer.write(content);
       }
@@ -58,7 +67,8 @@ class Lyrics {
                 ) // 无时间戳的纯文本行
                 : buffer.toString(),
         'startTime': timeStamps.first,
-        'endTime': timeStamps[lyricWords.length],
+        'endTime':
+            timeStamps[lyricWords.length.clamp(0, timeStamps.length - 1)],
         'lyric':
             lyricWords.isEmpty
                 ? [
@@ -67,7 +77,11 @@ class Lyrics {
                       textParts[0].lastIndexOf(']') + 1,
                     ),
                     'startTime': timeStamps.first,
-                    'endTime': timeStamps[lyricWords.length],
+                    'endTime':
+                        timeStamps[lyricWords.length.clamp(
+                          0,
+                          timeStamps.length - 1,
+                        )],
                   },
                 ]
                 : lyricWords,
@@ -79,11 +93,11 @@ class Lyrics {
       for (int i = 0; i < lines.length; i++) {
         // [00:39.94]新作動画 投稿だ
         final line = lines[i];
-        final match = timeRegex2.matchAsPrefix(line);
+        final match = timeRegex2.firstMatch(line);
         final textParts = line.split(timeRegex2);
         if (match == null) continue;
         // 转换时间戳为毫秒格式
-        final timeStamps = _parseTimeToMs(match.group(1)!);
+        final timeStamps = parseTimeToMs(match.group(1)!);
         final ctx = textParts[1];
         if (i >= lines.length - 1) {
           lyrics.add({
@@ -98,9 +112,9 @@ class Lyrics {
           continue;
         }
         // print('$i ${lines.length - 1}');
-        final nextMatch = timeRegex2.matchAsPrefix(lines[i + 1]);
+        final nextMatch = timeRegex2.firstMatch(lines[i + 1]);
         if (nextMatch == null) continue;
-        final nextTimeStamps = _parseTimeToMs(nextMatch.group(1)!);
+        final nextTimeStamps = parseTimeToMs(nextMatch.group(1)!);
         lyrics.add({
           'content': ctx,
           'startTime': timeStamps,
@@ -113,21 +127,15 @@ class Lyrics {
       }
     }
 
+    // print(header);
+
+    if (header['extra']?['sort']==false) return;
+
     // 按时间戳排序
     lyrics.sort((a, b) {
       final timeCompare = a['startTime'].compareTo(b['startTime']);
       if (timeCompare != 0) return timeCompare;
       return a['originalIndex'].compareTo(b['originalIndex']);
     });
-  }
-
-  /// 将时间字符串转换为毫秒数
-  int _parseTimeToMs(String time) {
-    final parts = time.split(':');
-    final minute = int.parse(parts[0]);
-    final secondParts = parts[1].split('.');
-    final second = int.parse(secondParts[0]);
-    final ms = int.parse(secondParts[1]) * 10; // 百分秒转毫秒
-    return minute * 60 * 1000 + second * 1000 + ms;
   }
 }

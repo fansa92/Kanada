@@ -17,7 +17,7 @@ class Player {
   }
 
   // 当前播放索引（内部存储）
-  int _currentIndex = -1;
+  int _currentIndex = 0;
   // 播放模式控制
   bool shuffle = false;    // 随机播放
   bool repeat = false;     // 列表循环
@@ -53,6 +53,9 @@ class Player {
 
   /// 更新播放队列和音频源
   Future<void> update() async {
+    final currentMetadata = Metadata(current!);
+    final task=currentMetadata.download();
+
     // 创建固定长度的音频源数组
     final sources = List<AudioSource?>.filled(
       _queue.length,
@@ -69,19 +72,23 @@ class Player {
 
       // 创建带元数据的音频源
       sources[index] = AudioSource.uri(
-        Uri.parse(path),
+        Uri.parse(await metadata.getPath()),
         tag: MediaItem(
-          id: path,
+          id: await metadata.getPath(),
           title: metadata.title ?? path.split('/').last, // 默认使用文件名
           artist: metadata.artist,
           album: metadata.album,
           artUri: Uri.parse('file://${metadata.coverCache}'),
+          extras: {
+            'metadataId': metadata.id, // 存储元数据
+          }
         ),
       );
     }
 
     // 并行处理所有元数据
     await Future.wait(List.generate(_queue.length, (index) => batch(index)));
+    await task;
 
     // 重置播放器并设置新源
     await stop();
