@@ -194,8 +194,18 @@ class MetadataNetEase extends Metadata {
   }
 }
 
+class PlaylistNetEase extends Playlist {
+  PlaylistNetEase(super.id) : super.internal();
+
+  @override
+  Future<void> getSongs() async {
+    return;
+  }
+}
+
 class NetEase {
   static String cookie = '';
+
   static Map<String, String> get cookiesMap => _parseCookies(cookie);
 
   // 新增Cookie解析方法
@@ -211,7 +221,6 @@ class NetEase {
     }
     return cookies;
   }
-
 
   static Future<Map?> search(String keywords) async {
     // POST https://music.163.com/api/cloudsearch/pc?s=39music&type=1&limit=10

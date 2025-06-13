@@ -21,7 +21,13 @@ class FolderPage extends StatefulWidget {
 }
 
 class _FolderPageState extends State<FolderPage> {
-  List<FileSystemEntity> files = [];
+  // List<FileSystemEntity> files = [];
+  static const List<String> sortTypeString = [
+    '',
+    PlaylistSortType.name,
+    PlaylistSortType.lastModified,
+  ];
+  Playlist playlist = Playlist('/ALL/');
   int sortType = 0;
   final ScrollController _scrollController = ScrollController();
   Duration? durationSum;
@@ -45,7 +51,6 @@ class _FolderPageState extends State<FolderPage> {
   }
 
   Future<void> _init() async {
-    files.clear();
     if (sortType == 0) {
       final settings = await UserData(
         'folder/settings/${widget.path.hashCode}.json',
@@ -56,58 +61,26 @@ class _FolderPageState extends State<FolderPage> {
         'folder/settings/${widget.path.hashCode}.json',
       ).set({'sort': sortType});
     }
-    if (widget.path == '/ALL/') {
-      final dirs = Settings.folders.map((e) => Directory(e)).toList();
-      for (var dir in dirs) {
-        List<FileSystemEntity> entities = await dir.list().toList();
-        files.addAll(
-          entities.where((entity) {
-            String extension = p.extension(entity.path).toLowerCase();
-            return extension == '.mp3' || extension == '.flac';
-          }),
-        );
-      }
-    } else {
-      final dir = Directory(widget.path);
-      List<FileSystemEntity> entities = await dir.list().toList();
-
-      files =
-          entities.where((entity) {
-            String extension = p.extension(entity.path).toLowerCase();
-            return extension == '.mp3' || extension == '.flac';
-          }).toList();
-    }
-
-    files.sort((a, b) {
-      final isAscending = sortType > 0;
-      switch (sortType.abs()) {
-        case 1: // 按文件名排序
-          final nameA = p.basename(a.path).toLowerCase();
-          final nameB = p.basename(b.path).toLowerCase();
-          return isAscending ? nameA.compareTo(nameB) : nameB.compareTo(nameA);
-        case 2: // 按修改时间排序
-          final dateA = File(a.path).lastModifiedSync();
-          final dateB = File(b.path).lastModifiedSync();
-          return isAscending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
-        default:
-          return 0;
-      }
-    });
-    Global.playlist = files.map((e) => e.path).toList();
+    playlist = Playlist(widget.path);
+    await playlist.getSongs();
+    await playlist.sort(type: sortTypeString[abs(sortType)], reverse: sortType < 0);
+    Global.playlist = playlist.songs;
     setState(() {});
 
     durationSum = Duration.zero;
     initiated = 0;
     const batchSize = 48;
-    for (var i = 0; i < files.length; i += batchSize) {
-      final batch = files.sublist(
+    for (var i = 0; i < playlist.songs.length; i += batchSize) {
+      final batch = playlist.songs.sublist(
         i,
-        i + batchSize > files.length ? files.length : i + batchSize,
+        i + batchSize > playlist.songs.length
+            ? playlist.songs.length
+            : i + batchSize,
       );
 
       await Future.wait(
         batch.map((element) async {
-          final value = await Metadata(element.path).getMetadata();
+          final value = await Metadata(element).getMetadata();
           durationSum = durationSum! + (value.duration ?? Duration.zero);
           initiated++;
           if (mounted) setState(() {});
@@ -122,7 +95,7 @@ class _FolderPageState extends State<FolderPage> {
     Global.init = false;
     Global.path = widget.path;
 
-    final playlistPaths = files.map((e) => e.path).toList();
+    final playlistPaths = playlist.songs;
 
     playlistPaths.shuffle();
 
@@ -179,7 +152,7 @@ class _FolderPageState extends State<FolderPage> {
                     child: Padding(
                       padding: EdgeInsets.only(right: 16),
                       child: Text(
-                        '共${files.length}首${durationSum != null ? ' ${durationSum?.inMinutes}分钟' : ''}',
+                        '共${playlist.songs.length}首${durationSum != null ? ' ${durationSum?.inMinutes}分钟' : ''}',
                         style: TextStyle(fontSize: 8),
                       ),
                     ),
@@ -318,9 +291,9 @@ class _FolderPageState extends State<FolderPage> {
                                 ),
                                 suggestionsBuilder:
                                     (context, controller) => List.generate(
-                                      files.length,
+                                      playlist.songs.length,
                                       (index) => MusicInfoSearch(
-                                        path: files[index].path,
+                                        path: playlist.songs[index],
                                         keywords: controller.text,
                                       ),
                                     ),
@@ -332,10 +305,10 @@ class _FolderPageState extends State<FolderPage> {
                         ],
                       )
                       : ListTile(
-                        key: ValueKey(files[index - 1].path),
-                        title: MusicInfo(path: files[index - 1].path),
+                        key: ValueKey(playlist.songs[index - 1]),
+                        title: MusicInfo(path: playlist.songs[index - 1]),
                       ),
-              childCount: files.length + 1,
+              childCount: playlist.songs.length + 1,
             ),
           ),
 
