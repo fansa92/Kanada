@@ -18,6 +18,7 @@ class _NetEaseDebugState extends State<NetEaseDebug>{
         [Icons.music_note, 'NetEase Search Debug Page', '/more/debug/netease/search'],
         [Icons.music_note, 'NetEase Detail Debug Page', '/more/debug/netease/detail'],
         [Icons.music_note, 'NetEase Url Debug Page', '/more/debug/netease/url'],
+        [Icons.music_note, 'NetEase Playlist Debug Page', '/more/debug/netease/playlist'],
       ]),
     );
   }

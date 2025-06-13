@@ -100,13 +100,13 @@ class MetadataNetEase extends Metadata {
     final lrc = File('${appDir.path}/cache/metadata/netease/lyric/$mid.lrc');
 
     // 检查歌词缓存
-    // if (cache &&
-    //     await lrc.exists() &&
-    //     DateTime.now().difference(await lrc.lastModified()).inSeconds <
-    //         timeout) {
-    //   lyric = await lrc.readAsString();
-    //   return lyric;
-    // }
+    if (cache &&
+        await lrc.exists() &&
+        DateTime.now().difference(await lrc.lastModified()).inSeconds <
+            timeout) {
+      lyric = await lrc.readAsString();
+      return lyric;
+    }
 
     // 从文件读取歌词
     lyric = await NetEase.getLyric(mid);
@@ -196,6 +196,22 @@ class MetadataNetEase extends Metadata {
 
 class NetEase {
   static String cookie = '';
+  static Map<String, String> get cookiesMap => _parseCookies(cookie);
+
+  // 新增Cookie解析方法
+  static Map<String, String> _parseCookies(String cookieStr) {
+    final cookies = <String, String>{};
+    for (final pair in cookieStr.split(';')) {
+      final index = pair.indexOf('=');
+      if (index > 0) {
+        final key = pair.substring(0, index).trim();
+        final value = pair.substring(index + 1).trim();
+        cookies[key] = value;
+      }
+    }
+    return cookies;
+  }
+
 
   static Future<Map?> search(String keywords) async {
     // POST https://music.163.com/api/cloudsearch/pc?s=39music&type=1&limit=10
@@ -436,7 +452,6 @@ class NetEase {
   static Future<Map<String, dynamic>> urlV1(
     int songId, [
     String level = 'jymaster',
-    Map<String, String>? cookies,
   ]) async {
     // 1. 构造请求参数
     final requestId = _generateRequestId();
@@ -477,7 +492,7 @@ class NetEase {
     // 5. 发送请求
     final response = await _postRequest("$baseUrl$apiPath", {
       "params": encryptedParams,
-    }, cookies ?? {});
+    }, cookiesMap);
 
     return json.decode(response.body);
   }
@@ -544,5 +559,33 @@ class NetEase {
   // 辅助方法：格式化Cookies
   static String _formatCookies(Map<String, String> cookies) {
     return cookies.entries.map((e) => '${e.key}=${e.value}').join('; ');
+  }
+
+  static Future<List<int>> getPlaylist(int id) async {
+    // POST https://music.163.com/api/v6/playlist/detail?id=13838627880
+    try {
+      final response = await http.post(
+        Uri.parse(
+          'https://music.163.com/api/v6/playlist/detail',
+        ).replace(queryParameters: {'id': id.toString()}),
+        headers: {
+          'Accept': '*/*',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+          'Referer': 'https://music.163.com/',
+          'Cookie': cookie,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(utf8.decode(response.bodyBytes));
+        // 解析歌曲ID列表
+        return (data['playlist']['trackIds'] as List)
+            .map<int>((e) => e['id'] as int)
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
   }
 }

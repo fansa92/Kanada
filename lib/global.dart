@@ -15,6 +15,7 @@ import 'package:kanada/pages/more/debug/lyric_sender.dart';
 import 'package:kanada/pages/more/debug/netease.dart';
 import 'package:kanada/pages/more/debug/netease/detail.dart';
 import 'package:kanada/pages/more/debug/netease/geturl.dart';
+import 'package:kanada/pages/more/debug/netease/playlist.dart';
 import 'package:kanada/pages/more/debug/netease/search.dart';
 import 'package:kanada/pages/more/debug/pick_color.dart';
 import 'package:kanada/pages/more/debug/player.dart';
@@ -52,6 +53,7 @@ class Global {
     '/more/debug/netease/search': (context) => const NetEaseSearchDebug(),
     '/more/debug/netease/detail': (context) => const NetEaseDetailDebug(),
     '/more/debug/netease/url': (context) => const NetEaseUrlDebug(),
+    '/more/debug/netease/playlist': (context) => const NetEasePlaylistDebug(),
     '/more/settings': (context) => const SettingsPage(),
     '/more/settings/folders': (context) => const FoldersSettings(),
     '/more/settings/player': (context) => const PlayerSettings(),
