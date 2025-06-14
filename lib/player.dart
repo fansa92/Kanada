@@ -1,5 +1,8 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:kanada/settings.dart';
+import 'package:kanada_volume/kanada_volume.dart';
 import 'metadata.dart';
 
 /// 播放器核心类，管理音频播放、队列和播放状态
@@ -113,6 +116,9 @@ class Player {
 
   /// 切换播放模式
   Future<void> updatePlayMode() async {
+    Settings.repeat = repeat;
+    Settings.repeatOne = repeatOne;
+    Settings.shuffle = shuffle;
   //   直接修改player的播放模式
     await _player.setLoopMode(
       repeatOne
@@ -125,7 +131,15 @@ class Player {
   }
 
   // 基础播放控制 --------------------------
-  Future<void> play() async => await _player.play();
+  Future<void> play() async {
+    await _player.play();
+    if(await KanadaVolumePlugin.getVolume()==0){
+      Fluttertoast.showToast(
+        msg: "请先调整音量",
+        toastLength: Toast.LENGTH_SHORT,
+      );
+    }
+  }
 
   Future<void> pause() async => await _player.pause();
 

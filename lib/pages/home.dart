@@ -7,6 +7,8 @@ import '../metadata.dart';
 
 import 'package:waterfall_flow/waterfall_flow.dart';
 
+import '../settings.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -102,7 +104,7 @@ class _WaterFallState extends State<WaterFall> {
         padding: padding,
         controller: _scrollController,
         gridDelegate: SliverWaterfallFlowDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+          crossAxisCount: Settings.homeWaterfallCrossAxisCount,
           crossAxisSpacing: padding.horizontal / 2,
           mainAxisSpacing: padding.vertical / 2,
         ),
@@ -204,7 +206,7 @@ class _WaterFallItemState extends State<WaterFallItem> {
                       if (metadata.title != null)
                         Text(
                           metadata.title!,
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style: Theme.of(context).textTheme.titleSmall,
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                         ),

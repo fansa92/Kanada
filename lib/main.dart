@@ -36,6 +36,10 @@ Future<void> main() async {
   // 加载应用设置
   await Settings.fresh();
 
+  Global.player.repeat = Settings.repeat;
+  Global.player.repeatOne = Settings.repeatOne;
+  Global.player.shuffle = Settings.shuffle;
+
   // 启动应用
   runApp(const MyApp());
 }

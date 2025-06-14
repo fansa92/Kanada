@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:kanada/settings.dart';
 import 'package:kanada_lyric_sender/kanada_lyric_sender.dart'; // 歌词发送插件
 import 'package:kanada_volume/kanada_volume.dart'; // 音量控制插件
 import 'global.dart';
@@ -37,13 +38,17 @@ Future<void> timerFunc(Timer timer) async {
 
 /// 后台任务主逻辑
 Future<void> background() async {
-  mutePause(); // 静音暂停处理
+  if (Settings.mutePause) {
+    mutePause(); // 静音暂停处理
+  }
   // 获取当前歌词
   getCurrentLyric().then((bool state) {
-    if (Global.player.playing) {
+    if (Global.player.playing && Settings.lyricSend) {
       sendLyrics(); // 发送歌词到其他组件
     }
-    writeLyrics(); // 写入歌词到文件
+    if (Settings.lyricWrite) {
+      writeLyrics(); // 写入歌词到文件
+    }
   });
 }
 
