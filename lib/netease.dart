@@ -195,13 +195,23 @@ class MetadataNetEase extends Metadata {
 }
 
 class PlaylistNetEase extends Playlist {
-  PlaylistNetEase(super.id) : super.internal();
+  int get mid => int.tryParse(id.replaceAll('netease://', '')) ?? 0;
+
+  PlaylistNetEase(super.id) : super.internal() {
+    init();
+  }
+
+  @override
+  Future<void> init() async {
+    name =
+        (await NetEase.getPlaylistInfo(mid))['playlist']?['name'] ??
+        id.replaceFirst('netease://', '');
+  }
 
   @override
   Future<void> getSongs() async {
-    final playlistId = id.replaceFirst('netease://', '');
-    songs = (await NetEase.getPlaylist(int.tryParse(playlistId) ?? 0))
-        .map((e) => 'netease://$e').toList();
+    songs =
+        (await NetEase.getPlaylist(mid)).map((e) => 'netease://$e').toList();
   }
 
   @override
@@ -612,7 +622,7 @@ class NetEase {
     return cookies.entries.map((e) => '${e.key}=${e.value}').join('; ');
   }
 
-  static Future<List<int>> getPlaylist(int id) async {
+  static Future<Map> getPlaylistInfo(int id) async {
     // POST https://music.163.com/api/v6/playlist/detail?id=13838627880
     try {
       final response = await http.post(
@@ -629,14 +639,19 @@ class NetEase {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(utf8.decode(response.bodyBytes));
-        // 解析歌曲ID列表
-        return (data['playlist']['trackIds'] as List)
-            .map<int>((e) => e['id'] as int)
-            .toList();
+        return data;
       }
-      return [];
+      return {};
     } catch (e) {
-      return [];
+      return {};
     }
+  }
+
+  static Future<List<int>> getPlaylist(int id) async {
+    final data = await getPlaylistInfo(id);
+    // 解析歌曲ID列表
+    return (data['playlist']['trackIds'] as List)
+        .map<int>((e) => e['id'] as int)
+        .toList();
   }
 }

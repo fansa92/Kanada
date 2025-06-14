@@ -1,11 +1,9 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as p;
 import '../global.dart';
 import '../background.dart';
 import '../metadata.dart';
-import '../settings.dart';
 
 import 'package:waterfall_flow/waterfall_flow.dart';
 

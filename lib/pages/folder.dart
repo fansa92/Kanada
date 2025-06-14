@@ -1,15 +1,10 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:kanada/Netease.dart';
 import 'package:kanada/metadata.dart';
 import 'package:kanada/userdata.dart';
 import 'package:kanada/widgets/music_info.dart';
-import 'dart:io';
-import 'package:path/path.dart' as p;
 import '../global.dart';
 import '../background.dart';
-import '../settings.dart';
-import '../tool.dart';
 import '../widgets/float_playing.dart';
 
 class FolderPage extends StatefulWidget {
@@ -72,7 +67,7 @@ class _FolderPageState extends State<FolderPage> {
 
     durationSum = Duration.zero;
     initiated = 0;
-    const batchSize = 48;
+    const batchSize = 128;
     for (var i = 0; i < playlist.songs.length; i += batchSize) {
       final batch = playlist.songs.sublist(
         i,
@@ -141,9 +136,13 @@ class _FolderPageState extends State<FolderPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    widget.path.split('/')[widget.path.split('/').length - 2],
-                    style: TextStyle(fontSize: 24),
+                  Expanded(
+                    child: Text(
+                      playlist.name,
+                      style: TextStyle(fontSize: 24),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   Opacity(
                     opacity: Curves.easeInOut.transform(
@@ -236,40 +235,44 @@ class _FolderPageState extends State<FolderPage> {
                                     },
                                   ),
                                 ),
-                                if(widget.path.startsWith('/')) PopupMenuItem(
-                                  value: 'modify_date',
-                                  child: ListTile(
-                                    title: const Text('修改日期'),
-                                    onTap: () {
-                                      if (sortType == PlaylistSortType.lastModified) {
-                                        reverse =!reverse;
+                                if (widget.path.startsWith('/'))
+                                  PopupMenuItem(
+                                    value: 'modify_date',
+                                    child: ListTile(
+                                      title: const Text('修改日期'),
+                                      onTap: () {
+                                        if (sortType ==
+                                            PlaylistSortType.lastModified) {
+                                          reverse = !reverse;
+                                          Navigator.pop(context);
+                                          _init();
+                                          return;
+                                        }
+                                        sortType =
+                                            PlaylistSortType.lastModified;
                                         Navigator.pop(context);
                                         _init();
-                                        return;
-                                      }
-                                      sortType = PlaylistSortType.lastModified;
-                                      Navigator.pop(context);
-                                      _init();
-                                    },
+                                      },
+                                    ),
                                   ),
-                                ),
-                                if(widget.path.startsWith('netease://')) PopupMenuItem(
-                                  value: 'id',
-                                  child: ListTile(
-                                    title: const Text('发布日期'),
-                                    onTap: () {
-                                      if (sortType == PlaylistSortType.id) {
-                                        reverse =!reverse;
+                                if (widget.path.startsWith('netease://'))
+                                  PopupMenuItem(
+                                    value: 'id',
+                                    child: ListTile(
+                                      title: const Text('发布日期'),
+                                      onTap: () {
+                                        if (sortType == PlaylistSortType.id) {
+                                          reverse = !reverse;
+                                          Navigator.pop(context);
+                                          _init();
+                                          return;
+                                        }
+                                        sortType = PlaylistSortType.id;
                                         Navigator.pop(context);
                                         _init();
-                                        return;
-                                      }
-                                      sortType = PlaylistSortType.id;
-                                      Navigator.pop(context);
-                                      _init();
-                                    },
+                                      },
+                                    ),
                                   ),
-                                ),
                                 PopupMenuItem(
                                   value: 'change',
                                   child: ListTile(

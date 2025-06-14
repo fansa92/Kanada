@@ -91,6 +91,7 @@ class PlaylistSortType {
 
 class Playlist {
   final String id;
+  String name = '';
   List<String> songs = [];
 
   factory Playlist(String id) {
@@ -103,22 +104,22 @@ class Playlist {
     return Playlist.internal(id);
   }
 
-  Playlist.internal(this.id);
-
-  Future<void> getSongs() async {
-    return;
+  Playlist.internal(this.id) {
+    name = id;
   }
+
+  Future<void> init() async {}
+
+  Future<void> getSongs() async {}
 
   Future<void> sort({
     String type = PlaylistSortType.name,
     bool reverse = false,
-  }) async {
-    return;
-  }
+  }) async {}
 
   @override
   String toString() {
-    return 'Playlist{id: $id, songs: $songs}';
+    return 'Playlist{id: $id, name: $name, songs: $songs}';
   }
 }
 
@@ -270,7 +271,10 @@ class MetadataFile extends Metadata {
 }
 
 class PlaylistFile extends Playlist {
-  PlaylistFile(super.id) : super.internal();
+  PlaylistFile(super.id) : super.internal() {
+    name = id.split('/').reversed.skip(1).first;
+  }
+
   static final Map<String, Map<String, dynamic>> _extra = {};
 
   @override

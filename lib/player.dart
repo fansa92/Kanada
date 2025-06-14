@@ -16,7 +16,7 @@ class Player {
       _currentIndex = index ?? -1; // 更新当前播放索引
       if (current != null) {
         final currentMetadata = Metadata(current!);
-        final task = currentMetadata.download();
+        currentMetadata.download();
       }
     });
   }

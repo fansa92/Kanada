@@ -1,10 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:kanada/metadata.dart';
 import 'package:kanada/widgets/link.dart';
 import 'package:kanada/widgets/music_info.dart';
-import 'package:path/path.dart' as p;
-
 import '../global.dart';
 import '../settings.dart';
 import 'folder.dart';
@@ -17,7 +14,8 @@ class FoldersPage extends StatefulWidget {
 }
 
 class _FoldersPageState extends State<FoldersPage> {
-  List<FileSystemEntity> files = [];
+  Playlist playlist = Playlist('/ALL/');
+  Map<String, Playlist> folders = {};
 
   @override
   void initState() {
@@ -26,19 +24,18 @@ class _FoldersPageState extends State<FoldersPage> {
   }
 
   Future<void> _init() async {
-    files.clear();
-    final dirs = Settings.folders.map((e) => Directory(e)).toList();
-    for (var dir in dirs) {
-      List<FileSystemEntity> entities = await dir.list().toList();
-      files.addAll(
-        entities.where((entity) {
-          String extension = p.extension(entity.path).toLowerCase();
-          return extension == '.mp3' || extension == '.flac';
-        }),
-      );
+    playlist.getSongs().then((value) {
+      Global.playlist = playlist.songs;
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    for (var i = 0; i < Settings.folders.length; i++) {
+      final path = Settings.folders[i];
+      folders[path] = Playlist(path);
     }
-    // print(files);
-    Global.playlist = files.map((e) => e.path).toList();
+    setState(() {});
+    await Future.wait(folders.values.map((e) => e.init()));
     setState(() {});
   }
 
@@ -50,21 +47,24 @@ class _FoldersPageState extends State<FoldersPage> {
         children: [
           Padding(
             padding: EdgeInsets.all(8.0),
-            child: Hero(tag: 'search-bar', child: SearchAnchor.bar(
-              // isFullScreen: false,
-              barHintText: 'Search',
-              barBackgroundColor: WidgetStateProperty.all(
-                Theme.of(context).colorScheme.secondaryContainer,
-              ),
-              suggestionsBuilder:
-                  (context, controller) => List.generate(
-                files.length,
-                    (index) => MusicInfoSearch(
-                  path: files[index].path,
-                  keywords: controller.text,
+            child: Hero(
+              tag: 'search-bar',
+              child: SearchAnchor.bar(
+                // isFullScreen: false,
+                barHintText: 'Search',
+                barBackgroundColor: WidgetStateProperty.all(
+                  Theme.of(context).colorScheme.secondaryContainer,
                 ),
+                suggestionsBuilder:
+                    (context, controller) => List.generate(
+                      playlist.songs.length,
+                      (index) => MusicInfoSearch(
+                        path: playlist.songs[index],
+                        keywords: controller.text,
+                      ),
+                    ),
               ),
-            )),
+            ),
           ),
           Expanded(
             child: ListView.builder(
@@ -85,9 +85,8 @@ class _FoldersPageState extends State<FoldersPage> {
                           FolderPage(path: Settings.folders[index - 1]),
                   child: ListTile(
                     title: Text(
-                      Settings.folders[index - 1].split(
-                        '/',
-                      )[Settings.folders[index - 1].split('/').length - 2],
+                      folders[Settings.folders[index - 1]]?.name ??
+                          Settings.folders[index - 1],
                     ),
                     subtitle: Text(Settings.folders[index - 1]),
                   ),
