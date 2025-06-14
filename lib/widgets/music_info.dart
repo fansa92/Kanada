@@ -50,7 +50,7 @@ class _MusicInfoState extends State<MusicInfo> {
 
     // 准备播放队列
     List<String> playlistPaths = Global.playlist;
-    playlistPaths.shuffle();
+    // playlistPaths.shuffle();
     int idx = playlistPaths.indexOf(widget.path);
     if (idx < 0) {
       playlistPaths = [widget.path];
@@ -121,6 +121,15 @@ class _MusicInfoState extends State<MusicInfo> {
               ],
             ),
           ),
+          // if (widget.nextPlay) IconButton(
+          //   onPressed: () async {
+          //     Global.player.insertQueueItem(Global.player.currentIndex + 1, widget.path);
+          //   },
+          //   icon: Icon(
+          //     Icons.add_circle,
+          //     color: theme.colorScheme.primary,
+          //   ),
+          // )
         ],
       ),
     );

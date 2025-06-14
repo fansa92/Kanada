@@ -95,13 +95,14 @@ class _FolderPageState extends State<FolderPage> {
 
     final playlistPaths = playlist.songs;
 
-    playlistPaths.shuffle();
+    // playlistPaths.shuffle();
 
     // Global.player.setAudioSource(
     //   ConcatenatingAudioSource(children: sources),
     // );
     await Global.player.setQueue(
       playlistPaths,
+      initialIndex: Global.player.shuffle?Random().nextInt(playlistPaths.length) : 0,
       // initialIndex: idx >= 0? idx : null,
     );
     Global.init = true;

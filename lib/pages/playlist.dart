@@ -65,41 +65,98 @@ class _PlaylistPageState extends State<PlaylistPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ListView.builder(
-        controller: _scrollController,
-        itemCount: playlist.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            key: index == 0 ? _firstItemKey : null,
-            title: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                color:
-                    Global.player.currentIndex == index
-                        ? Global.playerTheme.colorScheme.secondaryContainer
-                            .withValues(alpha: .4)
-                        : null,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: MusicInfo(
-                        path: playlist[index],
-                        play: false,
-                        theme: Global.playerTheme,
-                      ),
-                    ),
-                  ],
+    return Column(
+        children: [
+          SizedBox(
+            height: MediaQuery.of(context).padding.top,
+          ),
+          SizedBox(
+            height: 40,
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    Global.player.repeat=!Global.player.repeat;
+                    Global.player.updatePlayMode();
+                    setState(() {});
+                  },
+                  icon: Icon(Icons.repeat, color: Global.player.repeat?Global.playerTheme.colorScheme.primary:Global.playerTheme.colorScheme.onPrimary)
                 ),
-              ),
+                IconButton(
+                  onPressed: () {
+                    Global.player.repeatOne=!Global.player.repeatOne;
+                    Global.player.updatePlayMode();
+                    setState(() {});
+                  },
+                  icon: Icon(Icons.repeat_one, color: Global.player.repeatOne?Global.playerTheme.colorScheme.primary:Global.playerTheme.colorScheme.onPrimary)
+                ),
+                IconButton(
+                  onPressed: () {
+                    Global.player.shuffle=!Global.player.shuffle;
+                    Global.player.updatePlayMode();
+                    setState(() {});
+                  },
+                  icon: Icon(Icons.shuffle, color: Global.player.shuffle?Global.playerTheme.colorScheme.primary:Global.playerTheme.colorScheme.onPrimary)
+                ),
+              ],
             ),
-            onTap: () {
-              Global.player.skipToQueueItem(index);
-              Global.player.play();
-            },
-          );
-        },
-      ),
+          ),
+          Expanded(
+              child:LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  return ShaderMask(
+                    // 关键：使用线性渐变作为遮罩
+                    shaderCallback: (Rect bounds) {
+                      return LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent, // 渐变开始
+                          Colors.black, // 底部完全不透明
+                        ],
+                        stops: [0.0, 50 / bounds.height], // 调整渐变区域
+                      ).createShader(bounds);
+                    },
+                    blendMode: BlendMode.dstIn, // 使用目标输入混合模式
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: playlist.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          key: index == 0 ? _firstItemKey : null,
+                          title: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              color:
+                              Global.player.currentIndex == index
+                                  ? Global.playerTheme.colorScheme.secondaryContainer
+                                  .withValues(alpha: .4)
+                                  : null,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: MusicInfo(
+                                      path: playlist[index],
+                                      play: false,
+                                      theme: Global.playerTheme,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          onTap: () {
+                            Global.player.skipToQueueItem(index);
+                            Global.player.play();
+                          },
+                        );
+                      },
+                    ),
+                  );
+                },
+              )
+          )
+        ]
     );
   }
 }

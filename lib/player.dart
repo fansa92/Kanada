@@ -50,8 +50,8 @@ class Player {
           : null;
 
   /// 导航控制
-  bool get hasPrevious => _currentIndex > 0; // 是否有上一首
-  bool get hasNext => _currentIndex < _queue.length - 1; // 是否有下一首
+  bool get hasPrevious => _player.hasPrevious; // 是否有上一首
+  bool get hasNext => _player.hasNext; // 是否有下一首
 
   /// 播放器状态流
   Stream<SequenceState?> get sequenceStateStream => _player.sequenceStateStream;
@@ -111,6 +111,19 @@ class Player {
     );
   }
 
+  /// 切换播放模式
+  Future<void> updatePlayMode() async {
+  //   直接修改player的播放模式
+    await _player.setLoopMode(
+      repeatOne
+          ? LoopMode.one
+          : repeat
+              ? LoopMode.all
+              : LoopMode.off,
+    );
+    await _player.setShuffleModeEnabled(shuffle);
+  }
+
   // 基础播放控制 --------------------------
   Future<void> play() async => await _player.play();
 
@@ -137,8 +150,30 @@ class Player {
       await _player.seek(Duration.zero, index: index);
 
   /// 上一首/下一首控制
-  Future<void> skipToPrevious() async =>
-      await skipToQueueItem(_currentIndex - 1);
+  // Future<void> skipToPrevious() async =>
+  //     await skipToQueueItem(_currentIndex - 1);
+  //
+  // Future<void> skipToNext() async => await skipToQueueItem(_currentIndex + 1);
+  Future<void> skipToPrevious() async => await _player.seekToPrevious();
+  Future<void> skipToNext() async => await _player.seekToNext();
 
-  Future<void> skipToNext() async => await skipToQueueItem(_currentIndex + 1);
+  Future<void> insertQueueItem(int index, String path) async {
+    _queue.insert(index, path);
+    final metadata = Metadata(path);
+    await metadata.getMetadata(); // 获取元数据
+    metadata.getCover(); // 获取封面
+    await(_player.audioSource as ConcatenatingAudioSource).add(
+      AudioSource.uri(
+        Uri.parse(path),
+        tag: MediaItem(
+          id: path,
+          title: metadata.title?? path.split('/').last,
+          // 默认使用文件名
+          artist: metadata.artist,
+          album: metadata.album,
+          artUri: metadata.coverCache!= null?Uri.parse('file://${metadata.coverCache}'):null,
+        ),
+      ),
+    );
+  }
 }
