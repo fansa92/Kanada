@@ -215,7 +215,6 @@ class _SettingsPageState extends State<SettingsPage> {
             title: Text('歌词发送器可用？'),
             trailing: Text(lyricSendState ? '可用' : '不可用'),
             onTap: () async {
-              print('打开Lyric-Getter网站');
               //   https://github.com/xiaowine/Lyric-Getter/releases/latest
               final uri = Uri.parse(
                 'https://github.com/xiaowine/Lyric-Getter/releases/latest',

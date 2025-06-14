@@ -12,6 +12,9 @@ Future<void> main() async {
   // 初始化Flutter引擎绑定
   WidgetsFlutterBinding.ensureInitialized();
 
+  // 加载应用设置
+  await Settings.fresh();
+
   // 初始化音频后台服务
   await JustAudioBackground.init(
     androidNotificationChannelId: 'com.hontouniyuki.kanada.channel.audio',
@@ -32,13 +35,6 @@ Future<void> main() async {
 
   // 请求必要权限
   await requestPermission();
-
-  // 加载应用设置
-  await Settings.fresh();
-
-  Global.player.repeat = Settings.repeat;
-  Global.player.repeatOne = Settings.repeatOne;
-  Global.player.shuffle = Settings.shuffle;
 
   // 启动应用
   runApp(const MyApp());

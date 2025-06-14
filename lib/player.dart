@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:kanada/settings.dart';
+import 'package:kanada/userdata.dart';
 import 'package:kanada_volume/kanada_volume.dart';
 import 'metadata.dart';
 
@@ -15,13 +16,33 @@ class Player {
 
   /// 构造函数：初始化当前曲目索引监听
   Player() {
+    _init();
+  }
+
+  Future<void> _init() async {
+    repeat = Settings.repeat;
+    repeatOne = Settings.repeatOne;
+    shuffle = Settings.shuffle;
+    final playerData = await UserData(
+      'player.json',
+    ).get(defaultValue: {'queue': [], 'currentIndex': 0});
+    _queue.clear();
+    _queue.addAll(playerData['queue'].cast<String>().toList());
+    _currentIndex = playerData['currentIndex'] ?? 0;
+    await updatePlayMode();
+    await update();
+
     _player.currentIndexStream.listen((index) {
       _currentIndex = index ?? -1; // 更新当前播放索引
+      UserData(
+        'player.json',
+      ).set({'queue': _queue, 'currentIndex': _currentIndex});
       if (current != null) {
         final currentMetadata = Metadata(current!);
         currentMetadata.download();
       }
     });
+    // pause();
   }
 
   // 当前播放索引（内部存储）
@@ -119,13 +140,14 @@ class Player {
     Settings.repeat = repeat;
     Settings.repeatOne = repeatOne;
     Settings.shuffle = shuffle;
-  //   直接修改player的播放模式
+    Settings.save();
+    //   直接修改player的播放模式
     await _player.setLoopMode(
       repeatOne
           ? LoopMode.one
           : repeat
-              ? LoopMode.all
-              : LoopMode.off,
+          ? LoopMode.all
+          : LoopMode.off,
     );
     await _player.setShuffleModeEnabled(shuffle);
   }
@@ -133,11 +155,8 @@ class Player {
   // 基础播放控制 --------------------------
   Future<void> play() async {
     await _player.play();
-    if(await KanadaVolumePlugin.getVolume()==0){
-      Fluttertoast.showToast(
-        msg: "请先调整音量",
-        toastLength: Toast.LENGTH_SHORT,
-      );
+    if (await KanadaVolumePlugin.getVolume() == 0) {
+      Fluttertoast.showToast(msg: "请先调整音量", toastLength: Toast.LENGTH_SHORT);
     }
   }
 
@@ -169,6 +188,7 @@ class Player {
   //
   // Future<void> skipToNext() async => await skipToQueueItem(_currentIndex + 1);
   Future<void> skipToPrevious() async => await _player.seekToPrevious();
+
   Future<void> skipToNext() async => await _player.seekToNext();
 
   Future<void> insertQueueItem(int index, String path) async {
@@ -176,16 +196,19 @@ class Player {
     final metadata = Metadata(path);
     await metadata.getMetadata(); // 获取元数据
     metadata.getCover(); // 获取封面
-    await(_player.audioSource as ConcatenatingAudioSource).add(
+    await (_player.audioSource as ConcatenatingAudioSource).add(
       AudioSource.uri(
         Uri.parse(path),
         tag: MediaItem(
           id: path,
-          title: metadata.title?? path.split('/').last,
+          title: metadata.title ?? path.split('/').last,
           // 默认使用文件名
           artist: metadata.artist,
           album: metadata.album,
-          artUri: metadata.coverCache!= null?Uri.parse('file://${metadata.coverCache}'):null,
+          artUri:
+              metadata.coverCache != null
+                  ? Uri.parse('file://${metadata.coverCache}')
+                  : null,
         ),
       ),
     );
