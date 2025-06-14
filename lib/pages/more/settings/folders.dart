@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:kanada/settings.dart';
+
+import '../../../tool.dart';
 
 class FoldersSettings extends StatefulWidget {
   const FoldersSettings({super.key});
@@ -11,6 +14,7 @@ class FoldersSettings extends StatefulWidget {
 class _FoldersSettingsState extends State<FoldersSettings> {
   // 存储列表项的列表
   List<String>? _folders;
+  static RegExp uriReg=RegExp(r'(\w+)://([^/:]+)(:\d*)?([^# ]*)');
 
   Future<void> _init() async {
     _folders = Settings.folders;
@@ -24,90 +28,58 @@ class _FoldersSettingsState extends State<FoldersSettings> {
   }
 
   // 显示对话框输入文件夹路径
-  void _showAddFolderDialog() {
+  Future<void> _showAddFolderDialog([int? index]) async {
+    String clipboard = '';
+    if(index==null&&await Clipboard.hasStrings()){
+      clipboard = (await Clipboard.getData(Clipboard.kTextPlain))?.text ?? '';
+    }
     TextEditingController controller = TextEditingController();
-
+    controller.text = index != null ? _folders![index] : clipboard;
+    if(index==null){
+      if(clipboard.isNotEmpty&&uriReg.hasMatch(clipboard)){
+        // controller.text = uriReg.firstMatch(clipboard)?.group(0)?? '';
+        final uri = Uri.parse(await checkRedirects(uriReg.firstMatch(clipboard)?.group(0)?? ''));
+        if(uri.path=='/playlist'){
+          controller.text = 'netease://${uri.queryParameters['id']}';
+        }
+      }
+    }
+    if(!mounted) return;
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('请输入文件夹路径'),
+          title: const Text('添加文件夹'),
           content: TextField(
             controller: controller,
-            decoration: const InputDecoration(hintText: '/storage/emulated/0/'),
+            decoration: const InputDecoration(hintText: '输入文件夹路径'),
           ),
-          actions: [
+          actions: <Widget>[
             TextButton(
+              child: const Text('取消'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('取消'),
             ),
             TextButton(
+              child: const Text('确定'),
               onPressed: () {
-                String folderPath = controller.text;
-                // 检查路径是否以 / 结尾，如果没有则加上
-                if (folderPath.startsWith('/')&&!folderPath.endsWith('/')) {
-                  folderPath += '/';
+                if (index != null) {
+                  _folders![index] = controller.text;
                 }
-                setState(() {
-                  _folders?.add(folderPath);
-                  // 保存更新后的文件夹列表
-                  Settings.folders = _folders!;
-                  Settings.save();
-                });
-                Navigator.of(context).pop();
-              },
-              child: Text('确定'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // 显示对话框修改文件夹路径
-  void _showEditFolderDialog(int index) {
-    TextEditingController controller = TextEditingController(
-      text: _folders![index],
-    );
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('请输入文件夹路径'),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(hintText: '/storage/emulated/0/'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('取消'),
-            ),
-            TextButton(
-              onPressed: () {
-                String folderPath = controller.text;
-                // 检查路径是否以 / 结尾，如果没有则加上
-                if (folderPath.startsWith('/')&&!folderPath.endsWith('/')) {
-                  folderPath += '/';
+                else {
+                  _folders?.add(controller.text);
                 }
-                setState(() {
-                  _folders![index] = folderPath;
-                  // 保存更新后的文件夹列表
-                  Settings.folders = _folders!;
-                  Settings.save();
-                });
+                // 保存更新后的文件夹列表
+                Settings.folders = _folders!;
+                Settings.save();
                 Navigator.of(context).pop();
-              },
-              child: Text('确定'),
-            ),
-          ],
+                setState(() {});
+              }
+            )
+          ]
         );
-      },
+      }
     );
   }
 
@@ -151,17 +123,12 @@ class _FoldersSettingsState extends State<FoldersSettings> {
                       ),
                       onTap: () {
                         // 显示修改文件夹路径的对话框
-                        _showEditFolderDialog(index);
+                        _showAddFolderDialog(index);
                       },
                     ),
                 ],
               ),
             ),
-            // 添加按钮
-            // ElevatedButton(
-            //   onPressed: _showAddFolderDialog,
-            //   child: Text(Const.addItem),
-            // ),
           ],
         ),
       ),

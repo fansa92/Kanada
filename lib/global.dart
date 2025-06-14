@@ -5,6 +5,7 @@ import 'package:kanada/pages/home.dart';
 import 'package:kanada/pages/more.dart';
 import 'package:kanada/pages/more/cache.dart';
 import 'package:kanada/pages/more/debug.dart';
+import 'package:kanada/pages/more/debug/check_redirects.dart';
 import 'package:kanada/pages/more/debug/color.dart';
 import 'package:kanada/pages/more/debug/color_diffusion.dart';
 import 'package:kanada/pages/more/debug/current_lyric.dart';
@@ -54,6 +55,7 @@ class Global {
     '/more/debug/netease/detail': (context) => const NetEaseDetailDebug(),
     '/more/debug/netease/url': (context) => const NetEaseUrlDebug(),
     '/more/debug/netease/playlist': (context) => const NetEasePlaylistDebug(),
+    '/more/debug/check_redirects': (context) => const CheckRedirectsDebug(),
     '/more/settings': (context) => const SettingsPage(),
     '/more/settings/folders': (context) => const FoldersSettings(),
     '/more/settings/player': (context) => const PlayerSettings(),

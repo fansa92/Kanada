@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:palette_generator/palette_generator.dart';
 
 /// 计算整数的绝对值
@@ -88,4 +89,11 @@ String formatTime(int time) {
   final second = ((time % 60000) / 1000).floor();
   final ms = (time % 1000).floor();
   return '${minute.toString().padLeft(2, '0')}:${second.toString().padLeft(2, '0')}.${ms.toString().padLeft(2, '0')}';
+}
+
+Future<String> checkRedirects(String url) async {
+  http.Request req = http.Request("Get", Uri.parse(url))..followRedirects = false;
+  http.Client baseClient = http.Client();
+  http.StreamedResponse response = await baseClient.send(req);
+  return response.headers['location']??url;
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kanada/pages/folders.dart';
 import 'package:kanada/pages/more.dart';
+import 'package:kanada/pages/search.dart';
 import '../global.dart';
 import '../widgets/float_playing.dart';
 import 'home.dart';
@@ -13,24 +14,6 @@ class AppPage extends StatefulWidget {
 }
 
 class _AppPageState extends State<AppPage> {
-  static List<List<dynamic>> nav = [
-    [
-      NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-      const HomePage(),
-    ],
-    // [
-    //   NavigationDestination(icon: Icon(Icons.search), label: 'Search'),
-    //   const SearchPage(),
-    // ],
-    [
-      NavigationDestination(icon: Icon(Icons.library_music), label: 'Music'),
-      const FoldersPage(),
-    ],
-    [
-      NavigationDestination(icon: Icon(Icons.settings), label: 'More'),
-      const MorePage(),
-    ],
-  ];
   int index = 0;
 
   @override
@@ -53,6 +36,24 @@ class _AppPageState extends State<AppPage> {
 
   @override
   Widget build(BuildContext context) {
+    List<List<dynamic>> nav = [
+      [
+        NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+        const HomePage(),
+      ],
+      [
+        NavigationDestination(icon: Icon(Icons.search), label: 'Search'),
+        const SearchPage(),
+      ],
+      [
+        NavigationDestination(icon: Icon(Icons.library_music), label: 'Music'),
+        const FoldersPage(),
+      ],
+      [
+        NavigationDestination(icon: Icon(Icons.settings), label: 'More'),
+        const MorePage(),
+      ],
+    ];
     return Scaffold(
       body: nav[index][1],
       floatingActionButton: FloatPlaying(),

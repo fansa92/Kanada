@@ -306,6 +306,18 @@ class NetEase {
     }
   }
 
+  static Future<List<int>> searchIds(String keywords) async {
+    final data = await search(keywords);
+    if (data == null) {
+      return [];
+    }
+    final List<int> ids = [];
+    for (final song in data['result']['songs']) {
+      ids.add(song['id']);
+    }
+    return ids;
+  }
+
   static Future<Map?> getDetail(int id) async {
     // GET https://interface3.music.163.com/api/v3/song/detail?c=[{'id':514774040,'v':0}]
     final url = Uri.https('interface3.music.163.com', '/api/v3/song/detail', {
