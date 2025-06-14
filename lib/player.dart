@@ -6,6 +6,7 @@ import 'metadata.dart';
 class Player {
   // 静态音频播放器实例，全局唯一
   static final AudioPlayer _player = AudioPlayer();
+
   // 播放队列存储文件路径
   final List<String> _queue = [];
 
@@ -13,15 +14,20 @@ class Player {
   Player() {
     _player.currentIndexStream.listen((index) {
       _currentIndex = index ?? -1; // 更新当前播放索引
+      if (current != null) {
+        final currentMetadata = Metadata(current!);
+        final task = currentMetadata.download();
+      }
     });
   }
 
   // 当前播放索引（内部存储）
   int _currentIndex = 0;
+
   // 播放模式控制
-  bool shuffle = false;    // 随机播放
-  bool repeat = false;     // 列表循环
-  bool repeatOne = false;  // 单曲循环
+  bool shuffle = false; // 随机播放
+  bool repeat = false; // 列表循环
+  bool repeatOne = false; // 单曲循环
 
   /// 播放状态 getter
   bool get playing => _player.playing;
@@ -34,6 +40,7 @@ class Player {
 
   /// 音频时长和位置
   Duration? get duration => _player.duration;
+
   Duration get position => _player.position;
 
   /// 当前播放文件路径
@@ -43,18 +50,20 @@ class Player {
           : null;
 
   /// 导航控制
-  bool get hasPrevious => _currentIndex > 0;          // 是否有上一首
+  bool get hasPrevious => _currentIndex > 0; // 是否有上一首
   bool get hasNext => _currentIndex < _queue.length - 1; // 是否有下一首
 
   /// 播放器状态流
   Stream<SequenceState?> get sequenceStateStream => _player.sequenceStateStream;
+
   Stream<Duration> get positionStream => _player.positionStream;
+
   Stream<int?> get currentIndexStream => _player.currentIndexStream;
 
   /// 更新播放队列和音频源
   Future<void> update() async {
     final currentMetadata = Metadata(current!);
-    final task=currentMetadata.download();
+    final task = currentMetadata.download();
 
     // 创建固定长度的音频源数组
     final sources = List<AudioSource?>.filled(
@@ -67,21 +76,22 @@ class Player {
     Future<void> batch(int index) async {
       final path = _queue[index];
       final metadata = Metadata(path);
-      await metadata.getMetadata();  // 获取元数据
-      metadata.getCover();           // 获取封面
+      await metadata.getMetadata(); // 获取元数据
+      metadata.getCover(); // 获取封面
 
       // 创建带元数据的音频源
       sources[index] = AudioSource.uri(
         Uri.parse(await metadata.getPath()),
         tag: MediaItem(
           id: await metadata.getPath(),
-          title: metadata.title ?? path.split('/').last, // 默认使用文件名
+          title: metadata.title ?? path.split('/').last,
+          // 默认使用文件名
           artist: metadata.artist,
           album: metadata.album,
           artUri: Uri.parse('file://${metadata.coverCache}'),
           extras: {
             'metadataId': metadata.id, // 存储元数据
-          }
+          },
         ),
       );
     }
@@ -93,7 +103,8 @@ class Player {
     // 重置播放器并设置新源
     await stop();
     await _player.setAudioSource(
-      ConcatenatingAudioSource(  // 使用连接音频源处理队列
+      ConcatenatingAudioSource(
+        // 使用连接音频源处理队列
         children: sources.cast<AudioSource>(),
       ),
       initialIndex: _currentIndex, // 保持当前播放位置
@@ -102,7 +113,9 @@ class Player {
 
   // 基础播放控制 --------------------------
   Future<void> play() async => await _player.play();
+
   Future<void> pause() async => await _player.pause();
+
   Future<void> stop() async => await _player.stop();
 
   /// 跳转到指定位置
@@ -124,6 +137,8 @@ class Player {
       await _player.seek(Duration.zero, index: index);
 
   /// 上一首/下一首控制
-  Future<void> skipToPrevious() async => await skipToQueueItem(_currentIndex - 1);
+  Future<void> skipToPrevious() async =>
+      await skipToQueueItem(_currentIndex - 1);
+
   Future<void> skipToNext() async => await skipToQueueItem(_currentIndex + 1);
 }

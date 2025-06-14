@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:kanada/Netease.dart';
 import 'package:kanada/metadata.dart';
 import 'package:kanada/userdata.dart';
 import 'package:kanada/widgets/music_info.dart';
@@ -22,13 +23,14 @@ class FolderPage extends StatefulWidget {
 
 class _FolderPageState extends State<FolderPage> {
   // List<FileSystemEntity> files = [];
-  static const List<String> sortTypeString = [
-    '',
-    PlaylistSortType.name,
-    PlaylistSortType.lastModified,
-  ];
+  // static const List<String> sortTypeString = [
+  //   '',
+  //   PlaylistSortType.name,
+  //   PlaylistSortType.lastModified,
+  // ];
   Playlist playlist = Playlist('/ALL/');
-  int sortType = 0;
+  String sortType = '';
+  bool reverse = false;
   final ScrollController _scrollController = ScrollController();
   Duration? durationSum;
   int initiated = 0;
@@ -51,19 +53,20 @@ class _FolderPageState extends State<FolderPage> {
   }
 
   Future<void> _init() async {
-    if (sortType == 0) {
+    if (sortType == '') {
       final settings = await UserData(
         'folder/settings/${widget.path.hashCode}.json',
-      ).get(defaultValue: {'sort': 1});
+      ).get(defaultValue: {'sort': PlaylistSortType.name, 'reverse': false});
       sortType = settings['sort'];
+      reverse = settings['reverse'];
     } else {
       await UserData(
         'folder/settings/${widget.path.hashCode}.json',
-      ).set({'sort': sortType});
+      ).set({'sort': sortType, 'reverse': reverse});
     }
     playlist = Playlist(widget.path);
     await playlist.getSongs();
-    await playlist.sort(type: sortTypeString[abs(sortType)], reverse: sortType < 0);
+    await playlist.sort(type: sortType, reverse: reverse);
     Global.playlist = playlist.songs;
     setState(() {});
 
@@ -198,9 +201,21 @@ class _FolderPageState extends State<FolderPage> {
                                   value: '_',
                                   child: ListTile(
                                     title: Text(
-                                      '目前: ${abs(sortType) == 1 ? '名称' : (abs(sortType) == 2 ? '修改日期' : '')}(${sortType > 0 ? '升序' : '降序'})',
+                                      '目前: $sortType(${!reverse ? '升序' : '降序'})',
                                     ),
                                     onTap: () {},
+                                  ),
+                                ),
+                                PopupMenuItem(
+                                  value: 'noSort',
+                                  child: ListTile(
+                                    title: const Text('不排序'),
+                                    onTap: () {
+                                      sortType = PlaylistSortType.noSort;
+                                      reverse = false;
+                                      Navigator.pop(context);
+                                      _init();
+                                    },
                                   ),
                                 ),
                                 PopupMenuItem(
@@ -208,30 +223,48 @@ class _FolderPageState extends State<FolderPage> {
                                   child: ListTile(
                                     title: const Text('名称'),
                                     onTap: () {
-                                      if (sortType == 1) {
-                                        sortType = -1;
+                                      if (sortType == PlaylistSortType.name) {
+                                        reverse = !reverse;
                                         Navigator.pop(context);
                                         _init();
                                         return;
                                       }
-                                      sortType = 1;
+                                      sortType = PlaylistSortType.name;
+                                      reverse = false;
                                       Navigator.pop(context);
                                       _init();
                                     },
                                   ),
                                 ),
-                                PopupMenuItem(
+                                if(widget.path.startsWith('/')) PopupMenuItem(
                                   value: 'modify_date',
                                   child: ListTile(
                                     title: const Text('修改日期'),
                                     onTap: () {
-                                      if (sortType == 2) {
-                                        sortType = -2;
+                                      if (sortType == PlaylistSortType.lastModified) {
+                                        reverse =!reverse;
                                         Navigator.pop(context);
                                         _init();
                                         return;
                                       }
-                                      sortType = 2;
+                                      sortType = PlaylistSortType.lastModified;
+                                      Navigator.pop(context);
+                                      _init();
+                                    },
+                                  ),
+                                ),
+                                if(widget.path.startsWith('netease://')) PopupMenuItem(
+                                  value: 'id',
+                                  child: ListTile(
+                                    title: const Text('发布日期'),
+                                    onTap: () {
+                                      if (sortType == PlaylistSortType.id) {
+                                        reverse =!reverse;
+                                        Navigator.pop(context);
+                                        _init();
+                                        return;
+                                      }
+                                      sortType = PlaylistSortType.id;
                                       Navigator.pop(context);
                                       _init();
                                     },
@@ -240,9 +273,9 @@ class _FolderPageState extends State<FolderPage> {
                                 PopupMenuItem(
                                   value: 'change',
                                   child: ListTile(
-                                    title: Text(sortType > 0 ? '转降序' : '转升序'),
+                                    title: Text(!reverse ? '转降序' : '转升序'),
                                     onTap: () {
-                                      sortType = -sortType;
+                                      reverse = !reverse;
                                       Navigator.pop(context);
                                       _init();
                                     },

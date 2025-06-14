@@ -47,7 +47,7 @@ class _FoldersSettingsState extends State<FoldersSettings> {
               onPressed: () {
                 String folderPath = controller.text;
                 // 检查路径是否以 / 结尾，如果没有则加上
-                if (!folderPath.endsWith('/')) {
+                if (folderPath.startsWith('/')&&!folderPath.endsWith('/')) {
                   folderPath += '/';
                 }
                 setState(() {
@@ -92,7 +92,7 @@ class _FoldersSettingsState extends State<FoldersSettings> {
               onPressed: () {
                 String folderPath = controller.text;
                 // 检查路径是否以 / 结尾，如果没有则加上
-                if (!folderPath.endsWith('/')) {
+                if (folderPath.startsWith('/')&&!folderPath.endsWith('/')) {
                   folderPath += '/';
                 }
                 setState(() {

@@ -83,25 +83,24 @@ class Metadata {
 }
 
 class PlaylistSortType {
+  static const String noSort = 'noSort';
   static const String name = 'name';
   static const String lastModified = 'lastModified';
+  static const String id = 'id';
 }
 
 class Playlist {
-  static final _cache = <String, Playlist>{};
   final String id;
   List<String> songs = [];
 
   factory Playlist(String id) {
-    return _cache.putIfAbsent(id, () {
-      if (id.startsWith('/')) {
-        return PlaylistFile(id);
-      }
-      if (id.startsWith('netease://')) {
-        return PlaylistNetEase(id);
-      }
-      return Playlist.internal(id);
-    });
+    if (id.startsWith('/')) {
+      return PlaylistFile(id);
+    }
+    if (id.startsWith('netease://')) {
+      return PlaylistNetEase(id);
+    }
+    return Playlist.internal(id);
   }
 
   Playlist.internal(this.id);
@@ -115,6 +114,11 @@ class Playlist {
     bool reverse = false,
   }) async {
     return;
+  }
+
+  @override
+  String toString() {
+    return 'Playlist{id: $id, songs: $songs}';
   }
 }
 
@@ -274,7 +278,11 @@ class PlaylistFile extends Playlist {
     songs.clear();
     List<String> paths = [];
     if (id == '/ALL/') {
-      paths.addAll(Settings.folders);
+      for (final path in Settings.folders) {
+        if (path.startsWith('/')) {
+          paths.add(path);
+        }
+      }
     } else {
       paths.add(id);
     }
@@ -288,6 +296,7 @@ class PlaylistFile extends Playlist {
     String type = PlaylistSortType.name,
     bool reverse = false,
   }) async {
+    if (type == PlaylistSortType.noSort) return;
     songs.sort((a, b) {
       if (type == PlaylistSortType.name) {
         return a.compareTo(b);
@@ -296,7 +305,7 @@ class PlaylistFile extends Playlist {
       }
       return a.compareTo(b);
     });
-    if(reverse){
+    if (reverse) {
       songs = songs.reversed.toList();
     }
   }
@@ -317,5 +326,10 @@ class PlaylistFile extends Playlist {
       }
     }
     return paths;
+  }
+
+  @override
+  String toString() {
+    return super.toString().replaceFirst('Playlist', 'PlaylistFile');
   }
 }

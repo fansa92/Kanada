@@ -39,7 +39,7 @@ class WaterFall extends StatefulWidget {
 class _WaterFallState extends State<WaterFall> {
   final padding = EdgeInsets.all(12);
   final _scrollController = ScrollController();
-  final List<String> allPaths = [];
+  final Playlist playlist = Playlist('/ALL/');
   final Random random = Random();
   bool init = false;
   bool _firstBuild = true;
@@ -74,19 +74,7 @@ class _WaterFallState extends State<WaterFall> {
   }
 
   Future<void> _init() async {
-    allPaths.clear();
-    final dirs = Settings.folders.map((e) => Directory(e)).toList();
-    for (var dir in dirs) {
-      List<FileSystemEntity> entities = await dir.list().toList();
-      allPaths.addAll(
-        entities
-            .where((entity) {
-              String extension = p.extension(entity.path).toLowerCase();
-              return extension == '.mp3' || extension == '.flac';
-            })
-            .map((e) => e.path),
-      );
-    }
+    await playlist.getSongs();
     _fresh(n: 20);
     init = true;
   }
@@ -101,7 +89,7 @@ class _WaterFallState extends State<WaterFall> {
 
   Future<void> _fresh({int n = 20}) async {
     for (var i = 0; i < n; i++) {
-      WaterFall.data.add(allPaths[random.nextInt(allPaths.length)]);
+      WaterFall.data.add(playlist.songs[random.nextInt(playlist.songs.length)]);
     }
     if (mounted) {
       setState(() {});

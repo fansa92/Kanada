@@ -199,7 +199,49 @@ class PlaylistNetEase extends Playlist {
 
   @override
   Future<void> getSongs() async {
-    return;
+    final playlistId = id.replaceFirst('netease://', '');
+    songs = (await NetEase.getPlaylist(int.tryParse(playlistId) ?? 0))
+        .map((e) => 'netease://$e').toList();
+  }
+
+  @override
+  Future<void> sort({
+    String type = PlaylistSortType.name,
+    bool reverse = false,
+  }) async {
+    if (type == PlaylistSortType.noSort) return;
+    if ([PlaylistSortType.name].contains(type)) {
+      const batchSize = 48;
+      for (var i = 0; i < songs.length; i += batchSize) {
+        final batch = songs.sublist(i, min(i + batchSize, songs.length));
+        final futures = batch.map((id) => MetadataNetEase(id).getMetadata());
+        await Future.wait(futures);
+      }
+    }
+    songs.sort((a, b) {
+      if (type == PlaylistSortType.id) {
+        return int.parse(
+          a.replaceAll('netease://', ''),
+        ).compareTo(int.parse(b.replaceAll('netease://', '')));
+      }
+      final ma = MetadataNetEase(a);
+      final mb = MetadataNetEase(b);
+      if (type == PlaylistSortType.name) {
+        if (ma.title == null || mb.title == null) {
+          return 0;
+        }
+        return ma.title!.compareTo(mb.title!);
+      }
+      return 0;
+    });
+    if (reverse) {
+      songs = songs.reversed.toList();
+    }
+  }
+
+  @override
+  String toString() {
+    return super.toString().replaceFirst('Playlist', 'PlaylistNetEase');
   }
 }
 
