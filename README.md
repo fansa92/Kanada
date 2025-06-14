@@ -2,6 +2,8 @@
 
 ![Android版下载](https://img.shields.io/badge/Android-v1.0.0-blue?logo=android)
 
+[简体中文](README.md) | [English](README_EN.md)
+
 ## 概述
 Kanada 音乐播放器是一款专为 Android 设备深度定制的本地音乐播放器。秉持简洁易用的设计哲学，它为用户呈上了丰富且卓越的音乐播放体验。无论你钟情于在闲暇时光沉浸于舒缓旋律，还是在运动时刻感受激昂节奏，Kanada 都能精准契合你的需求。它不仅对常见音频格式提供全面支持，更具备强大的歌词显示功能与智能控制特性，引领你全身心沉醉于音乐的奇妙世界。
 
