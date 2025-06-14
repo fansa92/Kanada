@@ -274,7 +274,7 @@ class NetEase {
     return cookies;
   }
 
-  static Future<Map?> search(String keywords) async {
+  static Future<Map?> search(String keywords, {int limit=30}) async {
     // POST https://music.163.com/api/cloudsearch/pc?s=39music&type=1&limit=10
     // Accept: */*
     // User-Agent: Mozilla/5.0
@@ -286,7 +286,7 @@ class NetEase {
           queryParameters: {
             's': keywords,
             'type': '1', // 1: 单曲
-            'limit': '30', // 搜索结果数量
+            'limit': limit.toString(), // 搜索结果数量
           },
         ),
         headers: {
@@ -306,8 +306,8 @@ class NetEase {
     }
   }
 
-  static Future<List<int>> searchIds(String keywords) async {
-    final data = await search(keywords);
+  static Future<List<int>> searchIds(String keywords, {int limit=30}) async {
+    final data = await search(keywords, limit: limit);
     if (data == null) {
       return [];
     }
