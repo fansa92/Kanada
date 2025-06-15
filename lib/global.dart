@@ -21,6 +21,7 @@ import 'package:kanada/pages/more/debug/netease/search.dart';
 import 'package:kanada/pages/more/debug/pick_color.dart';
 import 'package:kanada/pages/more/debug/player.dart';
 import 'package:kanada/pages/more/debug/toast.dart';
+import 'package:kanada/pages/more/debug/uri.dart';
 import 'package:kanada/pages/more/settings.dart';
 import 'package:kanada/pages/more/settings/folders.dart';
 import 'package:kanada/pages/more/settings/player.dart';
@@ -56,6 +57,7 @@ class Global {
     '/more/debug/netease/url': (context) => const NetEaseUrlDebug(),
     '/more/debug/netease/playlist': (context) => const NetEasePlaylistDebug(),
     '/more/debug/check_redirects': (context) => const CheckRedirectsDebug(),
+    '/more/debug/uri': (context) => const UriDebug(),
     '/more/settings': (context) => const SettingsPage(),
     '/more/settings/folders': (context) => const FoldersSettings(),
     '/more/settings/player': (context) => const PlayerSettings(),

@@ -30,7 +30,9 @@ class Player {
     _queue.addAll(playerData['queue'].cast<String>().toList());
     _currentIndex = playerData['currentIndex'] ?? 0;
     await updatePlayMode();
-    await update();
+    if (_queue.isNotEmpty && _currentIndex >= 0) {
+      await update();
+    }
 
     _player.currentIndexStream.listen((index) {
       _currentIndex = index ?? -1; // 更新当前播放索引
@@ -40,6 +42,10 @@ class Player {
       if (current != null) {
         final currentMetadata = Metadata(current!);
         currentMetadata.download();
+      }
+      if (_player.hasNext && _player.nextIndex != null) {
+        final nextMetadata = Metadata(_queue[_player.nextIndex ?? 0]);
+        nextMetadata.download();
       }
     });
     // pause();
@@ -69,6 +75,14 @@ class Player {
 
   /// 当前播放文件路径
   String? get current =>
+      currentIndex >= 0 && currentIndex <
+          (_player.audioSource as ConcatenatingAudioSource).length
+          ? ((((_player
+          .audioSource as ConcatenatingAudioSource)[currentIndex] as UriAudioSource)
+          .tag as MediaItem).extras?['metadataId'] as String)
+          : null;
+
+  String? get _current =>
       _currentIndex >= 0 && _currentIndex < _queue.length
           ? _queue[_currentIndex]
           : null;
@@ -86,7 +100,7 @@ class Player {
 
   /// 更新播放队列和音频源
   Future<void> update() async {
-    final currentMetadata = Metadata(current!);
+    final currentMetadata = Metadata(_current!);
     final task = currentMetadata.download();
 
     // 创建固定长度的音频源数组
@@ -108,7 +122,9 @@ class Player {
         Uri.parse(await metadata.getPath()),
         tag: MediaItem(
           id: await metadata.getPath(),
-          title: metadata.title ?? path.split('/').last,
+          title: metadata.title ?? path
+              .split('/')
+              .last,
           // 默认使用文件名
           artist: metadata.artist,
           album: metadata.album,
@@ -156,7 +172,8 @@ class Player {
   Future<void> play() async {
     await _player.play();
     if (await KanadaVolumePlugin.getVolume() == 0) {
-      Fluttertoast.showToast(msg: "请先调整音量", toastLength: Toast.LENGTH_SHORT);
+      Fluttertoast.showToast(
+          msg: "请先调整音量", toastLength: Toast.LENGTH_SHORT);
     }
   }
 
@@ -201,14 +218,16 @@ class Player {
         Uri.parse(path),
         tag: MediaItem(
           id: path,
-          title: metadata.title ?? path.split('/').last,
+          title: metadata.title ?? path
+              .split('/')
+              .last,
           // 默认使用文件名
           artist: metadata.artist,
           album: metadata.album,
           artUri:
-              metadata.coverCache != null
-                  ? Uri.parse('file://${metadata.coverCache}')
-                  : null,
+          metadata.coverCache != null
+              ? Uri.parse('file://${metadata.coverCache}')
+              : null,
         ),
       ),
     );
