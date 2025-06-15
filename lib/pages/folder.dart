@@ -109,12 +109,24 @@ class _FolderPageState extends State<FolderPage> {
     await Global.player.play();
   }
 
+  Future<void> scrollToCurrentSong() async {
+    final path = Global.player.current;
+    if (path == null) return;
+    final index = playlist.songs.indexOf(path);
+    if(index == -1) return;
+    _scrollController.animateTo(
+      index*66.0,
+      duration: Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatPlaying(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      body: CustomScrollView(
+      body: Stack(children: [CustomScrollView(
         controller: _scrollController, // 关联控制器
         slivers: [
           SliverAppBar(
@@ -346,6 +358,15 @@ class _FolderPageState extends State<FolderPage> {
           SliverToBoxAdapter(child: SizedBox(height: 100)),
         ],
       ),
+        if(playlist.songs.contains(Global.player.current)) Positioned(
+          right: 20,
+          bottom: 96,
+          child: FloatingActionButton(
+            onPressed: scrollToCurrentSong,
+            child: const Icon(Icons.music_note),
+          )
+        ),
+      ]),
     );
   }
 }
