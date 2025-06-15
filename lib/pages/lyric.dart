@@ -42,19 +42,23 @@ class _LyricPageState extends State<LyricPage> {
       _init();
     });
     // 初始化位置监听
-    _positionSub = Global.player.positionStream.listen((position) {
+    if (Settings.lyricShowProgressBar) {
+      _positionSub = Global.player.positionStream.listen((position) {
       _duration = Global.player.duration?.inMilliseconds.toDouble() ?? 1.0;
       _position = Global.player.position.inMilliseconds.toDouble();
       _progress = _duration > 0 ? _position / _duration : 0.0;
       if (mounted) setState(() {});
     });
+    }
   }
 
   @override
   void dispose() {
     // _currentIndexSub?.cancel();
     _sequenceSub?.cancel();
-    _positionSub?.cancel();
+    if (Settings.lyricShowProgressBar) {
+      _positionSub?.cancel();
+    }
     super.dispose();
   }
 

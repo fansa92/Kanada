@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:kanada/background.dart';
 import 'package:kanada/settings.dart';
 import 'package:kanada/tool.dart';
 
@@ -67,29 +68,32 @@ class _LyricComplicatedViewState extends State<LyricComplicatedView> {
   Future<void> _fresh() async {
     if (!mounted) return;
     // print('fresh()');
-    int idx = -1;
-    for (int i = 0; i < lyrics!.lyrics.length; i++) {
-      final lyric = lyrics!.lyrics[i];
-      if (Global.player.position.inMilliseconds >= lyric['startTime']) {
-        idx = i;
-      }
-      if (Global.player.position.inMilliseconds <= lyric['endTime']) {
-        idx = i;
-        break;
-      }
-    }
-    if (idx != index) {
-      paddingTopCache.clear();
-      index = idx;
+    // int idx = -1;
+    // for (int i = 0; i < lyrics!.lyrics.length; i++) {
+    //   final lyric = lyrics!.lyrics[i];
+    //   if (Global.player.position.inMilliseconds >= lyric['startTime']) {
+    //     idx = i;
+    //   }
+    //   if (Global.player.position.inMilliseconds <= lyric['endTime']) {
+    //     idx = i;
+    //     break;
+    //   }
+    // }
+    // if (idx != index) {
+    await getCurrentLyric();
+    int newIndex=(currentLyric.index==-1?index:currentLyric.index).clamp(0, lyrics!.lyrics.length - 1);
+    if(newIndex!=index){
+    paddingTopCache.clear();
+    index = (newIndex);
+    setState(() {});
     }
     // print('index: $index');
     // widgets.clear();
     // final double offset = -index * 20;
     if (mounted) {
-      setState(() {});
-      Future.delayed(Duration(milliseconds: 10), () {
-        _fresh();
-      });
+    Future.delayed(Duration(milliseconds: 100), () {
+    _fresh();
+    });
     }
   }
 
@@ -117,11 +121,11 @@ class _LyricComplicatedViewState extends State<LyricComplicatedView> {
           child: Stack(
             children: [
               for (
-                int i = (index - 5).clamp(0, lyrics!.lyrics.length - 1);
-                i < lyrics!.lyrics.length &&
-                    (i - 1) * 60 - (index - 3) * 60 <=
-                        LyricComplicatedView.constraints!.maxHeight;
-                i++
+              int i = (index - 5).clamp(0, lyrics!.lyrics.length - 1);
+              i < lyrics!.lyrics.length &&
+                  (i - 3) * 60 - (index - 3) * 60 <=
+                      LyricComplicatedView.constraints!.maxHeight;
+              i++
               )
                 Builder(
                   builder: (context) {
@@ -135,39 +139,15 @@ class _LyricComplicatedViewState extends State<LyricComplicatedView> {
                       top: calcPaddingTop(i),
                       left: 0,
                       right: 0,
-                      child: ClipRect(
-                        child: ImageFiltered(
-                          imageFilter: ImageFilter.blur(
-                            sigmaX:
-                                Settings.lyricBlur
-                                    ? abs(index - i).toDouble()
-                                    : 0,
-                            sigmaY:
-                                Settings.lyricBlur
-                                    ? abs(index - i).toDouble()
-                                    : 0,
-                          ),
-                          child: Stack(
-                            children: [
-                              LyricWidget(
-                                ctx: lyrics!.lyrics[i]['content'],
-                                startTime: lyrics!.lyrics[i]['startTime'],
-                                endTime: lyrics!.lyrics[i]['endTime'],
-                                lyric: lyrics!.lyrics[i]['lyric'],
-                              ),
-                              if (Settings.lyricGlow)
-                                Positioned.fill(
-                                  child: BackdropFilter(
-                                    filter: ImageFilter.blur(
-                                      sigmaX: 2,
-                                      sigmaY: 2,
-                                    ),
-                                    child: Container(color: Colors.transparent),
-                                  ),
-                                ),
-                            ],
-                          ), // 你的目标组件
-                        ),
+                      child: LyricLineWidget(
+                        ctx: lyrics!.lyrics[i]['content'],
+                        startTime: lyrics!.lyrics[i]['startTime'],
+                        endTime: lyrics!.lyrics[i]['endTime'],
+                        lyric: lyrics!.lyrics[i]['lyric'],
+                        sigma: Settings.lyricBlur
+                            ? abs(index - i).toDouble()
+                            : 0,
+                        active: Global.player.position.inMilliseconds >= lyrics!.lyrics[i]['startTime'] && Global.player.position.inMilliseconds <= lyrics!.lyrics[i]['endTime'],
                       ),
                     );
                   },
@@ -198,5 +178,90 @@ class _LyricComplicatedViewState extends State<LyricComplicatedView> {
     }
     // return i*60 - (index-3)*60;
     return paddingTopCache[i]!;
+  }
+}
+
+class LyricLineWidget extends StatefulWidget {
+  final String ctx;
+  final int startTime;
+  final int endTime;
+  final List<Map<String, dynamic>> lyric;
+  final double sigma;
+  final bool active;
+  const LyricLineWidget({
+    super.key,
+    required this.ctx,
+    required this.startTime,
+    required this.endTime,
+    required this.lyric,
+    this.sigma=0,
+    this.active=false,
+  });
+  @override
+  State<LyricLineWidget> createState() => _LyricLineWidgetState();
+}
+
+class _LyricLineWidgetState extends State<LyricLineWidget> {
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  Future<void> _init() async {
+    if(!mounted) return;
+    final bool active=Global.player.position.inMilliseconds>=widget.startTime && Global.player.position.inMilliseconds<=widget.endTime;
+    if(active){
+      setState(() {});
+      Future.delayed(Duration(milliseconds: 10), () {
+        _init();
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(LyricLineWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if(oldWidget.active!=widget.active&&widget.active){
+      _init();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget lyric=LyricWidget(
+      ctx:widget.ctx,
+      startTime:widget.startTime,
+      endTime:widget.endTime,
+      lyric:widget.lyric,
+    );
+    if(Settings.lyricGlow){
+      lyric=Stack(
+        children: [
+          lyric,
+          if (Settings.lyricGlow)
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX: 2,
+                  sigmaY: 2,
+                ),
+                child: Container(color: Colors.transparent),
+              ),
+            ),
+        ],
+      );
+    }
+    if(Settings.lyricBlur){
+      lyric=ImageFiltered(
+        imageFilter: ImageFilter.blur(
+          sigmaX:widget.sigma,
+          sigmaY:widget.sigma,
+        ),
+        child: lyric,
+      );
+    }
+    return ClipRect(
+        child: lyric);
   }
 }

@@ -143,6 +143,7 @@ class CurrentLyric {
   String? path; // 文件路径
   int? position; // 当前播放位置（毫秒）
   Lyrics? lyrics; // 歌词解析器
+  int index = -1; // 当前歌词索引
   String content = ''; // 当前歌词内容
   int duration = 0; // 歌词持续时间（毫秒）
   int startTime = 0; // 歌词开始时间
@@ -163,7 +164,7 @@ class CurrentLyric {
 
   /// 获取当前时间点的歌词
   Future<bool> getCurrentLyric() async {
-    // 检查是否需要重新加载歌词
+    // 元数据检查逻辑保持不变...
     if (Global.metadataCache == null ||
         Global.metadataCache!.id != path ||
         lyrics == null) {
@@ -171,22 +172,157 @@ class CurrentLyric {
       await getLyrics();
     }
 
-    // 遍历查找匹配时间段的歌词
-    for (final lyric in lyrics!.lyrics) {
-      if (position! >= lyric['startTime'] && position! < lyric['endTime']) {
-        bool hasChanged = true;
-        // 检查歌词内容是否变化
-        if (content == lyric['content']) {
-          hasChanged = false;
-        }
-        // 更新歌词信息
-        content = lyric['content'];
-        duration = lyric['endTime'] - lyric['startTime'];
-        startTime = lyric['startTime'];
-        endTime = lyric['endTime'];
-        words = lyric['lyric'];
-        return hasChanged;
+    // 空歌词处理
+    if (lyrics!.lyrics.isEmpty) {
+      return handleEmptyLyrics();
+    }
+
+    final lyricList = lyrics!.lyrics;
+    final int pos = position!;
+
+    // 1. 快速路径：检查当前行和相邻行
+    if (index >= 0 && index < lyricList.length) {
+      final currentLyric = lyricList[index];
+
+      // 检查当前行是否仍然有效
+      if (pos >= currentLyric['startTime'] && pos < currentLyric['endTime']) {
+        return false; // 歌词未变化
       }
+
+      // 检查相邻行（针对连续播放优化）
+      if (_checkAdjacentLines(pos, lyricList)) {
+        return true;
+      }
+    }
+
+    // 2. 二分查找核心 - 确保找到第一个匹配行
+    int low = 0;
+    int high = lyricList.length - 1;
+    int? firstMatchIndex;
+
+    while (low <= high) {
+      final mid = (low + high) ~/ 2;
+      final lyric = lyricList[mid];
+      final start = lyric['startTime'];
+      final end = lyric['endTime'];
+
+      if (pos >= start && pos < end) {
+        // 找到匹配行，但需要检查前面是否有更早的匹配
+        firstMatchIndex = _findFirstMatch(mid, pos, lyricList);
+        break;
+      } else if (pos < start) {
+        high = mid - 1;
+      } else { // pos >= end
+        low = mid + 1;
+      }
+    }
+
+    // 3. 结果处理
+    if (firstMatchIndex != null) {
+      return updateLyricState(firstMatchIndex, lyricList[firstMatchIndex]);
+    }
+
+    // 4. 边界情况处理
+    return handleEdgeCases(lyricList, pos);
+  }
+
+  /// 向前搜索找到第一个匹配行
+  int _findFirstMatch(int startIndex, int pos, List<dynamic> lyricList) {
+    int firstMatch = startIndex;
+
+    // 向前搜索可能的更早匹配
+    for (int i = startIndex - 1; i >= 0; i--) {
+      final lyric = lyricList[i];
+      if (pos >= lyric['startTime'] && pos < lyric['endTime']) {
+        firstMatch = i; // 找到更早的匹配
+      } else {
+        break; // 已超出匹配范围
+      }
+    }
+
+    return firstMatch;
+  }
+
+  /// 检查相邻行（针对连续播放场景优化）
+  bool _checkAdjacentLines(int pos, List<dynamic> lyricList) {
+    // 优先检查下一行（常见于正常播放）
+    if (index + 1 < lyricList.length) {
+      final nextLyric = lyricList[index + 1];
+      if (pos >= nextLyric['startTime'] && pos < nextLyric['endTime']) {
+        return updateLyricState(index + 1, nextLyric);
+      }
+    }
+    if (index + 2 < lyricList.length) {
+      final nextLyric = lyricList[index + 2];
+      if (pos >= nextLyric['startTime'] && pos < nextLyric['endTime']) {
+        return updateLyricState(index + 2, nextLyric);
+      }
+    }
+
+    // 检查上一行（常见于回退操作）
+    if (index - 1 >= 0) {
+      final prevLyric = lyricList[index - 1];
+      if (pos >= prevLyric['startTime'] && pos < prevLyric['endTime']) {
+        return updateLyricState(index - 1, prevLyric);
+      }
+    }
+
+    return false;
+  }
+
+  /// 边界情况处理
+  bool handleEdgeCases(List<dynamic> lyricList, int pos) {
+    // 播放进度在首行之前
+    if (pos < lyricList.first['startTime']) {
+      return resetLyricState();
+    }
+    // 播放进度在末行之后
+    else if (pos >= lyricList.last['endTime']) {
+      final lastIndex = lyricList.length - 1;
+      return updateLyricState(lastIndex, lyricList[lastIndex]);
+    }
+    return false;
+  }
+
+  /// 更新歌词状态
+  bool updateLyricState(int newIndex, Map<String, dynamic> lyric) {
+    // 检查是否真正需要更新
+    if (index == newIndex &&
+        content == lyric['content'] &&
+        startTime == lyric['startTime']) {
+      return false;
+    }
+
+    // 更新状态
+    index = newIndex;
+    content = lyric['content'];
+    startTime = lyric['startTime'];
+    endTime = lyric['endTime'];
+    duration = endTime - startTime;
+    words = lyric['lyric'] ?? [];
+
+    return true;
+  }
+
+  /// 处理空歌词情况
+  bool handleEmptyLyrics() {
+    if (content.isNotEmpty) {
+      resetLyricState();
+      return true;
+    }
+    return false;
+  }
+
+  /// 重置歌词状态
+  bool resetLyricState() {
+    if (index != -1 || content.isNotEmpty) {
+      index = -1;
+      content = '';
+      duration = 0;
+      startTime = 0;
+      endTime = 0;
+      words = [];
+      return true;
     }
     return false;
   }
