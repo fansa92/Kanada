@@ -69,7 +69,9 @@ class _LyricPageState extends State<LyricPage> {
     metadata = Metadata(path!);
     await metadata!.getMetadata();
 
-    setState(() {});
+    if(mounted) {
+      setState(() {});
+    }
   }
 
   @override

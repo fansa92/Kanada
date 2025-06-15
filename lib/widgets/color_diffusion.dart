@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class ColorDiffusionWidget extends StatelessWidget {
@@ -14,9 +15,9 @@ class ColorDiffusionWidget extends StatelessWidget {
     this.width = double.infinity,
     this.height = double.infinity,
   }) : assert(
-         colors.length == offsets.length,
-         'Colors and offsets must have the same length',
-       );
+  colors.length == offsets.length,
+  'Colors and offsets must have the same length',
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -35,62 +36,54 @@ class _ColorDiffusionPainter extends CustomPainter {
   final List<Offset> offsets;
 
   _ColorDiffusionPainter({required this.colors, required this.offsets})
-    : assert(
-        colors.length == offsets.length,
-        'Colors and offsets must have the same length',
-      );
+      : assert(
+  colors.length == offsets.length,
+  'Colors and offsets must have the same length',
+  );
 
   @override
   bool shouldRepaint(covariant _ColorDiffusionPainter old) {
     // 添加深度比较
-    return old.colors != colors ||
-        old.offsets != offsets;
+    return !listEquals(old.colors, colors) || // 改为深度比较
+        !listEquals(old.offsets, offsets);
   }
 
   @override
   void paint(Canvas canvas, Size size) {
-    for (int i = 0; i < colors.length; i++) {
-      final color = colors[i];
+    // 预计算最大半径
+    final maxSize = max(size.width, size.height);
+    final gradients = List<RadialGradient>.generate(colors.length, (i) {
       final offset = offsets[i];
-
-      // 计算实际坐标
       final centerX = offset.dx * size.width;
       final centerY = offset.dy * size.height;
 
-      // 计算到四个角落的最大距离
       final distances = [
-        _calculateDistance(centerX, centerY, 0, 0),
-        _calculateDistance(centerX, centerY, size.width, 0),
-        _calculateDistance(centerX, centerY, size.width, size.height),
-        _calculateDistance(centerX, centerY, 0, size.height),
+        (Offset(centerX, centerY) - const Offset(0, 0)).distance,
+        (Offset(centerX, centerY) - Offset(size.width, 0)).distance,
+        (Offset(centerX, centerY) - Offset(size.width, size.height)).distance,
+        (Offset(centerX, centerY) - Offset(0, size.height)).distance,
       ];
       final maxDistance = distances.reduce(max);
-
-      // 计算渐变半径（相对于最大尺寸）
-      final maxSize = max(size.width, size.height);
-      final radius = maxDistance / (maxSize / 2);
-
-      // 创建径向渐变
-      final gradient = RadialGradient(
+      return RadialGradient(
         center: Alignment((offset.dx * 2 - 1), (offset.dy * 2 - 1)),
-        colors: [color, Colors.transparent],
+        colors: [colors[i], Colors.transparent],
         stops: const [0.0, 1.0],
-        radius: radius,
+        radius: maxDistance / (maxSize / 2),
         tileMode: TileMode.clamp,
       );
+    });
 
-      // 绘制渐变
-      final paint =
-          Paint()
-            ..shader = gradient.createShader(
-              Rect.fromLTWH(0, 0, size.width, size.height),
-            );
+    // 缓存 Paint 对象
+    final paintCache = Paint()..shader = gradients[0].createShader(
+        Rect.fromLTWH(0, 0, size.width, size.height));
 
-      canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
+    for (int i = 0; i < colors.length; i++) {
+      // 重用缓存的 Paint 对象
+      if (i > 0) {
+        paintCache.shader = gradients[i].createShader(
+            Rect.fromLTWH(0, 0, size.width, size.height));
+      }
+      canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paintCache);
     }
-  }
-
-  double _calculateDistance(double x1, double y1, double x2, double y2) {
-    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
   }
 }

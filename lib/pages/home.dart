@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../global.dart';
-import '../background.dart';
 import '../metadata.dart';
 
 import 'package:waterfall_flow/waterfall_flow.dart';
@@ -166,12 +165,6 @@ class _WaterFallItemState extends State<WaterFallItem> {
       initialIndex: idx >= 0 ? idx : null,
     );
     Global.init = true;
-    if (!Global.lyricSenderInit) {
-      // print('sendLyrics');
-      // sendLyrics();
-      startBackground();
-      Global.lyricSenderInit = true;
-    }
     await Global.player.seek(Duration.zero);
     await Global.player.play();
   }

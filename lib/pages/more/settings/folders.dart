@@ -38,8 +38,8 @@ class _FoldersSettingsState extends State<FoldersSettings> {
     if(index==null){
       if(clipboard.isNotEmpty&&uriReg.hasMatch(clipboard)){
         // controller.text = uriReg.firstMatch(clipboard)?.group(0)?? '';
-        final uri = Uri.parse(await checkRedirects(uriReg.firstMatch(clipboard)?.group(0)?? ''));
-        if(uri.path=='/playlist'){
+        final uri = Uri.parse(await checkRedirects(uriReg.firstMatch(clipboard.replaceFirst('/#/', '/'))?.group(0)?? ''));
+        if(uri.authority=='music.163.com'&&uri.path=='/playlist'){
           controller.text = 'netease://${uri.queryParameters['id']}';
         }
       }

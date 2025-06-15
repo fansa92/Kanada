@@ -27,6 +27,7 @@ class _DebugPageState extends State<DebugPage>{
         [Icons.color_lens, 'Color Page', '/more/debug/color'],
         [Icons.music_note, 'NetEase Debug Page', '/more/debug/netease'],
         [Icons.text_fields, 'Check Redirects Debug Page', '/more/debug/check_redirects'],
+        [Icons.text_fields, 'Uri Debug Page', '/more/debug/uri'],
       ]),
     );
   }

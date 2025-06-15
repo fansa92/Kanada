@@ -1,9 +1,7 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:kanada/global.dart';
 import 'package:kanada/metadata.dart';
-import '../background.dart';
 
 /// 音乐信息展示组件，包含封面、标题、艺术家信息和播放功能
 class MusicInfo extends StatefulWidget {
@@ -63,12 +61,6 @@ class _MusicInfoState extends State<MusicInfo> {
       initialIndex: idx >= 0 ? idx : null,
     );
     Global.init = true;
-
-    // 初始化歌词后台服务
-    if (!Global.lyricSenderInit) {
-      startBackground();
-      Global.lyricSenderInit = true;
-    }
 
     // 跳转到当前曲目并开始播放
     if (idx >= 0) {

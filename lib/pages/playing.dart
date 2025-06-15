@@ -188,7 +188,7 @@ class _PlayerBackgroundState extends State<PlayerBackground>
   @override
   Widget build(BuildContext context) {
     return isLoading
-        ? Container()
+        ? Container(color: Global.playerTheme.colorScheme.secondaryContainer)
         : ColorDiffusionWidget(colors: colors, offsets: _animatedOffsets);
   }
 }

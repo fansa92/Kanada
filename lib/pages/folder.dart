@@ -4,7 +4,6 @@ import 'package:kanada/metadata.dart';
 import 'package:kanada/userdata.dart';
 import 'package:kanada/widgets/music_info.dart';
 import '../global.dart';
-import '../background.dart';
 import '../widgets/float_playing.dart';
 
 class FolderPage extends StatefulWidget {
@@ -106,12 +105,6 @@ class _FolderPageState extends State<FolderPage> {
       // initialIndex: idx >= 0? idx : null,
     );
     Global.init = true;
-    if (!Global.lyricSenderInit) {
-      // print('sendLyrics');
-      // sendLyrics();
-      startBackground();
-      Global.lyricSenderInit = true;
-    }
     await Global.player.seek(Duration.zero);
     await Global.player.play();
   }

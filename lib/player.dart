@@ -4,6 +4,8 @@ import 'package:just_audio/just_audio.dart';
 import 'package:kanada/settings.dart';
 import 'package:kanada/userdata.dart';
 import 'package:kanada_volume/kanada_volume.dart';
+import 'background.dart';
+import 'global.dart';
 import 'metadata.dart';
 
 /// 播放器核心类，管理音频播放、队列和播放状态
@@ -74,15 +76,15 @@ class Player {
   Duration get position => _player.position;
 
   /// 当前播放文件路径
-  String? get current =>
-      currentIndex >= 0 && currentIndex <
-          (_player.audioSource as ConcatenatingAudioSource).length
-          ? ((((_player
-          .audioSource as ConcatenatingAudioSource)[currentIndex] as UriAudioSource)
-          .tag as MediaItem).extras?['metadataId'] as String)
-          : null;
+  // String? get current =>
+  //     currentIndex >= 0 && currentIndex <
+  //         (_player.audioSource as ConcatenatingAudioSource).length
+  //         ? ((((_player
+  //         .audioSource as ConcatenatingAudioSource)[currentIndex] as UriAudioSource)
+  //         .tag as MediaItem).extras?['metadataId'] as String)
+  //         : null;
 
-  String? get _current =>
+  String? get current =>
       _currentIndex >= 0 && _currentIndex < _queue.length
           ? _queue[_currentIndex]
           : null;
@@ -100,7 +102,7 @@ class Player {
 
   /// 更新播放队列和音频源
   Future<void> update() async {
-    final currentMetadata = Metadata(_current!);
+    final currentMetadata = Metadata(current!);
     final task = currentMetadata.download();
 
     // 创建固定长度的音频源数组
@@ -134,6 +136,13 @@ class Player {
           },
         ),
       );
+
+      if (!Global.lyricSenderInit) {
+        // print('sendLyrics');
+        // sendLyrics();
+        startBackground();
+        Global.lyricSenderInit = true;
+      }
     }
 
     // 并行处理所有元数据
