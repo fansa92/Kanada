@@ -38,16 +38,27 @@ class Player {
 
     _player.currentIndexStream.listen((index) {
       _currentIndex = index ?? -1; // 更新当前播放索引
+      final metadata = Metadata(current!);
+      final nextMetadata = Metadata(_queue[_player.nextIndex ?? 0]);
+      Fluttertoast.showToast(
+          msg: "当前播放: ${metadata.title}\n下一首: ${nextMetadata.title}", toastLength: Toast.LENGTH_SHORT);
       UserData(
         'player.json',
       ).set({'queue': _queue, 'currentIndex': _currentIndex});
       if (current != null) {
         final currentMetadata = Metadata(current!);
-        currentMetadata.download();
+        // if(await currentMetadata.getPath()) // TODO 提前暂停，下载完后播放
+        currentMetadata.download().then((value) {
+          Fluttertoast.showToast(
+              msg: "下载完成: ${currentMetadata.title}", toastLength: Toast.LENGTH_SHORT);
+        });
       }
       if (_player.hasNext && _player.nextIndex != null) {
         final nextMetadata = Metadata(_queue[_player.nextIndex ?? 0]);
-        nextMetadata.download();
+        nextMetadata.download().then((value) {
+          Fluttertoast.showToast(
+              msg: "下载完成: ${nextMetadata.title}", toastLength: Toast.LENGTH_SHORT);
+        });
       }
     });
     // pause();

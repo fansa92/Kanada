@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:kanada/cache.dart';
 import 'package:kanada/global.dart';
+import 'package:kanada/metadata.dart';
 import 'package:kanada/player.dart';
 import 'package:kanada/settings.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -14,6 +16,19 @@ Future<void> main() async {
 
   // 加载应用设置
   await Settings.fresh();
+
+  int totalSize = 0;
+  Metadata.metadataCacheManager=
+      KanadaCacheManager(cacheKey: 'metadata', maxSize: FileSize(mB: 16), extension: 'json');
+  totalSize += Metadata.metadataCacheManager.maxSize.size;
+  Metadata.coverCacheManager=
+      KanadaCacheManager(cacheKey:'cover', maxSize: FileSize(mB: Settings.cacheSize.gB>=2?1024-16-32:512-16-32), extension: 'jpg');
+  totalSize += Metadata.coverCacheManager.maxSize.size;
+  Metadata.lyricCacheManager=
+      KanadaCacheManager(cacheKey:'lyric', maxSize: FileSize(mB: 32), extension: 'lrc');
+  totalSize += Metadata.lyricCacheManager.maxSize.size;
+  Metadata.musicCacheManager=
+      KanadaCacheManager(cacheKey:'music', maxSize: FileSize(B: Settings.cacheSize.size-totalSize), extension: 'flac');
 
   // 初始化音频后台服务
   await JustAudioBackground.init(

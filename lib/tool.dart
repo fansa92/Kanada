@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:palette_generator/palette_generator.dart';
@@ -96,4 +98,13 @@ Future<String> checkRedirects(String url) async {
   http.Client baseClient = http.Client();
   http.StreamedResponse response = await baseClient.send(req);
   return response.headers['location']??url;
+}
+
+String sha256String(String input) {
+  // 把输入的字符串转换为UTF-8字节数组
+  final bytes = utf8.encode(input);
+  // 计算SHA256哈希值
+  final digest = sha256.convert(bytes);
+  // 把结果转换为16进制字符串
+  return digest.toString();
 }

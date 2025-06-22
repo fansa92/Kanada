@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:kanada/pages/more/settings/cache.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:kanada/pages/app.dart';
 import 'package:kanada/widgets/link.dart';
 import 'package:kanada_lyric_sender/kanada_lyric_sender.dart';
 
+import '../../cache.dart';
 import '../../settings.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -294,6 +296,77 @@ class _SettingsPageState extends State<SettingsPage> {
               Settings.mutePause = !Settings.mutePause;
               Settings.save();
               setState(() {});
+            },
+          ),
+          Divider(),
+          ListTile(
+            title: Text('缓存大小'),
+            trailing: Text(Settings.cacheSize.toString()),
+            onTap: () {
+              Settings.cacheSize = Settings.cacheSize.clamp(
+                FileSize(gB: 1),
+                FileSize(gB: 24),
+              );
+              showDialog(
+                context: context,
+                builder:
+                    (context) => StatefulBuilder(
+                      builder:
+                          (context, setState) => AlertDialog(
+                            title: Text('调整缓存大小'),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Slider(
+                                  value: Settings.cacheSize.size.toDouble(),
+                                  min: 1024 * 1024 * 1024,
+                                  max: 1024 * 1024 * 1024 * 24,
+                                  divisions: 23,
+                                  label: Settings.cacheSize.toString(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      Settings.cacheSize = FileSize(
+                                        B: value.round(),
+                                      );
+                                    });
+                                  },
+                                ),
+                                Text('当前值: ${Settings.cacheSize.toString()}'),
+                              ],
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed:
+                                    () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => CacheSettings(),
+                                      ),
+                                    ),
+                                child: Text('详情'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: Text('取消'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Settings.save();
+                                  Fluttertoast.showToast(
+                                    msg: '重启生效',
+                                    toastLength: Toast.LENGTH_LONG,
+                                  );
+                                  Navigator.pop(context);
+                                  setState(() {});
+                                },
+                                child: Text('确定'),
+                              ),
+                            ],
+                          ),
+                    ),
+              ).then((value) {
+                setState(() {});
+              });
             },
           ),
           Divider(),

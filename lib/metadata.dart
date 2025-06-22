@@ -3,12 +3,24 @@ import 'dart:io';
 import 'package:audio_metadata_reader/audio_metadata_reader.dart';
 import 'package:kanada/settings.dart';
 import 'package:kanada_album_art/kanada_album_art.dart';
-import 'package:path_provider/path_provider.dart';
+import 'cache.dart';
 import 'netease.dart';
 
 class Metadata {
   // 使用缓存避免重复创建相同路径的元数据对象
   static final _cache = <String, Metadata>{};
+  // static final KanadaCacheManager metadataCacheManager=
+  //     KanadaCacheManager(cacheKey: 'metadata', maxSize: FileSize(mB: 128));
+  // static final KanadaCacheManager coverCacheManager=
+  //     KanadaCacheManager(cacheKey:'cover', maxSize: FileSize(mB: 256));
+  // static final KanadaCacheManager lyricCacheManager=
+  //     KanadaCacheManager(cacheKey:'lyric', maxSize: FileSize(mB: 128));
+  // static final KanadaCacheManager musicCacheManager=
+  //     KanadaCacheManager(cacheKey:'music', maxSize: FileSize(gB: 12));
+  static late final KanadaCacheManager metadataCacheManager;
+  static late final KanadaCacheManager coverCacheManager;
+  static late final KanadaCacheManager lyricCacheManager;
+  static late final KanadaCacheManager musicCacheManager;
   final String id; // 音频文件路径（不可变）
 
   /// 工厂构造函数，保证同一路径只有一个实例
@@ -48,7 +60,7 @@ class Metadata {
   // 缓存状态标志
   bool gotMetadata = false; // 元数据是否已获取
   bool gotLyric = false; // 歌词是否已获取
-  bool gotCover = false; // 封面是否已获取
+  bool gotCover = false;
 
   /// 获取元数据（带缓存功能）
   /// [cache] 是否使用缓存
@@ -140,10 +152,7 @@ class MetadataFile extends Metadata {
     }
     gotMetadata = true;
 
-    final appDir = await getApplicationDocumentsDirectory();
-    final meta = File(
-      '${appDir.path}/cache/metadata/metadata/${id.hashCode}.json',
-    );
+    final meta = await Metadata.metadataCacheManager.getCachedFile(id);
 
     // 检查缓存有效性
     if (cache &&
@@ -181,10 +190,9 @@ class MetadataFile extends Metadata {
     duration = metadata.duration;
 
     // 检查封面缓存
-    if (File(
-      '${appDir.path}/cache/metadata/picture/${id.hashCode}.jpg',
-    ).existsSync()) {
-      coverCache = '${appDir.path}/cache/metadata/picture/${id.hashCode}.jpg';
+    final cachedCover = await Metadata.coverCacheManager.getCachedFile(id);
+    if (await cachedCover.exists()) {
+      coverCache = cachedCover.path;
       coverPath = coverCache;
     }
 
@@ -210,8 +218,7 @@ class MetadataFile extends Metadata {
     }
     gotLyric = true;
 
-    final appDir = await getApplicationDocumentsDirectory();
-    final lrc = File('${appDir.path}/cache/metadata/lyric/${id.hashCode}.lrc');
+    final lrc = await Metadata.lyricCacheManager.getCachedFile(id);
 
     // 检查歌词缓存
     if (cache &&
@@ -237,10 +244,7 @@ class MetadataFile extends Metadata {
     }
     gotCover = true;
 
-    final appDir = await getApplicationDocumentsDirectory();
-    final pic = File(
-      '${appDir.path}/cache/metadata/picture/${id.hashCode}.jpg',
-    );
+    final pic = await Metadata.coverCacheManager.getCachedFile(id);
 
     // 检查封面缓存
     if (cache &&

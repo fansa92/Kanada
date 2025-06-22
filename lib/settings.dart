@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:kanada/userdata.dart';
 
+import 'cache.dart';
+
 /// 应用设置管理类，使用静态成员存储全局设置
 ///
 /// 负责：
@@ -24,6 +26,8 @@ class Settings {
   static late bool repeat; // 循环开关状态
   static late bool repeatOne; // 单曲循环开关状态
   static late bool shuffle; // 随机开关状态
+  static late FileSize cacheSize; // 缓存大小
+  static late Map<String, dynamic> netease; // 网易云音乐登录信息
   static late bool debug; // 调试模式开关状态
 
   /// 从持久化存储初始化设置
@@ -56,6 +60,8 @@ class Settings {
           'repeat': false,
           'repeatOne': false,
           'shuffle': false,
+          'cacheSize': FileSize(gB: 12).size,
+          'netease': {'cookie': ''},
           'debug': false,
         },
       );
@@ -74,6 +80,8 @@ class Settings {
       repeat = json['repeat'];
       repeatOne = json['repeatOne'];
       shuffle = json['shuffle'];
+      cacheSize = FileSize(B: json['cacheSize']);
+      netease = json['netease'].cast<String, dynamic>();
       debug = json['debug'];
     } catch (e) {
       if (userdata.absPath != null) {
@@ -101,6 +109,8 @@ class Settings {
       'repeat': repeat,
       'repeatOne': repeatOne,
       'shuffle': shuffle,
+      'cacheSize': cacheSize.size,
+      'netease': netease,
       'debug': debug,
     });
   }
