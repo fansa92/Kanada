@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:kanada/settings.dart';
 import 'package:kanada/tool.dart';
 import 'metadata.dart';
@@ -17,12 +18,8 @@ class MetadataNetEase extends Metadata {
 
   /// 获取元数据（带缓存功能）
   /// [cache] 是否使用缓存
-  /// [timeout] 缓存超时时间（秒），默认7天
   @override
-  Future<Metadata> getMetadata({
-    bool cache = false,
-    int timeout = 604800,
-  }) async {
+  Future<Metadata> getMetadata({bool cache = false}) async {
     if (cache && gotMetadata && title != null) {
       return this;
     }
@@ -31,10 +28,9 @@ class MetadataNetEase extends Metadata {
     final meta = await Metadata.metadataCacheManager.getCachedFile(id);
 
     // 检查缓存有效性
-    if (cache &&
-        await meta.exists() &&
-        DateTime.now().difference(await meta.lastModified()).inSeconds <
-            timeout) {
+    // 修改 getMetadata 方法中的缓存检查
+    if (cache && await meta.exists()) {
+      // 移除超时检查
       final data = jsonDecode(await meta.readAsString());
       title = data['title'];
       artist = data['artist'];
@@ -86,7 +82,7 @@ class MetadataNetEase extends Metadata {
 
   /// 获取歌词（带缓存功能）
   @override
-  Future<String?> getLyric({bool cache = true, int timeout = 604800}) async {
+  Future<String?> getLyric({bool cache = true}) async {
     if (cache && gotLyric && lyric != null) {
       return lyric;
     }
@@ -95,10 +91,9 @@ class MetadataNetEase extends Metadata {
     final lrc = await Metadata.lyricCacheManager.getCachedFile(id);
 
     // 检查歌词缓存
-    if (cache &&
-        await lrc.exists() &&
-        DateTime.now().difference(await lrc.lastModified()).inSeconds <
-            timeout) {
+    // 修改 getLyric 方法中的缓存检查
+    if (cache && await lrc.exists()) {
+      // 移除超时检查
       lyric = await lrc.readAsString();
       return lyric;
     }
@@ -116,7 +111,7 @@ class MetadataNetEase extends Metadata {
 
   /// 获取专辑封面（带缓存功能）
   @override
-  Future<String?> getCover({bool cache = true, int timeout = 604800}) async {
+  Future<String?> getCover({bool cache = true}) async {
     if (cache && gotCover && coverPath != null) {
       return coverPath;
     }
@@ -125,11 +120,9 @@ class MetadataNetEase extends Metadata {
     final pic = await Metadata.coverCacheManager.getCachedFile(id);
 
     // 检查封面缓存
-    if (cache &&
-        await pic.exists() &&
-        DateTime.now().difference(await pic.lastModified()).inSeconds <
-            timeout) {
-      // cover = await pic.readAsBytes();
+    // 修改 getCover 方法中的缓存检查
+    if (cache && await pic.exists()) {
+      // 移除超时检查
       coverPath = pic.path;
       return coverPath;
     }
@@ -184,9 +177,13 @@ class MetadataNetEase extends Metadata {
     if (url == null) {
       return;
     }
-    final response = await http.get(Uri.parse(url));
-    if (response.statusCode == 200) {
-      await file.writeAsBytes(response.bodyBytes);
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        await file.writeAsBytes(response.bodyBytes);
+      }
+    } catch (e) {
+      if (kDebugMode) print(e);
     }
   }
 }
@@ -460,9 +457,9 @@ class NetEase {
 
   // 获取歌曲播放链接
   static Future<Map<String, dynamic>> urlV1(
-      int songId, [
-        String level = 'jymaster',
-      ]) async {
+    int songId, [
+    String level = 'jymaster',
+  ]) async {
     // 1. 构造请求参数
     final requestId = _generateRequestId();
     final config = {
@@ -550,13 +547,13 @@ class NetEase {
 
   // 辅助方法：发送POST请求，使用cookiesMap
   static Future<http.Response> _postRequest(
-      String url,
-      Map<String, String> data,
-      Map<String, String> cookies,
-      ) async {
+    String url,
+    Map<String, String> data,
+    Map<String, String> cookies,
+  ) async {
     final headers = {
       'User-Agent':
-      'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 '
+          'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 '
           '(KHTML, like Gecko) Safari/537.36 Chrome/91.0.4472.164 '
           'NeteaseMusicDesktop/2.10.2.200154',
       'Referer': 'https://music.163.com/', // 修正：添加Referer

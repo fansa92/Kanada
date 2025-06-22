@@ -12,6 +12,7 @@ import 'dart:io'; // 文件操作
 final CurrentLyric currentLyric = CurrentLyric();
 // 播放状态标志
 bool isPlaying = false;
+int lastIndex=-1;
 
 /// 启动后台任务
 Future<void> startBackground() async {
@@ -40,6 +41,10 @@ Future<void> timerFunc(Timer timer) async {
 Future<void> background() async {
   if (Settings.mutePause) {
     mutePause(); // 静音暂停处理
+  }
+  if(lastIndex!=Global.player.currentIndex){
+    lastIndex=Global.player.currentIndex;
+    Global.player.listenIndex(lastIndex);
   }
   // 获取当前歌词
   getCurrentLyric().then((bool state) {
@@ -158,8 +163,12 @@ class CurrentLyric {
 
   /// 解析歌词
   Future<void> getLyrics() async {
-    lyrics = Lyrics(Global.metadataCache!.lyric!);
-    await lyrics!.parse();
+    if (Global.metadataCache!.lyric != null) {
+      lyrics = Lyrics(Global.metadataCache!.lyric!);
+      await lyrics!.parse();
+    }
+    // lyrics=Lyrics('');
+    // lyrics!.parse();
   }
 
   /// 获取当前时间点的歌词

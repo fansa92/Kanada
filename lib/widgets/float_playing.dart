@@ -72,7 +72,7 @@ class _FloatPlayingState extends State<FloatPlaying> {
     if (newPath == null) return;
 
     // 路径未变化时跳过
-    if (newPath == metadata?.id) return;
+    // if (newPath == metadata?.id) return;
 
     // 更新元数据
     path = newPath;
@@ -107,7 +107,7 @@ class _FloatPlayingState extends State<FloatPlaying> {
         ),
       );
     }
-    setState(() {});
+    if(mounted) setState(() {});
   }
 
   @override

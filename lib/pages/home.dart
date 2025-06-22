@@ -74,6 +74,9 @@ class _WaterFallState extends State<WaterFall> {
 
   Future<void> _init() async {
     await playlist.getSongs();
+    if(playlist.songs.isEmpty){
+      return;
+    }
     _fresh(n: 20);
     init = true;
   }

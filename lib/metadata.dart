@@ -64,19 +64,15 @@ class Metadata {
 
   /// 获取元数据（带缓存功能）
   /// [cache] 是否使用缓存
-  /// [timeout] 缓存超时时间（秒），默认7天
-  Future<Metadata> getMetadata({
-    bool cache = false,
-    int timeout = 604800,
-  }) async {
+  Future<Metadata> getMetadata({bool cache = false}) async {
     return this;
   }
 
-  Future<String?> getLyric({bool cache = true, int timeout = 604800}) async {
+  Future<String?> getLyric({bool cache = true}) async {
     return lyric;
   }
 
-  Future<String?> getCover({bool cache = true, int timeout = 604800}) async {
+  Future<String?> getCover({bool cache = true}) async {
     return coverPath;
   }
 
@@ -141,12 +137,8 @@ class MetadataFile extends Metadata {
 
   /// 获取元数据（带缓存功能）
   /// [cache] 是否使用缓存
-  /// [timeout] 缓存超时时间（秒），默认7天
   @override
-  Future<Metadata> getMetadata({
-    bool cache = false,
-    int timeout = 604800,
-  }) async {
+  Future<Metadata> getMetadata({bool cache = false}) async {
     if (cache && gotMetadata) {
       return this;
     }
@@ -154,11 +146,8 @@ class MetadataFile extends Metadata {
 
     final meta = await Metadata.metadataCacheManager.getCachedFile(id);
 
-    // 检查缓存有效性
-    if (cache &&
-        await meta.exists() &&
-        DateTime.now().difference(await meta.lastModified()).inSeconds <
-            timeout) {
+    // 修改缓存检查逻辑（移除超时判断）
+    if (cache && await meta.exists()) {
       final data = jsonDecode(await meta.readAsString());
       title = data['title'];
       artist = data['artist'];
@@ -212,7 +201,7 @@ class MetadataFile extends Metadata {
 
   /// 获取歌词（带缓存功能）
   @override
-  Future<String?> getLyric({bool cache = true, int timeout = 604800}) async {
+  Future<String?> getLyric({bool cache = true}) async {
     if (cache && gotLyric) {
       return lyric;
     }
@@ -221,10 +210,7 @@ class MetadataFile extends Metadata {
     final lrc = await Metadata.lyricCacheManager.getCachedFile(id);
 
     // 检查歌词缓存
-    if (cache &&
-        await lrc.exists() &&
-        DateTime.now().difference(await lrc.lastModified()).inSeconds <
-            timeout) {
+    if (cache && await lrc.exists()) {
       lyric = await lrc.readAsString();
       return lyric;
     }
@@ -238,7 +224,7 @@ class MetadataFile extends Metadata {
 
   /// 获取专辑封面（带缓存功能）
   @override
-  Future<String?> getCover({bool cache = true, int timeout = 604800}) async {
+  Future<String?> getCover({bool cache = true}) async {
     if (cache && gotCover) {
       return coverPath;
     }
@@ -247,10 +233,7 @@ class MetadataFile extends Metadata {
     final pic = await Metadata.coverCacheManager.getCachedFile(id);
 
     // 检查封面缓存
-    if (cache &&
-        await pic.exists() &&
-        DateTime.now().difference(await pic.lastModified()).inSeconds <
-            timeout) {
+    if (cache && await pic.exists()) {
       // cover = await pic.readAsBytes();
       coverPath = pic.path;
       return coverPath;

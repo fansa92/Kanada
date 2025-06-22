@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/services.dart';
@@ -17,18 +19,32 @@ Future<void> main() async {
   // 加载应用设置
   await Settings.fresh();
 
-  int totalSize = 0;
-  Metadata.metadataCacheManager=
-      KanadaCacheManager(cacheKey: 'metadata', maxSize: FileSize(mB: 16), extension: 'json');
-  totalSize += Metadata.metadataCacheManager.maxSize.size;
-  Metadata.coverCacheManager=
-      KanadaCacheManager(cacheKey:'cover', maxSize: FileSize(mB: Settings.cacheSize.gB>=2?1024-16-32:512-16-32), extension: 'jpg');
-  totalSize += Metadata.coverCacheManager.maxSize.size;
-  Metadata.lyricCacheManager=
-      KanadaCacheManager(cacheKey:'lyric', maxSize: FileSize(mB: 32), extension: 'lrc');
-  totalSize += Metadata.lyricCacheManager.maxSize.size;
-  Metadata.musicCacheManager=
-      KanadaCacheManager(cacheKey:'music', maxSize: FileSize(B: Settings.cacheSize.size-totalSize), extension: 'flac');
+  FileSize totalSize = FileSize();
+  Metadata.metadataCacheManager = KanadaCacheManager(
+    cacheKey: 'metadata',
+    maxSize: FileSize(mB: 16),
+    extension: 'json',
+  );
+  totalSize += Metadata.metadataCacheManager.maxSize;
+  Metadata.coverCacheManager = KanadaCacheManager(
+    cacheKey: 'cover',
+    maxSize: FileSize(
+      B: (max(512, Settings.cacheSize.size * .2) - 16 - 32).toInt(),
+    ),
+    extension: 'jpg',
+  );
+  totalSize += Metadata.coverCacheManager.maxSize;
+  Metadata.lyricCacheManager = KanadaCacheManager(
+    cacheKey: 'lyric',
+    maxSize: FileSize(mB: 32),
+    extension: 'lrc',
+  );
+  totalSize += Metadata.lyricCacheManager.maxSize;
+  Metadata.musicCacheManager = KanadaCacheManager(
+    cacheKey: 'music',
+    maxSize: Settings.cacheSize - totalSize,
+    extension: 'flac',
+  );
 
   // 初始化音频后台服务
   await JustAudioBackground.init(
@@ -58,12 +74,12 @@ Future<void> main() async {
 /// 请求运行时权限
 Future<void> requestPermission() async {
   final permissions = [
-    Permission.audio,               // 音频播放权限
+    Permission.audio, // 音频播放权限
     Permission.manageExternalStorage, // 文件管理权限
-    Permission.notification,        // 通知权限
+    Permission.notification, // 通知权限
   ];
 
-  bool hasDenied = false;          // 存在暂时拒绝的权限
+  bool hasDenied = false; // 存在暂时拒绝的权限
   bool hasPermanentDenied = false; // 存在永久拒绝的权限
 
   for (final permission in permissions) {
@@ -75,7 +91,7 @@ Future<void> requestPermission() async {
     }
   }
 
-  if (hasDenied) requestPermission();   // 重新请求暂时拒绝的权限
+  if (hasDenied) requestPermission(); // 重新请求暂时拒绝的权限
   if (hasPermanentDenied) openAppSettings(); // 引导到设置页面
 }
 
@@ -117,7 +133,8 @@ class MyApp extends StatelessWidget {
             colorScheme: darkColorScheme,
             useMaterial3: true,
           ),
-          themeMode: ThemeMode.system, // 跟随系统主题
+          themeMode: ThemeMode.system,
+          // 跟随系统主题
           initialRoute: '/',
           routes: Global.routes, // 应用路由配置
         );

@@ -34,7 +34,9 @@ class _FoldersPageState extends State<FoldersPage> {
     }
     setState(() {});
     await Future.wait(folders.values.map((e) => e.init()));
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override

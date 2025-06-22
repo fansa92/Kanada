@@ -1,4 +1,5 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:kanada/settings.dart';
@@ -36,32 +37,67 @@ class Player {
       await update();
     }
 
-    _player.currentIndexStream.listen((index) {
-      _currentIndex = index ?? -1; // 更新当前播放索引
-      final metadata = Metadata(current!);
-      final nextMetadata = Metadata(_queue[_player.nextIndex ?? 0]);
-      Fluttertoast.showToast(
-          msg: "当前播放: ${metadata.title}\n下一首: ${nextMetadata.title}", toastLength: Toast.LENGTH_SHORT);
-      UserData(
-        'player.json',
-      ).set({'queue': _queue, 'currentIndex': _currentIndex});
-      if (current != null) {
-        final currentMetadata = Metadata(current!);
-        // if(await currentMetadata.getPath()) // TODO 提前暂停，下载完后播放
-        currentMetadata.download().then((value) {
-          Fluttertoast.showToast(
-              msg: "下载完成: ${currentMetadata.title}", toastLength: Toast.LENGTH_SHORT);
-        });
-      }
-      if (_player.hasNext && _player.nextIndex != null) {
-        final nextMetadata = Metadata(_queue[_player.nextIndex ?? 0]);
-        nextMetadata.download().then((value) {
-          Fluttertoast.showToast(
-              msg: "下载完成: ${nextMetadata.title}", toastLength: Toast.LENGTH_SHORT);
-        });
-      }
-    });
+    // _player.currentIndexStream.listen((index) {
+    //   _currentIndex = index ?? -1; // 更新当前播放索引
+    //   final metadata = Metadata(current!);
+    //   final nextMetadata = Metadata(_queue[_player.nextIndex ?? 0]);
+    //   Fluttertoast.showToast(
+    //       msg: "当前播放: ${metadata.title}\n下一首: ${nextMetadata.title}", toastLength: Toast.LENGTH_SHORT);
+    //   UserData(
+    //     'player.json',
+    //   ).set({'queue': _queue, 'currentIndex': _currentIndex});
+    //   if (current != null) {
+    //     final currentMetadata = Metadata(current!);
+    //     currentMetadata.download().then((value) {
+    //       Fluttertoast.showToast(
+    //           msg: "下载完成: ${currentMetadata.title}", toastLength: Toast.LENGTH_SHORT);
+    //     });
+    //   }
+    //   if (_player.hasNext && _player.nextIndex != null) {
+    //     final nextMetadata = Metadata(_queue[_player.nextIndex ?? 0]);
+    //     nextMetadata.download().then((value) {
+    //       Fluttertoast.showToast(
+    //           msg: "下载完成: ${nextMetadata.title}", toastLength: Toast.LENGTH_SHORT);
+    //     });
+    //   }
+    // });
     // pause();
+  }
+
+  Future<void> listenIndex(int? index) async {
+    _currentIndex = index ?? -1; // 更新当前播放索引
+    final metadata = Metadata(current!);
+    final nextMetadata = Metadata(_queue[_player.nextIndex ?? 0]);
+    // Fluttertoast.showToast(
+    //   msg: "当前播放: ${metadata.title}\n下一首: ${nextMetadata.title}",
+    //   toastLength: Toast.LENGTH_SHORT,
+    // );
+    print("当前播放: ${metadata.title}\n下一首: ${nextMetadata.title}");
+    UserData(
+      'player.json',
+    ).set({'queue': _queue, 'currentIndex': _currentIndex});
+    if (current != null) {
+      final currentMetadata = Metadata(current!);
+      pause();
+      currentMetadata.download().then((value) {
+        play();
+        // Fluttertoast.showToast(
+        //   msg: "下载完成: ${currentMetadata.title}",
+        //   toastLength: Toast.LENGTH_SHORT,
+        // );
+        print('${currentMetadata.title} 下载完成');
+      });
+    }
+    if (_player.hasNext && _player.nextIndex != null) {
+      final nextMetadata = Metadata(_queue[_player.nextIndex ?? 0]);
+      nextMetadata.download().then((value) {
+        // Fluttertoast.showToast(
+        //   msg: "下载完成: ${nextMetadata.title}",
+        //   toastLength: Toast.LENGTH_SHORT,
+        // );
+        print('${nextMetadata.title} 下载完成');
+      });
+    }
   }
 
   // 当前播放索引（内部存储）
@@ -135,9 +171,7 @@ class Player {
         Uri.parse(await metadata.getPath()),
         tag: MediaItem(
           id: await metadata.getPath(),
-          title: metadata.title ?? path
-              .split('/')
-              .last,
+          title: metadata.title ?? path.split('/').last,
           // 默认使用文件名
           artist: metadata.artist,
           album: metadata.album,
@@ -162,13 +196,17 @@ class Player {
 
     // 重置播放器并设置新源
     await stop();
-    await _player.setAudioSource(
-      ConcatenatingAudioSource(
-        // 使用连接音频源处理队列
-        children: sources.cast<AudioSource>(),
-      ),
-      initialIndex: _currentIndex, // 保持当前播放位置
-    );
+    try {
+      await _player.setAudioSource(
+        ConcatenatingAudioSource(
+          // 使用连接音频源处理队列
+          children: sources.cast<AudioSource>(),
+        ),
+        initialIndex: _currentIndex, // 保持当前播放位置
+      );
+    } catch (e) {
+      if (kDebugMode) print(e);
+    }
   }
 
   /// 切换播放模式
@@ -192,8 +230,7 @@ class Player {
   Future<void> play() async {
     await _player.play();
     if (await KanadaVolumePlugin.getVolume() == 0) {
-      Fluttertoast.showToast(
-          msg: "请先调整音量", toastLength: Toast.LENGTH_SHORT);
+      Fluttertoast.showToast(msg: "请先调整音量", toastLength: Toast.LENGTH_SHORT);
     }
   }
 
@@ -238,16 +275,14 @@ class Player {
         Uri.parse(path),
         tag: MediaItem(
           id: path,
-          title: metadata.title ?? path
-              .split('/')
-              .last,
+          title: metadata.title ?? path.split('/').last,
           // 默认使用文件名
           artist: metadata.artist,
           album: metadata.album,
           artUri:
-          metadata.coverCache != null
-              ? Uri.parse('file://${metadata.coverCache}')
-              : null,
+              metadata.coverCache != null
+                  ? Uri.parse('file://${metadata.coverCache}')
+                  : null,
         ),
       ),
     );

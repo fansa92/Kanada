@@ -18,6 +18,7 @@ class AppPage extends StatefulWidget {
 
 class _AppPageState extends State<AppPage> {
   int index = 0;
+  late PageController _pageController;
 
   int get idx => Settings.searchPage ? index : (index > 0 ? index - 1 : index);
 
@@ -30,6 +31,7 @@ class _AppPageState extends State<AppPage> {
   @override
   void initState() {
     super.initState();
+    _pageController = PageController(initialPage: idx);
     _init();
   }
 
@@ -80,7 +82,14 @@ class _AppPageState extends State<AppPage> {
       ],
     ];
     return Scaffold(
-      body: nav[idx][1],
+      body: PageView.builder(
+        controller: _pageController,
+        itemCount: nav.length,
+        onPageChanged: (index) {
+          setState(() => idx = index);
+        },
+        itemBuilder: (context, index) => nav[index][1],
+      ),
       floatingActionButton: FloatPlaying(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       bottomNavigationBar: NavigationBar(
@@ -89,9 +98,12 @@ class _AppPageState extends State<AppPage> {
         ).colorScheme.secondaryContainer.withValues(alpha: .3),
         labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
         onDestinationSelected: (int index) {
-          setState(() {
-            idx = index;
-          });
+          setState(() => idx = index);
+          _pageController.animateToPage(
+            idx,
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
         },
         selectedIndex: idx,
         destinations:
