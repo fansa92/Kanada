@@ -1,0 +1,81 @@
+name: Build Kanada Multi‑Platform
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+          - os: ubuntu-latest
+            platform: linux
+          - os: ubuntu-latest
+            platform: android
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: flutter-actions/setup-flutter@v4.0
+      with:
+        channel: stable
+        version: 'latest'
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Install Linux deps 🛠
+      if: matrix.platform == 'linux'
+      run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev ninja-build
+
+    - name: Set up Java (Android)
+      if: matrix.platform == 'android'
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Build for ${{ matrix.platform }}
+      run: |
+        if [ "${{ matrix.platform }}" == "windows" ]; then
+          flutter config --enable-windows-desktop
+          flutter build windows
+        elif [ "${{ matrix.platform }}" == "linux" ]; then
+          flutter build linux
+        else
+          flutter build apk --split-per-abi
+        fi
+
+    - name: Package build
+      run: |
+        if [ "${{ matrix.platform }}" == "windows" ]; then
+          cd build/windows/x64/runner/Release
+          mkdir -p bundle
+          cp *.exe *.dll bundle/ || true
+          cp -r data bundle/ || true
+          powershell -Command "Compress-Archive -Path bundle/* -DestinationPath windows.zip"
+        elif [ "${{ matrix.platform }}" == "linux" ]; then
+          cd build/linux/release/bundle
+          tar czf linux.tar.gz *
+        else
+          cp build/app/outputs/flutter-apk/*.apk ./
+          
+        fi
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Kanada-${{ matrix.platform }}
+        path: |
+          build/windows/x64/runner/Release/windows.zip
+          build/linux/release/bundle/linux.tar.gz
+          *.apk
